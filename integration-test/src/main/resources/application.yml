@@ -4,3 +4,5 @@ server:
 
 integration-export:
   enable: true
+integration-wechat:
+  enable: true

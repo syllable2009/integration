@@ -25,6 +25,9 @@
 
     <modules>
         <module>integration-export</module>
+        <module>integration-test</module>
+        <module>integration-base</module>
+        <module>integration-wechat</module>
     </modules>
 
     <dependencyManagement>
@@ -84,6 +87,18 @@
                 <artifactId>spring-boot-configuration-processor</artifactId>
                 <version>${spring-boot.version}</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>3.6.1</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java-util</artifactId>
+                <version>3.6.1</version>
+                <scope>compile</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
