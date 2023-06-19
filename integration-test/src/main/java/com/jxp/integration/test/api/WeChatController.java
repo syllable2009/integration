@@ -2,6 +2,7 @@ package com.jxp.integration.test.api;
 
 import javax.annotation.Resource;
 
+import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,8 @@ public class WeChatController {
 
     @Resource
     WeChatService weChatService;
+    @Resource
+    Environment environment;
 
     @GetMapping("/getToken")
     public ResponseEntity<Object> getToken() {
