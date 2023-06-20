@@ -49,6 +49,9 @@ public class IndexServiceImpl implements IndexService {
                 .indices()
                 .create(c -> c
                         .index(name)
+                        .aliases("main-index", a -> a   //创别名
+                                .isWriteIndex(true)
+                        )
                         .settings(settingFn)
                         .mappings(mappingFn)
                 );

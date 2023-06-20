@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.jxp.es.model.Product;
 
 import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.IndexResponse;
@@ -12,7 +13,7 @@ import co.elastic.clients.elasticsearch.core.IndexResponse;
  * @author jiaxiaopeng
  * Created on 2023-06-19 15:30
  */
-public interface BaseCrudService<T> {
+public interface BaseCrudService {
     /**
      * 根据文档id查找文档
      * @param index
@@ -20,7 +21,7 @@ public interface BaseCrudService<T> {
      * @return
      * @throws Exception
      */
-    T search(String index, String id);
+    Product search(String index, String id);
 
     /**
      * 新增一个文档
@@ -28,7 +29,7 @@ public interface BaseCrudService<T> {
      * @param product 文档对象
      * @return
      */
-    IndexResponse createByFluentDSL(String index, T product) throws Exception;
+    IndexResponse createByFluentDSL(String index, Product product) throws Exception;
 
     /**
      * 新增一个文档
@@ -36,7 +37,7 @@ public interface BaseCrudService<T> {
      * @param product 文档对象
      * @return
      */
-    IndexResponse createByBuilderPattern(String index, T product) throws Exception;
+    IndexResponse createByBuilderPattern(String index, Product product) throws Exception;
 
     /**
      * 异步新增文档
@@ -44,7 +45,7 @@ public interface BaseCrudService<T> {
      * @param product
      * @param action
      */
-    void createAnsync(String index, T product, BiConsumer<IndexResponse, Throwable> action);
+    void createAnsync(String index, Product product, BiConsumer<IndexResponse, Throwable> action);
 
     /**
      * 用JSON字符串创建文档
@@ -62,7 +63,7 @@ public interface BaseCrudService<T> {
      * @return 批量操作的结果
      * @throws Exception
      */
-    BulkResponse bulkCreate(String index, List<T> products) throws Exception;
+    BulkResponse bulkCreate(String index, List<Product> products) throws Exception;
 
     /**
      * 批量删除文档
