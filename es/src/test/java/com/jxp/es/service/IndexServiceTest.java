@@ -11,7 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.google.common.collect.Lists;
+import com.jxp.es.model.EsSimpleQueryDTO;
 import com.jxp.es.model.Product;
+import com.jxp.es.utils.ElasticsearchClientUtil;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.IdUtil;
@@ -50,6 +52,27 @@ class IndexServiceTest {
     @Resource
     private ElasticsearchClient elasticsearchClient;
     private static final String index = "cosmo_v1";
+
+    @Resource
+    ElasticsearchClientUtil elasticsearchClientUtil;
+
+    @Test
+    void testTerm() throws Exception {
+
+        EsSimpleQueryDTO dto = EsSimpleQueryDTO.builder()
+                .indexName(index)
+                .field("name")
+                .value("halo")
+                .from(null) // 分页从0开始，null和0等效
+                .size(50)
+                .build();
+
+        long count = elasticsearchClientUtil.termCount(elasticsearchClient, dto);
+        log.info("count,{}", count);
+        List<Product> term = elasticsearchClientUtil.termPageQueryList(elasticsearchClient, dto, Product.class);
+        log.info("terms,{}", term);
+    }
+
 
     @Test
     void simpleSearchQuery() throws IOException {

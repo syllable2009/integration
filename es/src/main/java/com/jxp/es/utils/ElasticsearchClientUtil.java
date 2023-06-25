@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Component;
+
 import com.jxp.es.model.EsQueryDTO;
 import com.jxp.es.model.EsQueryDTO.FilterDto;
+import com.jxp.es.model.EsSimpleQueryDTO;
 
 import cn.hutool.core.collection.CollectionUtil;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
@@ -14,6 +17,7 @@ import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
+import co.elastic.clients.elasticsearch.core.CountResponse;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
@@ -22,7 +26,32 @@ import co.elastic.clients.json.JsonData;
  * @author jiaxiaopeng
  * Created on 2023-06-20 11:18
  */
+@Component
 public class ElasticsearchClientUtil<T> {
+
+
+    // “term 查询可以用于精确匹配一个字段中的某个值
+    public List<T> termPageQueryList(ElasticsearchClient elasticsearchClient, EsSimpleQueryDTO dto, Class<T> targetClass)
+            throws IOException {
+        SearchResponse<T> response = elasticsearchClient.search(s -> s
+                        .index(dto.getIndexName())
+                        .query(q -> q.term(t -> t
+                                .field(dto.getField())
+                                .value(dto.getValue())
+                        )).from(dto.getFrom()).size(dto.getSize()),
+                targetClass);
+
+        return getResult(response);
+    }
+
+    public long termCount(ElasticsearchClient client, EsSimpleQueryDTO dto) throws Exception {
+        CountResponse count = client.count(c -> c.index(dto.getIndexName()).query(q -> q.term(t -> t
+                .field(dto.getField())
+                .value(dto.getValue())
+        )));
+        return count.count();
+    }
+
 
     public List<T> query(ElasticsearchClient elasticsearchClient, EsQueryDTO dto, Class<T> targetClass)
             throws IOException {
