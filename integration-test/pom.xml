@@ -25,6 +25,12 @@
 
         <dependency>
             <groupId>com.jxp</groupId>
+            <artifactId>integration-event</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.jxp</groupId>
             <artifactId>integration-wechat</artifactId>
             <version>1.0.0</version>
         </dependency>

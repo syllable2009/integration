@@ -6,3 +6,20 @@ integration-export:
   enable: true
 integration-wechat:
   enable: true
+integration-event:
+  enable: true
+
+event:
+    publishProperties:
+      - appKey: "p1"
+        topic: "t1"
+        className: "ddd"
+        publishType: "local"
+    consumerProperties:
+      - appKey: "c1"
+        topic: "t2"
+        consumerGroup: "cg"
+        tag:
+          - helo
+          - word
+

@@ -1,0 +1,13 @@
+event:
+  conf:
+    publishProperties:
+      - appKey: "p1"
+        topic: "t1"
+        className: "ddd"
+        publishType: "local"
+    consumerProperties:
+      - appKey: "c1"
+        topic: "t2"
+        consumerGroup: "cg1"
+          - tag: "t1"
+          - tag: "t2"
