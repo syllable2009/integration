@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
+import cn.hutool.core.util.IdUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -26,7 +27,7 @@ public class WrapRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        log.info("start WrapRequestFilter");
+        response.setHeader("Trace-Id", IdUtil.fastUUID());
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
         if (isFileUpload(request)) {
             filterChain.doFilter(request, wrappedResponse);

@@ -15,6 +15,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 
 import com.jxp.integration.test.plugin.AccessLogInterceptor;
+import com.jxp.integration.test.plugin.IdentifyInterceptor;
 
 /**
  * @author jiaxiaopeng
@@ -25,6 +26,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Resource
     private AccessLogInterceptor accessLogInterceptor;
+    @Resource
+    private IdentifyInterceptor identifyInterceptor;
 
     private static final List<String> EXCLUDE_PATH_PATTERNS = Arrays.asList(
             "/",
@@ -43,9 +46,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(accessLogInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns(EXCLUDE_PATH_PATTERNS);
-//        registry.addInterceptor(authInterceptor)
-//                .addPathPatterns("/**")
-//                .excludePathPatterns(EXCLUDE_PATH_PATTERNS);
+        registry.addInterceptor(identifyInterceptor)
+                .addPathPatterns("/**")
+                .excludePathPatterns(EXCLUDE_PATH_PATTERNS);
     }
 
 
