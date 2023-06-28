@@ -12,6 +12,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class JacksonUtils {
 
     private static final String EMPTY_JSON = "{}";
@@ -70,12 +73,22 @@ public class JacksonUtils {
         }
     }
 
-    public static JsonNode parseObj(String string) {
+    public static JsonNode parseObj(byte[] content) {
         try {
-            return MAPPER.readTree(string);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return MAPPER.readTree(content);
+        } catch (Exception e) {
+            log.error("JacksonUtils parseObj error,content:{}", content, e);
         }
+        return null;
+    }
+
+    public static JsonNode parseObj(String str) {
+        try {
+            return MAPPER.readTree(str);
+        } catch (Exception e) {
+            log.error("JacksonUtils parseObj error,str:{}", str, e);
+        }
+        return null;
     }
 
 
