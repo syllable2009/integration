@@ -42,7 +42,7 @@ public class AccessLogInterceptor implements HandlerInterceptor {
         // ext log
         // 获取上下文对象,里面包含一些额外信息
         String userId = RequestContext.getUserId(); // 可从上下文中获取requestContextDto.getRequestTimestamp()
-        long cost = System.currentTimeMillis() - 0;
+        long cost = System.currentTimeMillis() - RequestContext.getRequestTimestamp();
         log.info("method={} path={} httpStatus={} cost={} userId={} traceId={} "
                         + "language={} query={} request={} response={}",
                 request.getMethod(), request.getRequestURI(), response.getStatus(), cost,

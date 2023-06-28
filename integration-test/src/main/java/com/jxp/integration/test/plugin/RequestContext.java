@@ -8,23 +8,32 @@ public class RequestContext {
     private static final ThreadLocal<Context> THREAD_LOCAL = ThreadLocal.withInitial(Context::new);
 
 
-    public static String  getUserId(){
+    public static String getUserId() {
         Context requestContext = getRequestContext();
-        if (null != requestContext){
-            return getRequestContext().getUserId();
+        if (null != requestContext) {
+            return requestContext.getUserId();
         }
         return null;
+    }
+
+    public static long getRequestTimestamp() {
+        Context requestContext = getRequestContext();
+        if (null != requestContext) {
+            return requestContext.getRequestTimestamp();
+        }
+        return 0;
     }
 
     public static Context getRequestContext() {
         return THREAD_LOCAL.get();
     }
 
-    public static void setRequestContext(Context context){
+    public static void setRequestContext(Context context) {
         Context c = getRequestContext();
         c.setUserId(context.getUserId());
-        if (c.getRequestTimestamp() != 0) {
-            c.setRequestTimestamp(context.getRequestTimestamp());
+        c.setAnonymous(context.getAnonymous());
+        if (c.getRequestTimestamp() == null) {
+            c.setRequestTimestamp(System.currentTimeMillis());
         }
     }
 

@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.core.Ordered;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -44,12 +45,17 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
 
         registry.addInterceptor(accessLogInterceptor)
+                .order(Ordered.HIGHEST_PRECEDENCE + 2)
                 .addPathPatterns("/**")
                 .excludePathPatterns(EXCLUDE_PATH_PATTERNS);
         registry.addInterceptor(identifyInterceptor)
+                .order(Ordered.HIGHEST_PRECEDENCE + 1)
                 .addPathPatterns("/**")
                 .excludePathPatterns(EXCLUDE_PATH_PATTERNS);
+
     }
+
+
 
 
     /**

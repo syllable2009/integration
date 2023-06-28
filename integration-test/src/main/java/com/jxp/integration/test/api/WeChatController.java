@@ -35,4 +35,9 @@ public class WeChatController {
         return ResponseEntity.ok(accessToken);
     }
 
+    @GetMapping("/test")
+    public ResponseEntity<Object> test() {
+        return ResponseEntity.ok(true);
+    }
+
 }

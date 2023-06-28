@@ -4,7 +4,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -28,11 +27,10 @@ public class IdentifyInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
-
         // 优先级 testUserId > 登录 > 匿名
         // 先要判断环境
-        String env = "prod";
-        if (StringUtils.equalsAny(env, "test", "dev", "local")) {
+        String env = "test";
+        if (StrUtil.equalsAny(env, "test", "dev", "local")) {
             Context context = buildDebugContext(request);
             if (null != context) {
                 RequestContext.setRequestContext(context);
@@ -47,6 +45,12 @@ public class IdentifyInterceptor implements HandlerInterceptor {
             RequestContext.setRequestContext(context);
             return true;
         }
+
+        if (null == context){
+            RequestContext.setRequestContext(Context.builder()
+                    .userId("Unkown")
+                    .build());
+        }
         return true;
     }
 
@@ -57,7 +61,6 @@ public class IdentifyInterceptor implements HandlerInterceptor {
         }
         return Context.builder()
                 .userId(testUserId)
-                .requestTimestamp(System.currentTimeMillis())
                 .build();
     }
 
