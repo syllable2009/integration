@@ -43,16 +43,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-
         registry.addInterceptor(accessLogInterceptor)
-                .order(Ordered.HIGHEST_PRECEDENCE + 2)
+                .order(Ordered.HIGHEST_PRECEDENCE)
                 .addPathPatterns("/**")
                 .excludePathPatterns(EXCLUDE_PATH_PATTERNS);
-        registry.addInterceptor(identifyInterceptor)
-                .order(Ordered.HIGHEST_PRECEDENCE + 1)
-                .addPathPatterns("/**")
-                .excludePathPatterns(EXCLUDE_PATH_PATTERNS);
-
     }
 
 

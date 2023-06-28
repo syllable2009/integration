@@ -6,6 +6,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -19,6 +21,7 @@ import com.jxp.integration.base.tool.JacksonUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+@Order(Ordered.HIGHEST_PRECEDENCE + 3)
 @Slf4j
 @Component
 public class AccessLogInterceptor implements HandlerInterceptor {
@@ -29,6 +32,7 @@ public class AccessLogInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable
             Exception ex)
             throws Exception {
+        log.info("AccessLogInterceptor");
         if (RequestMethod.HEAD.name().equals(request.getMethod()) || !isJsonResponse(response)) {
             return;
         }
