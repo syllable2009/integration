@@ -18,6 +18,13 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import cn.hutool.core.util.IdUtil;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 在接口调用链中，request的请求流只能调用一次，处理之后，如果之后还需要用到请求流获取数据，就会发现数据为空。
+ * 继承HttpServletRequestWrapper，将请求中的流copy一份，复写getInputStream和getReader方法供外部使用。每次调用后的getInputStream
+ * 方法都是从复制出来的二进制数组中进行获取，这个二进制数组在对象存在期间一致存在。
+ * 使用Filter过滤器，在一开始，替换request为自己定义的可以多次读取流的request
+ */
+
 @Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @WebFilter(urlPatterns = "/*", filterName = "wrapRequestFilter")
