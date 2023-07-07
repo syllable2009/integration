@@ -44,7 +44,7 @@ public class HttpApiRateLimitFilter extends OncePerRequestFilter {
     private static final LimitConfig DEFAULT_LIMIT_CONFIG = LimitConfig.builder()
             .localLimiter(true)
             .redisLimiter(true)
-            .permitsPerSecond(2)
+            .permitsPerSecond(30)
             .expire(60)
             .build();
 
@@ -93,7 +93,7 @@ public class HttpApiRateLimitFilter extends OncePerRequestFilter {
         PrintWriter pw = response.getWriter();
         Map<String, Object> ret = Maps.newHashMap();
         ret.put("code", 403);
-        ret.put("message", "limit");
+        ret.put("message", "当前请求量过大，请稍后访问");
         pw.println(JacksonUtils.toJsonStr(ret));
         pw.flush();
     }
