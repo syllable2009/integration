@@ -62,6 +62,7 @@ public class IdentifyInterceptor extends OncePerRequestFilter {
                     .build());
         }
         filterChain.doFilter(request, response);
+        RequestContext.clear();
     }
 
     private static Context buildDebugContext(HttpServletRequest request) {

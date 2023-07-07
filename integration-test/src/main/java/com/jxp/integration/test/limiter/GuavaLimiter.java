@@ -27,8 +27,8 @@ public class GuavaLimiter implements LimiterManager {
             rateLimiterMap.putIfAbsent(key, rateLimiter);
         }
         boolean acquire = rateLimiter.tryAcquire();
-        log.info("GuavaLimiter tryAccessByIp fail,rate:{},ip:{}", rateLimiter.getRate(), ip);
         if (!acquire) {
+            log.info("GuavaLimiter tryAccessByIp fail,rate:{},ip:{}", rateLimiter.getRate(), ip);
             return true;
         }
         return false;
@@ -36,15 +36,15 @@ public class GuavaLimiter implements LimiterManager {
 
     @Override
     public boolean rateLimitByUri(LimitConfig config, String uri, String method) {
-        String key = uri + ":" + method;
+        String key = method + ":" + uri;
         RateLimiter rateLimiter = rateLimiterMap.get(key);
         if (null == rateLimiter) {
             rateLimiter = RateLimiter.create(config.getLocalUriRate());
             rateLimiterMap.putIfAbsent(key, rateLimiter);
         }
         boolean acquire = rateLimiter.tryAcquire();
-        log.info("GuavaLimiter rateLimitByUri fail,rate:{},key:{}", rateLimiter.getRate(), key);
         if (!acquire) {
+            log.info("GuavaLimiter rateLimitByUri fail,rate:{},key:{}", rateLimiter.getRate(), key);
             return true;
         }
         return false;

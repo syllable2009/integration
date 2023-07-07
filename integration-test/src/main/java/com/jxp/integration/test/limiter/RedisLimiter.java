@@ -38,8 +38,8 @@ public class RedisLimiter implements LimiterManager {
         Long count = stringRedisTemplate
                 .execute(redisScript, Lists.newArrayList(key), String.valueOf(config.getRedisIpPerSecond()),
                         String.valueOf(config.getRedisIpExpire()));
-        log.info("RedisLimiter tryAccessByIp fail,count:{},key={}", count, key);
         if (count != null && count == 0) {
+            log.info("RedisLimiter tryAccessByIp fail,count:{},key={}", count, key);
             return true;
         }
         return false;
@@ -47,12 +47,12 @@ public class RedisLimiter implements LimiterManager {
 
     @Override
     public boolean rateLimitByUri(LimitConfig config, String uri, String method) {
-        String key = uri + ":" + method;
+        String key = method + ":" + uri;
         Long count = stringRedisTemplate
                 .execute(redisScript, Lists.newArrayList(key), String.valueOf(config.getRedisUriPerSecond()),
                         String.valueOf(config.getRedisUriExpire()));
-        log.info("RedisLimiter rateLimitByUri fail,count:{},key={}", count, key);
         if (count != null && count == 0) {
+            log.info("RedisLimiter rateLimitByUri fail,count:{},key={}", count, key);
             return true;
         }
         return false;

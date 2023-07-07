@@ -53,7 +53,6 @@ public class AccessLogInterceptor implements HandlerInterceptor {
                 userId, response.getHeader("Trace-Id"),
                 request.getLocale().getLanguage(), request.getQueryString(), requestBodyLog, responseBodyLog
         );
-        RequestContext.clear();
     }
 
     @SneakyThrows

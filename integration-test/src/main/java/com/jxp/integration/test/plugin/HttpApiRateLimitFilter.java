@@ -104,7 +104,7 @@ public class HttpApiRateLimitFilter extends OncePerRequestFilter {
         response.setContentType("application/json;charset=utf-8");
         PrintWriter pw = response.getWriter();
         Map<String, Object> ret = Maps.newHashMap();
-        ret.put("code", 403);
+        ret.put("code", 413);
         ret.put("message", "当前请求量过大，请稍后访问");
         pw.println(JacksonUtils.toJsonStr(ret));
         pw.flush();
