@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 
 @Slf4j
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE + 1)
 @WebFilter(urlPatterns = "/*", filterName = "wrapRequestFilter")
 @Component
 public class WrapRequestFilter extends OncePerRequestFilter {

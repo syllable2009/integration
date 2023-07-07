@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author jiaxiaopeng
  * Created on 2023-06-28 11:40
  */
-@Order(Ordered.HIGHEST_PRECEDENCE + 1)
+@Order(Ordered.HIGHEST_PRECEDENCE + 2)
 @Slf4j
 @Component
 public class IdentifyInterceptor extends OncePerRequestFilter {

@@ -4,22 +4,26 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.RateLimiter;
 import com.jxp.integration.base.tool.IPUtil;
 import com.jxp.integration.base.tool.JacksonUtils;
+import com.jxp.integration.test.limiter.LimitConfig;
+import com.jxp.integration.test.limiter.LimiterManager;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,42 +35,56 @@ import lombok.extern.slf4j.Slf4j;
  * "/api/v1/member/addMembersInSpace" :   "60-5"           ------>   URI限流配置信息
  */
 @Slf4j
-@Order(Ordered.HIGHEST_PRECEDENCE + 2)
+@Order(Ordered.HIGHEST_PRECEDENCE + 3)
 @Component
 public class HttpApiRateLimitFilter extends OncePerRequestFilter {
 
     private static final RateLimiter rateLimiter = RateLimiter.create(10.0); // 设置每秒最多处理10个请求
+    private static final Map<String, LimitConfig> rateLimitMap = ImmutableMap.of();
+    private static final LimitConfig DEFAULT_LIMIT_CONFIG = LimitConfig.builder()
+            .localLimiter(true)
+            .redisLimiter(true)
+            .permitsPerSecond(2)
+            .expire(60)
+            .build();
+
+    @Resource(name = "redisLimiter")
+    LimiterManager redisLimiter;
+
+    @Resource(name = "guavaLimiter")
+    LimiterManager guavaLimiter;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         log.info("HttpApiRateLimitFilter");
-        if (this.rateLimit(request)) {
-            setRateLimitResponse(response);
-        } else {
+        // 判断是local还是redis
+        String requestURI = request.getRequestURI();
+        LimitConfig limitConfig = rateLimitMap.getOrDefault(requestURI, DEFAULT_LIMIT_CONFIG);
+        if (BooleanUtils.isNotTrue(limitConfig.getRedisLimiter()) && BooleanUtils
+                .isNotTrue(limitConfig.getLocalLimiter())) {
             filterChain.doFilter(request, response);
         }
-    }
-
-    private boolean rateLimit(@NotNull HttpServletRequest request) {
         String ip = IPUtil.getIpAddr(request);
-        String userId = RequestContext.getUserId();
-        if (StringUtils.isEmpty(ip)) {
-            log.warn("userId->{},通过未知ip->{},请求URI->{},直接限流,不允许访问", userId, ip, request.getRequestURI());
-            return true;
+        String method = request.getMethod();
+        if (true == limitConfig.getLocalLimiter()) {
+            // 本地可以改造成单机限流
+            if (guavaLimiter.tryAccess(limitConfig, ip, requestURI, method)) {
+                String userId = RequestContext.getUserId();
+                log.warn("userId->{},通过未知ip->{},请求URI->{},local限流,不允许访问", userId, ip, request.getRequestURI());
+                setRateLimitResponse(response);
+                return;
+            }
         }
-        // 解析的配置
-        Map<String, String> rateLimitMap = Maps.newHashMap();
-        return this.rateLimitByIp(rateLimitMap, ip)
-                || this.rateLimitByUri(rateLimitMap, request.getRequestURI(), userId);
-    }
-
-    private boolean rateLimitByIp(Map<String, String> rateLimitMap, String ip) {
-        return false;
-    }
-
-    private boolean rateLimitByUri(Map<String, String> rateLimitMap, String uri, String userId) {
-        return false;
+        if (true == limitConfig.getRedisLimiter()) {
+            if (redisLimiter.tryAccess(limitConfig, ip, requestURI, method)) {
+                String userId = RequestContext.getUserId();
+                log.warn("userId->{},通过未知ip->{},请求URI->{},redis限流,不允许访问", userId, ip, request.getRequestURI());
+                setRateLimitResponse(response);
+                return;
+            }
+        }
+        filterChain.doFilter(request, response);
     }
 
     private void setRateLimitResponse(@NotNull HttpServletResponse response) throws IOException {

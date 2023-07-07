@@ -5,4 +5,4 @@ elasticsearch:
   passwd: T0=q*0aAWo6q6UT-fSIN
 #  apikey: ZVVWMVY0RUJ1Y0dJeHBiZXJHdUo6WXloU1RoOUVUejJMS0JrMy1JeTJldw==
 integration-es:
-  enable: true
+  enable: false

@@ -62,9 +62,9 @@ public class HanLPTest {
         log.info("distance:{}", distance);
 //        long distance2 = CoreSynonymDictionary.distance("公积金", "住房公积金");
 //        log.info("distance2:{}", distance2);
-        Vector what = wordVectorService.getDocVectorStr("中国人好");
+        Vector what = wordVectorService.getDocVectorStr("公积金");
         log.info("whatVec:{}", what);
-        Vector with = wordVectorService.getDocVectorStr("中国人民好");
+        Vector with = wordVectorService.getDocVectorStr("住房公积金");
         log.info("withVec:{}", with);
         log.info("similarity:{}", what.cosineForUnitVector(with));
 
