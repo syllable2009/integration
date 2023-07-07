@@ -5,7 +5,7 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.RateLimiter;
 
-import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.BooleanUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -20,6 +20,17 @@ public class GuavaLimiter implements LimiterManager {
 
     @Override
     public boolean tryAccessByIp(LimitConfig config, String ip) {
+        String key = "limit:" + ip;
+        RateLimiter rateLimiter = rateLimiterMap.get(key);
+        if (null == rateLimiter) {
+            rateLimiter = RateLimiter.create(config.getLocalIpRate());
+            rateLimiterMap.putIfAbsent(key, rateLimiter);
+        }
+        boolean acquire = rateLimiter.tryAcquire();
+        log.info("GuavaLimiter tryAccessByIp fail,rate:{},ip:{}", rateLimiter.getRate(), ip);
+        if (!acquire) {
+            return true;
+        }
         return false;
     }
 
@@ -28,7 +39,7 @@ public class GuavaLimiter implements LimiterManager {
         String key = uri + ":" + method;
         RateLimiter rateLimiter = rateLimiterMap.get(key);
         if (null == rateLimiter) {
-            rateLimiter = RateLimiter.create(NumberUtil.div(30,60));
+            rateLimiter = RateLimiter.create(config.getLocalUriRate());
             rateLimiterMap.putIfAbsent(key, rateLimiter);
         }
         boolean acquire = rateLimiter.tryAcquire();
@@ -41,9 +52,9 @@ public class GuavaLimiter implements LimiterManager {
 
     @Override
     public boolean tryAccess(LimitConfig config, String ip, String uri, String method) {
-        if (tryAccessByIp(config, ip)) {
+        if (BooleanUtil.isTrue(config.getLocalIpLimiter()) && tryAccessByIp(config, ip)) {
             return true;
         }
-        return rateLimitByUri(config, uri, method);
+        return BooleanUtil.isTrue(config.getLocalUriLimiter()) && rateLimitByUri(config, uri, method);
     }
 }

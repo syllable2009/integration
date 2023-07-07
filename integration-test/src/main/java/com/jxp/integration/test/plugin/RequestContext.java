@@ -37,4 +37,7 @@ public class RequestContext {
         }
     }
 
+    public static void clear() {
+        THREAD_LOCAL.remove();
+    }
 }

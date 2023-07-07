@@ -9,6 +9,7 @@ import org.springframework.scripting.support.ResourceScriptSource;
 
 import com.google.common.collect.Lists;
 
+import cn.hutool.core.util.BooleanUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,6 +34,14 @@ public class RedisLimiter implements LimiterManager {
 
     @Override
     public boolean tryAccessByIp(LimitConfig config, String ip) {
+        String key = "limit:" + ip;
+        Long count = stringRedisTemplate
+                .execute(redisScript, Lists.newArrayList(key), String.valueOf(config.getRedisIpPerSecond()),
+                        String.valueOf(config.getRedisIpExpire()));
+        log.info("RedisLimiter tryAccessByIp fail,count:{},key={}", count, key);
+        if (count != null && count == 0) {
+            return true;
+        }
         return false;
     }
 
@@ -40,9 +49,9 @@ public class RedisLimiter implements LimiterManager {
     public boolean rateLimitByUri(LimitConfig config, String uri, String method) {
         String key = uri + ":" + method;
         Long count = stringRedisTemplate
-                .execute(redisScript, Lists.newArrayList(key), String.valueOf(config.getPermitsPerSecond()),
-                        String.valueOf(config.getExpire()));
-        log.info("Access try count is {} for key={}", count, key);
+                .execute(redisScript, Lists.newArrayList(key), String.valueOf(config.getRedisUriPerSecond()),
+                        String.valueOf(config.getRedisUriExpire()));
+        log.info("RedisLimiter rateLimitByUri fail,count:{},key={}", count, key);
         if (count != null && count == 0) {
             return true;
         }
@@ -51,10 +60,10 @@ public class RedisLimiter implements LimiterManager {
 
     @Override
     public boolean tryAccess(LimitConfig config, String ip, String uri, String method) {
-        if (tryAccessByIp(config, ip)) {
+        if (BooleanUtil.isTrue(config.getRedisIpLimiter()) && tryAccessByIp(config, ip)) {
             return true;
         }
-        return rateLimitByUri(config, uri, method);
+        return BooleanUtil.isTrue(config.getRedisUriLimiter()) && rateLimitByUri(config, uri, method);
 
     }
 }

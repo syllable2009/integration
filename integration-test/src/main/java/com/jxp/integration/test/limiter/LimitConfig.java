@@ -19,15 +19,25 @@ public class LimitConfig {
 
     private String method;
 
-    private Boolean localLimiter;
+    private Boolean localIpLimiter;
+    private Double localIpRate;
 
-    private Boolean redisLimiter;
+    private Boolean localUriLimiter;
+    private Double localUriRate;
+
+    private Boolean redisIpLimiter;
 
     // 最多的访问限制次数
-    private long permitsPerSecond;
-
+    private long redisIpPerSecond;
     //过期时间也可以理解为单位时间，单位秒
-    private long expire;
+    private long redisIpExpire;
+
+    private Boolean redisUriLimiter;
+
+    // 最多的访问限制次数
+    private long redisUriPerSecond;
+    //过期时间也可以理解为单位时间，单位秒
+    private long redisUriExpire;
 
     private String msg;
 }
