@@ -20,15 +20,16 @@ import lombok.extern.slf4j.Slf4j;
 public class CosmoEntityValueServiceImpl implements CosmoEntityValueService {
 
     @Override
-    public List<CosmoEntityValue> getValueByCosmoId(String cosmoId) {
+    public List<CosmoEntityValue> getValue(String cosmoId, Collection<String> entityIds) {
         List<CosmoEntityValue> ret = Lists.newArrayList();
-//        Mockito.mock();
+        //        Mockito.mock();
         return ret;
     }
 
     @Override
-    public List<CosmoEntityValue> getValueByCosmoIds(Collection<String> cosmoIds) {
+    public List<CosmoEntityValue> getValueList(Collection<String> cosmoIds, Collection<String> entityIds) {
         List<CosmoEntityValue> ret = Lists.newArrayList();
+        // 模拟db查询
         return ret;
     }
 }

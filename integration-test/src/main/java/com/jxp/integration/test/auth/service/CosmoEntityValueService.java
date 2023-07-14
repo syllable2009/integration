@@ -11,9 +11,8 @@ import com.jxp.integration.test.auth.bean.CosmoEntityValue;
  */
 public interface CosmoEntityValueService {
 
-    List<CosmoEntityValue> getValueByCosmoId(String cosmoId);
+    List<CosmoEntityValue> getValue(String cosmoId, Collection<String> entityIds);
 
-    List<CosmoEntityValue> getValueByCosmoIds(Collection<String> cosmoIds);
-
+    List<CosmoEntityValue> getValueList(Collection<String> cosmoIds, Collection<String> entityIds);
 
 }
