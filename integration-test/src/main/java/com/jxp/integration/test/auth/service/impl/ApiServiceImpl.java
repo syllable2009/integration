@@ -48,6 +48,7 @@ public class ApiServiceImpl implements ApiService {
         } else {
             // 非根节点:select * from ShortCut where domainId = #{} and spaceType = #{} and parentId = root;
         }
+        // 节点类型直接nodeType
         Map<Boolean, List<ShortCut>> shortcutNodeMap = shortCutList.stream()
                 .collect(Collectors.groupingBy(e -> StrUtil.equals("shortcut", e.getNodeType())));
 
