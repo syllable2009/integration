@@ -28,6 +28,11 @@ public class ShortCutServiceImpl implements ShortCutService {
     }
 
     @Override
+    public List<ShortCut> getByTreeId(String treeId) {
+        return null;
+    }
+
+    @Override
     public List<ShortCut> getByParentIds(Collection<String> pids) {
         return null;
     }

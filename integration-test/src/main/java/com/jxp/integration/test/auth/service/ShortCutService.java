@@ -15,6 +15,8 @@ public interface ShortCutService {
 
     ShortCut getById(String id);
 
+    List<ShortCut> getByTreeId(String treeId);
+
     List<ShortCut> getByParentIds(Collection<String> pids);
 
     List<ShortCut> getByParentId(String pid);

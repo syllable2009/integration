@@ -1,10 +1,13 @@
 package com.jxp.integration.test.spider.processor;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.jxp.integration.test.spider.pipeline.JuejinPipeline;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
@@ -22,6 +25,7 @@ public class WeiXinPageProcessor implements PageProcessor {
 
     // 部分一：抓取网站的相关配置，包括编码、抓取间隔、重试次数等
     private Site site = Site.me().setRetryTimes(3).setSleepTime(1000)
+            .setCharset("utf8")
             .addHeader("referer", "https://github.com")
             .addHeader("user-agent",
                     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -37,32 +41,58 @@ public class WeiXinPageProcessor implements PageProcessor {
         //                多端登录如何实现踢人下线
         //                <!----> <!----></h1>
         String rawText = page.getRawText();
-        log.info("rawText:{}", rawText);
+        //        log.info("rawText:{}", rawText);
         Html plainText = new Html(rawText);
 
 
-//        Html html = page.getHtml();
-//        page.isDownloadSuccess();
-//        if (null == html) {
-//            log.error("html is null,{}", page.getUrl());
-//            return;
-//        }
+        //        Html html = page.getHtml();
+        //        page.isDownloadSuccess();
+        //        if (null == html) {
+        //            log.error("html is null,{}", page.getUrl());
+        //            return;
+        //        }
 
         Selectable xpath = plainText.xpath("//div[@id=img-content]");
-//        Selectable xpath = html.xpath("//div[@id=img-content]");
+        //        Selectable xpath = html.xpath("//div[@id=img-content]");
         String title = xpath.xpath("//h1[@id=activity-name]/text()").get();
         page.putField("title", StrUtil.trim(title));
         //        String title = xpath.xpath("//h1[@id=meta_content]/text()").get();
         //        List<String> all = xpath.xpath("//div[@id=js_content]/section/p/text()").all();
         List<Selectable> nodes = plainText.xpath("//div[@id=js_content]").nodes();
 
-        nodes.forEach(e->{
-            log.info("{}",e.xpath("//img/@data-src").all());
-        });
+        List<String> smart = nodes.stream()
+                .map(e -> e.smartContent().all())
+                .flatMap(Collection::stream)
+                .filter(s -> StrUtil.isNotBlank(s))
+                .map(s -> StrUtil.trim(s))
+                .collect(Collectors.toList());
+        log.info("smart:{}", JSONUtil.toJsonStr(smart));
+        //        nodes.forEach(e->{
+        //            log.info("{}",e.xpath("//img/@data-src").all());
+        //        });
         log.info("***********************************");
-        nodes.forEach(e -> {
-            log.info("{}", e.smartContent().get());
-        });
+        //        nodes.forEach(e -> {
+        //            //            log.info("{}", e.smartContent().get());
+        //            log.info("{}", e.smartContent().all());
+        //        });
+
+
+        log.info("***********************************");
+        // 自己写的
+        List<String> self = plainText.xpath("//div[@id=js_content]").nodes()
+                .stream()
+                .map(e -> e.xpath("//*//text()").all())
+                .flatMap(Collection::stream)
+                .filter(s -> StrUtil.isNotBlank(s))
+                .map(s -> {
+                    return s.replaceAll("\\s+", " ")
+                            .replaceAll("\u00A0", " ").trim();
+                    //                    return StrUtil.removeAllLineBreaks(s).trim();
+                    //                    s.replaceAll("(\\\\u00a0+|)", " ");
+                    //                    return StrUtil.trim(s);
+                })
+                .collect(Collectors.toList());
+        log.info("self:{}", JSONUtil.toJsonStr(self));
 
         //        Selectable select = html.xpath("//body");
         //        page.putField("title", StrUtil.trim(html.xpath("//body//h1[@class=article-title]/text()").get()));
@@ -94,11 +124,14 @@ public class WeiXinPageProcessor implements PageProcessor {
 
     public static void main(String[] args) {
 
+        //        String string = "\\u00a0\\u00a0\\u00a0\\u00a0public\\u00a0void\\u00a0setCountry
+        //        (String\\u00a0country)";
+        //        log.info("{}", string.replaceAll("\\\\u00a0"," "));
         Spider.create(new WeiXinPageProcessor())
                 //从"https://github.com/code4craft"开始抓
                 //                .addUrl("https://github.com/code4craft/webmagic")
                 //                .addUrl("https://mp.weixin.qq.com/s/3EvY2ZozaNwNpWehi3z8kQ")
-                .addUrl("https://mp.weixin.qq.com/s/BPMOXx2zmd52686pBJV4tg")
+                .addUrl("https://mp.weixin.qq.com/s/ceZ3LVXBaWBcOV0eIAnXMw")
                 //开启5个线程抓取
                 .thread(1)
                 .addPipeline(new JuejinPipeline())

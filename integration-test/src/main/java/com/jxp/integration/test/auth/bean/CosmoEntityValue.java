@@ -34,10 +34,10 @@ public class CosmoEntityValue implements Serializable {
     private String cosmoId;
     private Long entityId; // groupInfoId
     private Long value; // roleCode
-    private Integer invalidType; // 0=继承记录 1=阻断记录时，
+    private Integer invalidType; // 0=普通记录 1=阻断记录时，
 
-    // db datetime(6)
     private LocalDateTime createTime;
+    // db datetime(6) 以更新时间为准
     private LocalDateTime updateTime;
     private String createId;
     private String updateId;
