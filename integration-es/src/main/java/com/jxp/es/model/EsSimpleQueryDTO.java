@@ -1,5 +1,7 @@
 package com.jxp.es.model;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,6 +28,11 @@ public class EsSimpleQueryDTO {
     private Integer from;
     //    @ApiModelProperty("页数")
     private Integer size;
+
+    private List<String> words;//关键字值数组
+
+    private String order;//排序字段
+    private String orderType;//排序方式 asc/desc
 
     public Integer getSize() {
         return size == 0 ? 30 : size;

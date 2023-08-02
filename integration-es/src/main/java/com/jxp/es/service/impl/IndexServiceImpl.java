@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import co.elastic.clients.util.ObjectBuilder;
  * @author jiaxiaopeng
  * Created on 2023-06-19 10:44
  */
+@ConditionalOnBean(ElasticsearchClient.class)
 @Service
 public class IndexServiceImpl implements IndexService {
 

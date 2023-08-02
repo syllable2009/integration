@@ -25,6 +25,7 @@ import com.jxp.integration.test.auth.service.impl.CosmoEntityValueServiceImpl;
 import com.jxp.integration.test.auth.service.impl.CosmoServiceImpl;
 import com.jxp.integration.test.auth.service.impl.ShortCutServiceImpl;
 
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -78,12 +79,27 @@ public class AuthMain {
     public Map<String, String> calAuthByDocId(String userId, String docId) {
         Cosmo cosmo = cosmoService.getById(docId);
         String firstShortcut = cosmo.getFirstShortcut();
-        calAuthByShortcutId(userId, firstShortcut);
+        Map<Long, CosmoEntityValue> valueMap = calAuthByShortcutId(firstShortcut);
+        Long login = 0L;
+        List<Long> groupIds = valueMap.keySet()
+                .stream()
+                .filter(e -> NumberUtils.compare(login, e) != 0)
+                .collect(Collectors.toList());
+        // 获取用户组关系
+
+        //
+        // 特殊规则处理：比如创建人，知识库的owner
+        // 权限返回
+        //        valueMap.forEach((k, v) -> {
+        //            v.forEach((e, c) -> {
+        //
+        //            });
+        //        });
         return null;
     }
 
     // 计算权限-内存计算查询权限向上查询，赋值权限向下查询
-    public Map<String, Map<String, Integer>> calAuthByShortcutId(String userId, String shortcutId) {
+    public Map<Long, CosmoEntityValue> calAuthByShortcutId(String shortcutId) {
         // 获取原始节点
         ShortCut originShortcutNode = getOriginShortcutNode(shortcutId);
         // 批量获取nodes
@@ -97,7 +113,7 @@ public class AuthMain {
         // 分组统计，阻断权限表示在当前层，按照更新时间排序精确到6位
         // 阻断记录
         Map<String, Map<Long, CosmoEntityValue>> blockMap = valueList.stream()
-                .filter(e -> 0 == e.getInvalidType())
+                .filter(e -> 1 == e.getInvalidType())
                 .collect(Collectors.groupingBy(CosmoEntityValue::getCosmoId,
                         Collectors.toMap(CosmoEntityValue::getEntityId, Function.identity(), (f, s) -> s)));
         // 继承记录
@@ -106,32 +122,45 @@ public class AuthMain {
                 .collect(Collectors.groupingBy(CosmoEntityValue::getCosmoId,
                         Collectors.toMap(CosmoEntityValue::getEntityId, Function.identity(), (f, s) -> s)));
 
-
-        //        Map<Long, CosmoEntityValue> blockMap = Maps.newHashMap();
-        cosmoIds.forEach(e -> {
-            Map<Long, CosmoEntityValue> nodeMap = inheritMap.get(e);
-            Map<Long, CosmoEntityValue> block = blockMap.get(e);
-
-            //            if (null != nodeValueMap) {
-            //                // Group1 list
-            //                nodeValueMap.forEach((o, v) -> {
-            //                    CosmoEntityValue max = v.stream()
-            //                            .max(Comparator.comparing(CosmoEntityValue::getUpdateTime))
-            //                            .get();
-            //
-            //                });
-            //            }
-        });
-
-
-        // 特殊规则处理：比如创建人，知识库的owner
-        // 权限返回
-//        valueMap.forEach((k, v) -> {
-//            v.forEach((e, c) -> {
-//
-//            });
-//        });
-        return null;
+        Map<Long, CosmoEntityValue> finalAuthMap = Maps.newHashMap();
+        String docId = null;
+        Map<Long, CosmoEntityValue> perMap;
+        for (int i = cosmoIds.size() - 1; i >= 0; i--) {
+            docId = cosmoIds.get(i);
+            Map<Long, CosmoEntityValue> blockEntityValueMap = inheritMap.get(docId);
+            if (MapUtil.isNotEmpty(blockEntityValueMap)) {
+                blockEntityValueMap.forEach((k, v) -> {
+                    // 当前的权限节点
+                    CosmoEntityValue cev = finalAuthMap.get(k);
+                    if (cev == null) {
+                        finalAuthMap.put(k, v);
+                    } else {
+                        if (v.getUpdateTime().isAfter(cev.getUpdateTime())) {
+                            // 权限的时间判断,当前的权限被覆盖
+                            finalAuthMap.put(k, v);
+                        } else {
+                            log.info("当前的权限记录时间早，之后被覆盖了");
+                        }
+                    }
+                });
+            }
+            // 再处理阻断记录
+            perMap = blockMap.get(docId);
+            if (MapUtil.isNotEmpty(perMap)) {
+                perMap.forEach((k, v) -> {
+                    CosmoEntityValue cev = finalAuthMap.get(k);
+                    if (cev == null) {
+                        log.info("found only block record,but not found grant record");
+                    } else {
+                        if (cev.getUpdateTime().isBefore(v.getUpdateTime())) {
+                            // 相等或者之后
+                            finalAuthMap.remove(k);
+                        }
+                    }
+                });
+            }
+        }
+        return finalAuthMap;
     }
 
     // 向上遍历到祖宗,过滤掉shortcut节点
@@ -163,12 +192,20 @@ public class AuthMain {
     public void downLoopdescendants(ShortCut originShortcutNode, List<ShortCut> treeList) {
         TreeMap<Comparable, Object> comparableObjectTreeMap = Maps.newTreeMap();
 
+        // <parentId,List>
         Map<String, List<ShortCut>> treeMap =
                 treeList.stream()
                         .collect(Collectors.groupingBy(ShortCut::getParentId));
 
         List<ShortCut> shortCuts = treeMap.get(originShortcutNode.getId());
 
+        // 获取用户的shortcut权限，此操作返回的各个节点的权限
+        Map<String, Map<Long, CosmoEntityValue>> getAllAuthByTree = getAllAuthByTree();
+    }
+
+    //
+    Map<String, Map<Long, CosmoEntityValue>> getAllAuthByTree() {
+        return null;
     }
 
     // 带缓存的权限获取

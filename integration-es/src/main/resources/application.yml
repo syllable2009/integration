@@ -1,8 +1,10 @@
 elasticsearch:
   # \u591A\u4E2AIP\u9017\u53F7\u9694\u5F00
   hosts: 127.0.0.1:9200
-  username: elastic
-  passwd: T0=q*0aAWo6q6UT-fSIN
+  username: test
+  passwd: jiaxiaopengtest
+
+
 #  apikey: ZVVWMVY0RUJ1Y0dJeHBiZXJHdUo6WXloU1RoOUVUejJMS0JrMy1JeTJldw==
 integration-es:
-  enable: false
+  enable: true

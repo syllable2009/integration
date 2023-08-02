@@ -28,4 +28,6 @@ public class Page {
     private String cover;
     private Integer state;
     private String folderId; // 文件夹id
+    private Integer size; // 失效检测
+    private String processor; // 解析组件名称
 }

@@ -1,8 +1,11 @@
 package com.jxp.es.service;
 
 import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
@@ -18,15 +21,24 @@ import com.jxp.es.utils.ElasticsearchClientUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.json.JSONUtil;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import co.elastic.clients.elasticsearch._types.mapping.TypeMapping;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchPhraseQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.MultiMatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.TermsQuery;
 import co.elastic.clients.elasticsearch.core.ScrollResponse;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.core.search.TotalHits;
@@ -56,13 +68,175 @@ class IndexServiceTest {
     @Resource
     ElasticsearchClientUtil elasticsearchClientUtil;
 
+    void testQuery(Function<Query.Builder, ObjectBuilder<Query>> fn) {
+        try {
+            List<Product> list =
+                    elasticsearchClientUtil.defaultQueryList(elasticsearchClient, index, Product.class, fn);
+            log.info("query result, data:{}", JSONUtil.toJsonStr(list));
+        } catch (Exception ex) {
+            log.error("exception e", ex);
+        }
+    }
+
+    @Test
+    void test1() {
+        // term
+        Function<Query.Builder, ObjectBuilder<Query>> fn1 = q ->
+                q.term(t -> t
+                        .field("name")
+                        .value("bug2")
+                );
+        testQuery(fn1);
+        BoolQuery bq = BoolQuery
+                .of(e -> e.must(fn1).must(s -> s.term(TermQuery.of(t -> t.field("description").value("6lfdv")))));
+        Function<Query.Builder, ObjectBuilder<Query>> fn2 = q ->
+                q.bool(bq);
+        testQuery(fn2);
+
+        BoolQuery bq3 = BoolQuery
+                .of(e -> e.should(fn1).should(s -> s.term(TermQuery.of(t -> t.field("description").value("ksh3e")))));
+        testQuery(t -> t.bool(bq3));
+        // match,英文的分词以空格为主
+        MatchQuery m1 = MatchQuery.of(e -> e.field("description").query("ksh"));
+        testQuery(t -> t.match(m1));
+    }
+
+    @Test
+    void test2() {
+        // match,ik分词
+        MatchQuery m1 = MatchQuery.of(e -> e.field("description").query("中国"));
+        testQuery(t -> t.match(m1));
+
+        MultiMatchQuery mq = QueryBuilders.multiMatch().fields("description", "name").query("ksh")
+                .build();
+        testQuery(t -> t.multiMatch(mq));
+    }
+
+    @Test
+    void test3() {
+        // 条件 or and
+    }
+
+    @Test
+    void test4() {
+        // 过滤filter
+    }
+
+    @Test
+    void test5() {
+        // 聚合
+    }
+
+    @Test
+    void test6() {
+        // 分页1
+    }
+
+    @Test
+    void test7() {
+        // 分页2
+    }
+
+    @Test
+    void test8() throws IOException {
+        // 构建查询条件
+        List<Query> queryList = new ArrayList<>();
+
+        // MatchPhraseQuery
+        String name = "张三 李四";
+        Query byName = MatchPhraseQuery.of(m -> m
+                .field("name")
+                .query(name)
+        )._toQuery();
+
+        // RangeQuery
+        Query byAge1 = RangeQuery.of(r -> r
+                .field("age")
+                .gte(JsonData.of(10))
+        )._toQuery();
+
+        Query byAge2 = RangeQuery.of(r -> r
+                .field("age")
+                .lte(JsonData.of(13))
+        )._toQuery();
+
+        // TermsQuery
+        List<FieldValue> ls = new ArrayList<>();
+        ls.add(FieldValue.of("男"));
+        ls.add(FieldValue.of("女"));
+        Query termsQuery = TermsQuery.of(t -> t.field("sex").terms(terms -> terms.value(ls)))._toQuery();
+
+        queryList.add(byName);
+        queryList.add(byAge1);
+        queryList.add(byAge2);
+        queryList.add(termsQuery);
+
+        // 普通查询
+        SearchResponse<Product> search2 = elasticsearchClient.search(s -> s.index(index)
+                .query(q -> q.bool(b -> b.must(queryList))), Product.class
+        );
+
+        // scroll第一次查询
+        SearchResponse<Product> response = elasticsearchClient.search(s -> s
+                        .index("user")
+                        .query(q -> q.bool(b -> b.must(queryList)))
+                        .size(5000)
+                        .scroll(t -> t.time("5m")),                                               //开启scroll
+                Product.class
+        );
+
+        List<Hit<Product>> hits = response.hits().hits();
+        for (Hit<Product> hit : hits) {
+            //            userList.add(hit.source());
+        }
+        String scrollId = response.scrollId();
+        List<String> strings = new ArrayList<>();
+        strings.add(scrollId);
+        ScrollResponse<Product> search = null;
+        do {
+            String scrollIdTemp = scrollId;
+            log.info(scrollIdTemp);
+            search = elasticsearchClient.scroll(s -> s.scrollId(scrollIdTemp).scroll(t -> t.time("5m")), Product.class);
+            for (Hit<Product> hit : search.hits().hits()) {
+                // userList.add(hit.source());
+            }
+            scrollId = search.scrollId();
+            strings.add(scrollId);
+        } while (!search.hits().hits().isEmpty());
+        // 手动清除scrollId
+        elasticsearchClient.clearScroll(c -> c.scrollId(strings));
+
+    }
+
+    @Test
+    void test9() throws IOException {
+        // 如果你觉得这种调用各种方法拼接参数的方式不习惯，那么也可以直接上 JSON，如下：
+        String key = "bug2";
+        StringReader sr = new StringReader("{\n" +
+                "  \"query\": {\n" +
+                "    \"term\": {\n" +
+                "      \"name\": {\n" +
+                "        \"value\": \"" + key + "\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}");
+        SearchRequest request = new SearchRequest.Builder()
+                .index(index)
+                .withJson(sr)
+                .build();
+        SearchResponse<Product> search = elasticsearchClient.search(request, Product.class);
+        List<Product> result = elasticsearchClientUtil.getResult(search);
+        log.info("result:{}", JSONUtil.toJsonStr(result));
+    }
+
     @Test
     void testTerm() throws Exception {
 
         EsSimpleQueryDTO dto = EsSimpleQueryDTO.builder()
                 .indexName(index)
                 .field("name")
-                .value("halo")
+                .value("Bug2")
                 .from(null) // 分页从0开始，null和0等效
                 .size(50)
                 .build();
@@ -76,15 +250,21 @@ class IndexServiceTest {
 
     @Test
     void simpleSearchQuery() throws IOException {
-        String searchText = "duck";
+        String searchText = "bike";
+
+        MatchQuery nameQuery = MatchQuery.of(m -> m
+                .field("name")
+                .query(searchText));
+
+        MatchQuery descriptionQuery = MatchQuery.of(m -> m
+                .field("description")
+                .query("4yw47"));
+
         SearchResponse<Product> response = elasticsearchClient.search(s -> s
                         .index(index)
-                        .query(q -> q
-                                .match(t -> t
-                                        .field("name")
-                                        .query(searchText)
-                                )
-                        ),
+                        .query(q -> q.bool(b -> b.must(Query.of(w -> w.match(nameQuery)))
+                                .must(Query.of(w -> w.match(descriptionQuery))))
+                        ).size(100),
                 Product.class
         );
 
@@ -202,21 +382,21 @@ class IndexServiceTest {
     @Test
     void add() throws Exception {
         List<Product> productList = Lists.newArrayList();
-        //        Stream.of("bike", "mike", "hike", "bike", "tank", "siri", "halo")
-        //                .forEach(e -> productList.add(Product.builder()
-        //                        .id(IdUtil.fastSimpleUUID())
-        //                        .name(e)
-        //                        .price(RandomUtil.randomInt())
-        //                        .description(RandomUtil.randomString(5))
-        //                        .build()));
-        for (int i = 0; i < 10000; i++) {
-            productList.add(Product.builder()
-                    .id(IdUtil.fastSimpleUUID())
-                    .name("bike")
-                    .price(RandomUtil.randomInt())
-                    .description(RandomUtil.randomString(5))
-                    .build());
-        }
+        Stream.of("我是中国人", "中国的地方很大", "中国的gdp在下降", "中国人口数量在下降", "ksh tank", "siri ksh", "halo ksh")
+                .forEach(e -> productList.add(Product.builder()
+                        .id(IdUtil.fastSimpleUUID())
+                        .name(e)
+                        .price(RandomUtil.randomInt(1, 10000))
+                        .description(e)
+                        .build()));
+        //        for (int i = 0; i < 10000; i++) {
+        //            productList.add(Product.builder()
+        //                    .id(IdUtil.fastSimpleUUID())
+        //                    .name(RandomUtil.randomString(4))
+        //                    .price(RandomUtil.randomInt())
+        //                    .description(RandomUtil.randomString(5))
+        //                    .build());
+        //        }
         baseCrudService.bulkCreate(index, productList);
     }
 

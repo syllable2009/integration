@@ -5,6 +5,7 @@ import java.util.function.BiConsumer;
 
 import javax.annotation.Resource;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -24,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
  * Created on 2023-06-19 15:31
  */
 
+@ConditionalOnBean(ElasticsearchClient.class)
 @Service
 @Slf4j
 public class BaseCrudServiceImpl implements BaseCrudService {
@@ -59,7 +61,7 @@ public class BaseCrudServiceImpl implements BaseCrudService {
 
         // 将每一个product对象都放入builder中
         products.stream()
-                .forEach(product -> br
+                .forEach(product -> br.routing(product.getId())
                         .operations(op -> op
                                 .index(idx -> idx
                                         .index(index)
