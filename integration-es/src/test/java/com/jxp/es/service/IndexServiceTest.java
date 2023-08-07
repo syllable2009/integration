@@ -221,6 +221,33 @@ class IndexServiceTest {
                 "    }\n" +
                 "  }\n" +
                 "}");
+
+//        sr = new StringReader("{\n"
+//                + "  \"query\": {\n"
+//                + "    \"terms\": {\n"
+//                + "      \"name\": [\"bug2\",\"1phk\",\"ebp8\"]\n"
+//                + "    }\n"
+//                + "  }\n"
+//                + "}");
+
+        sr = new StringReader("{\n"
+                + "  \"query\": {\n"
+                + "    \"range\": {\n"
+                + "      \"price\": {\n"
+                + "        \"gte\": -10000,\n"
+                + "        \"lt\": 20000\n"
+                + "      }\n"
+                + "    }\n"
+                + "  },\n"
+                + "  \"sort\": [\n"
+                + "    {\n"
+                + "      \"price\": {\n"
+                + "        \"order\": \"desc\"\n"
+                + "      }\n"
+                + "    }\n"
+                + "  ]\n"
+                + "}");
+
         SearchRequest request = new SearchRequest.Builder()
                 .index(index)
                 .withJson(sr)

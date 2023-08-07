@@ -13,7 +13,6 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.google.common.collect.ImmutableMap;
@@ -36,20 +35,20 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE + 3)
-@Component
+//@Component
 public class HttpApiRateLimitFilter extends OncePerRequestFilter {
 
     //    private static final RateLimiter rateLimiter = RateLimiter.create(10.0); // 设置每秒最多处理10个请求
     private static final Map<String, LimitConfig> rateLimitMap = ImmutableMap.of();
     private static final LimitConfig DEFAULT_LIMIT_CONFIG = LimitConfig.builder()
-            .localIpLimiter(true)
+            .localIpLimiter(false)
             .localIpRate(0.5)
-            .localUriLimiter(true)
+            .localUriLimiter(false)
             .localUriRate(0.5)
             .redisIpLimiter(true)
             .redisIpPerSecond(30)
             .redisIpExpire(60)
-            .redisUriLimiter(true)
+            .redisUriLimiter(false)
             .redisUriPerSecond(30)
             .redisUriExpire(60)
             .build();

@@ -1,11 +1,15 @@
 server:
   port: 8081
 
+  #client开放指定信息给服务器看
 management:
   endpoints:
     web:
       exposure:
         include: "*"
+  endpoint:
+    health:
+      show-details: always
 
 integration-export:
   enable: true
@@ -29,9 +33,22 @@ event:
           - word
 
 limit:
-  local: true
-  redis: true
+  local: false
+  redis: false
 
 spring:
   main:
     allow-bean-definition-overriding: true
+  redis:
+    password: jxp550
+  boot:
+    admin:
+      client:
+        url: http://localhost:8081
+
+  application:
+    name: spring-boot-test1
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
