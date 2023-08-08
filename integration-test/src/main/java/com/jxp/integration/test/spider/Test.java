@@ -1,17 +1,25 @@
 package com.jxp.integration.test.spider;
 
 import java.io.File;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.Pdf;
+import org.openqa.selenium.PrintsPage;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.print.PrintOptions;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -22,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Test {
 
+    private static String cookieJsonStr = "[]";
     public static void main(String[] args) throws InterruptedException {
 
         //        System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
@@ -30,17 +39,17 @@ public class Test {
         ChromeOptions options = new ChromeOptions();
         // 允许所有请求
         options.addArguments("--remote-allow-origins=*");
-        //        options.addArguments("--headless"); //无浏览器模式
+//        options.addArguments("--headless"); //无浏览器模式
         options.addArguments("--disable-gpu"); // 谷歌文档提到需要加上这个属性来规避bug
         options.addArguments("--disable-software-rasterizer"); //禁用3D软件光栅化器
         options.addArguments("--no-sandbox");// 为了让linux root用户也能执行
         options.addArguments("--disable-dev-shm-usage"); //解决在某些VM环境中，/dev/shm分区太小，导致Chrome失败或崩溃
-        options.addArguments("blink-settings=imagesEnabled=false"); //禁止加图片,如果爬取图片的话,这个不能禁用
+//        options.addArguments("blink-settings=imagesEnabled=false"); //禁止加图片,如果爬取图片的话,这个不能禁用
         //        options.addArguments("--incognito") ; //无痕模式
         options.addArguments("--disable-plugins"); //禁用插件,加快速度
         options.addArguments("--disable-extensions"); //禁用扩展
-        //        options.addArguments("--disable-popup-blocking"); //关闭弹窗拦截
-        //        options.addArguments("--ignore-certificate-errors"); //  禁现窗口最大化
+        options.addArguments("--disable-popup-blocking"); //关闭弹窗拦截
+        options.addArguments("--ignore-certificate-errors"); //  禁现窗口最大化
         options.addArguments("--allow-running-insecure-content");  //关闭https提示 32位
         options.addArguments("--disable-infobars");  //禁用浏览器正在被自动化程序控制的提示,但是高版本不生效
 
@@ -62,6 +71,11 @@ public class Test {
         // 刷新页面
 //        webDriver.navigate().refresh();
         Set<Cookie> cookies = webDriver.manage().getCookies();
+        List<Cookie> cookies1 = JSONUtil.toList(cookieJsonStr, Cookie.class);
+        if (CollectionUtil.isNotEmpty(cookies1)) {
+            cookies1.forEach(e -> webDriver.manage().addCookie(e));
+
+        }
         log.info("**********************************");
         cookies.forEach(e -> log.info("cookie:{},value:{}", e.getName(), e.getValue()));
         log.info("**********************************");
@@ -71,7 +85,7 @@ public class Test {
 
         // 启动需要打开的网页
         //        webDriver.get("https://www.baidu.com");
-        webDriver.navigate().to("https://#/official/social/?workLocationCode=domestic");
+        webDriver.get("https://www.selenium.dev/documentation/webdriver/interactions/windows/");
 
         //操作浏览器 获取到输入框
         //        WebElement kk = webDriver.findElement(By.id("kw"));
@@ -83,27 +97,49 @@ public class Test {
         //        btn.click();
         //浏览器窗口最大化
         webDriver.manage().window().maximize();
-        webDriver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
-//        WebElement kk = webDriver.findElement(By.id("username_sso"));
-//        kk.sendKeys("jiaxiaopeng");
-//        WebElement kp = webDriver.findElement(By.id("password_sso"));
-//        kp.sendKeys("Jxp@13261573576");
-//        By xpath = By.xpath("//input[@class=btn btn-submit btn-block]");
-//        WebElement element = xpath.findElement(webDriver);
-//        element.click();
-//        webDriver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
-        Set<Cookie> cookies2 = webDriver.manage().getCookies();
-        log.info("**********************************");
-        cookies2.forEach(e -> log.info("cookie:{},value:{}", e.getName(), e.getValue()));
-        log.info("**********************************");
+        JavascriptExecutor executor = (JavascriptExecutor)webDriver;
+        String js = "window.scrollTo(0, document.body.scrollHeight);";
+        executor.executeScript(js);
+        webDriver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+
+//        try {
+//            // 找到了登录的iframe
+//            WebElement element = webDriver.findElement(By.xpath("/html/body/div[3]/div[1]/div[1]/div/iframe"));
+//            if (null != element){
+//                WebDriver frame = webDriver.switchTo().frame(element);
+//                WebElement kk = frame.findElement(By.id("username_sso"));
+//                kk.sendKeys("jiaxiaopeng");
+//                WebElement kp = frame.findElement(By.id("password_sso"));
+//                kp.sendKeys("Jxp@13261573576");
+//                WebElement btn = frame.findElement(By.xpath("/html/body/div[2]/div/div/div[2]/div/div[2]/form/section[8]/input[4]"));
+//                btn.click();
+//                webDriver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
+//            }
+//        }catch (Exception e){
+//            log.error("没有找到iframe:",e);
+//        }
+
+//        Set<Cookie> cookies2 = webDriver.manage().getCookies();
+//        log.info("**********************************");
+//        cookies2.forEach(e -> log.info("cookie:{},value:{}", e.getName(), e.getValue()));
+//        log.info("**********************************");
+//        log.info("Cookie:{}", JSONUtil.toJsonStr(cookies2));
         //获取元素文本信息
 //        String pageSource = webDriver.getPageSource();
-        String js = "window.scrollTo(0, document.body.scrollHeight);";
+//        String js = "window.scrollTo(0, document.body.scrollHeight);";
 //        new Actions(webDriver)
 //                .moveToElement(webDriver.findElement(By.ByTagName("")))
-        webDriver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
-        String data = webDriver.getPageSource();
+//        webDriver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+
+        PrintOptions printOptions = new PrintOptions();
+        printOptions.setPageRanges("1-1");
+        PrintsPage printer = (PrintsPage) webDriver;
+        Pdf print = printer.print(printOptions);
+        log.info("print:{}",print.getContent());
+        String data = webDriver.findElement(By.tagName("html")).getText();
+
         log.info("pageSource:{}", data);
+//        webDriver.navigate().to("");
         File file = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.FILE);
         // 放到指定路径下
         FileUtil.copy(file, FileUtil.file("/Users/jiaxiaopeng/shoot.png"), true);
