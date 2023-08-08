@@ -1,7 +1,6 @@
 package com.jxp.integration.test.spider.processor;
 
 import java.io.File;
-import java.net.URL;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -12,14 +11,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.ImmediateRefreshHandler;
-import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.WebResponse;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -35,66 +26,66 @@ public class TestWebclient {
     //文件版本,防止多线程缓存文件和用户文件共享,导致创建错误
     private static AtomicInteger fileSerial = new AtomicInteger(0);
 
-    public static void main(String[] args) throws Exception {
-
-        //        Runtime rt = Runtime.getRuntime();
-        ////        //        String[] commands = {"ls", "-lah"};
-        ////        String[] commands = {"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-        ////                " --headless", " --disable-gpu", " --screenshot", "--window-size=1280,1696",
-        ////                " https:///article/5728"};
-        ////
-        ////        Process proc = rt.exec(commands);
-        ////
-        ////        BufferedReader stdInput = new BufferedReader(new
-        ////                InputStreamReader(proc.getInputStream()));
-        ////
-        ////        // Read the output from the command
-        ////        System.out.println("Here is the standard output of the command:\n");
-        ////        String s = null;
-        ////        while ((s = stdInput.readLine()) != null) {
-        ////            System.out.println(s);
-        ////        }
-//        java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
-        WebRequest webRequest = new WebRequest(new URL("https:///detail?entryId=1eaa22c8ce32426af0abd90081adcf46&uuid=41b42952fd694488b177e53c758b2d77"));
-        webRequest.setAdditionalHeader("Cookie",
-                "_did=web_35512701325345A6; ksCorpDeviceid=d33d31d0-d6e4-41dd-9840-32b1cb60a43e; "
-                        + "hdige2wqwoino=GPr7AfktnrCh3NZrN7te6wSctAe6zX7R084e139b; "
-                        + "did=web_b0b09f485cdbba02cc31ba7871dcf1359720; "
-                        + "Hm_lvt_86a27b7db2c5c0ae37fee4a8a35033ee=1677650476; _ga_VKXBFL78SD=GS1.1.1678333927.1.1"
-                        + ".1678333945.42.0.0; intercom-device-id-pjrf3upr=81a2f76b-6b30-4c72-9dc2-b7023170abc6; "
-                        + "logged_out_marketing_header_id"
-                        +
-                        "=eyJfcmFpbHMiOnsibWVzc2FnZSI6IkltTXhZemd5TnpBd0xUZGtPR1l0TkRBd05pMDRabUppTFRWbU1USXlNRGN4TkRKallpST0iLCJleHAiOm51bGwsInB1ciI6ImNvb2tpZS5sb2dnZWRfb3V0X21hcmtldGluZ19oZWFkZXJfaWQifX0%3D--dcc568a3031a2656a358922ad27c8e29f93fcc80; apdid=686ab5e0-f6cb-4c7d-bd2d-eb8bb27baf317567b145a767badb03931f8b6013184c:1687682245:1; accessproxy_session=80d98724-29e6-4e50-8268-7a4624d638f4; didv=1689240364810; userSource=others; _gid=GA1.2.874043532.1691048681; k-token=a07f37b10c38491e79672c29361be4cf; _ga=GA1.2.2027780773.1664422375; _ga_F6CM1VE30P=GS1.1.1691048681.4.1.1691048760.0.0.0");
-        webRequest.setAdditionalHeader("user-agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36");
-        WebClient webClient = test3();
-        Page page = webClient.getPage(webRequest);
-        webClient.waitForBackgroundJavaScript(30000); // 该方法阻塞
-        if (page != null && page.isHtmlPage()){
-        }
+//    public static void main(String[] args) throws Exception {
 //
-        WebResponse webResponse = page.getWebResponse();
-        log.info("result:{}", webResponse.getContentAsString());
-//        test2();
-    }
+//        //        Runtime rt = Runtime.getRuntime();
+//        ////        //        String[] commands = {"ls", "-lah"};
+//        ////        String[] commands = {"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+//        ////                " --headless", " --disable-gpu", " --screenshot", "--window-size=1280,1696",
+//        ////                " https:///article/5728"};
+//        ////
+//        ////        Process proc = rt.exec(commands);
+//        ////
+//        ////        BufferedReader stdInput = new BufferedReader(new
+//        ////                InputStreamReader(proc.getInputStream()));
+//        ////
+//        ////        // Read the output from the command
+//        ////        System.out.println("Here is the standard output of the command:\n");
+//        ////        String s = null;
+//        ////        while ((s = stdInput.readLine()) != null) {
+//        ////            System.out.println(s);
+//        ////        }
+////        java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
+//        WebRequest webRequest = new WebRequest(new URL("https:///detail?entryId=1eaa22c8ce32426af0abd90081adcf46&uuid=41b42952fd694488b177e53c758b2d77"));
+//        webRequest.setAdditionalHeader("Cookie",
+//                "_did=web_35512701325345A6; ksCorpDeviceid=d33d31d0-d6e4-41dd-9840-32b1cb60a43e; "
+//                        + "hdige2wqwoino=GPr7AfktnrCh3NZrN7te6wSctAe6zX7R084e139b; "
+//                        + "did=web_b0b09f485cdbba02cc31ba7871dcf1359720; "
+//                        + "Hm_lvt_86a27b7db2c5c0ae37fee4a8a35033ee=1677650476; _ga_VKXBFL78SD=GS1.1.1678333927.1.1"
+//                        + ".1678333945.42.0.0; intercom-device-id-pjrf3upr=81a2f76b-6b30-4c72-9dc2-b7023170abc6; "
+//                        + "logged_out_marketing_header_id"
+//                        +
+//                        "=eyJfcmFpbHMiOnsibWVzc2FnZSI6IkltTXhZemd5TnpBd0xUZGtPR1l0TkRBd05pMDRabUppTFRWbU1USXlNRGN4TkRKallpST0iLCJleHAiOm51bGwsInB1ciI6ImNvb2tpZS5sb2dnZWRfb3V0X21hcmtldGluZ19oZWFkZXJfaWQifX0%3D--dcc568a3031a2656a358922ad27c8e29f93fcc80; apdid=686ab5e0-f6cb-4c7d-bd2d-eb8bb27baf317567b145a767badb03931f8b6013184c:1687682245:1; accessproxy_session=80d98724-29e6-4e50-8268-7a4624d638f4; didv=1689240364810; userSource=others; _gid=GA1.2.874043532.1691048681; k-token=a07f37b10c38491e79672c29361be4cf; _ga=GA1.2.2027780773.1664422375; _ga_F6CM1VE30P=GS1.1.1691048681.4.1.1691048760.0.0.0");
+//        webRequest.setAdditionalHeader("user-agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36");
+//        WebClient webClient = test3();
+//        Page page = webClient.getPage(webRequest);
+//        webClient.waitForBackgroundJavaScript(30000); // 该方法阻塞
+//        if (page != null && page.isHtmlPage()){
+//        }
+////
+//        WebResponse webResponse = page.getWebResponse();
+//        log.info("result:{}", webResponse.getContentAsString());
+////        test2();
+//    }
 
-    public static WebClient test3() throws Exception {
-        //            WebClient webClient = new WebClient(BrowserVersion.BEST_SUPPORTED);
-        WebClient webClient = new WebClient(BrowserVersion.CHROME);
-        webClient.getOptions().setTimeout(600 * 1000);
-        webClient.getOptions().setRedirectEnabled(true);
-        webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
-        webClient.getOptions().setUseInsecureSSL(true);
-        webClient.getOptions().setActiveXNative(false);
-        webClient.getOptions().setJavaScriptEnabled(true);
-        webClient.getOptions().setThrowExceptionOnScriptError(false);
-        webClient.getOptions().setCssEnabled(true);
-        webClient.setJavaScriptTimeout(600 * 1000);
-        webClient.waitForBackgroundJavaScript(600 * 1000);
-        webClient.setAjaxController(new NicelyResynchronizingAjaxController());
-        webClient.setRefreshHandler(new ImmediateRefreshHandler());
-        //            Assert.assertEquals("HtmlUnit – Welcome to HtmlUnit", page.getTitleText());
-    return webClient;
-    }
+//    public static WebClient test3() throws Exception {
+//        //            WebClient webClient = new WebClient(BrowserVersion.BEST_SUPPORTED);
+//        WebClient webClient = new WebClient(BrowserVersion.CHROME);
+//        webClient.getOptions().setTimeout(600 * 1000);
+//        webClient.getOptions().setRedirectEnabled(true);
+//        webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
+//        webClient.getOptions().setUseInsecureSSL(true);
+//        webClient.getOptions().setActiveXNative(false);
+//        webClient.getOptions().setJavaScriptEnabled(true);
+//        webClient.getOptions().setThrowExceptionOnScriptError(false);
+//        webClient.getOptions().setCssEnabled(true);
+//        webClient.setJavaScriptTimeout(600 * 1000);
+//        webClient.waitForBackgroundJavaScript(600 * 1000);
+//        webClient.setAjaxController(new NicelyResynchronizingAjaxController());
+//        webClient.setRefreshHandler(new ImmediateRefreshHandler());
+//        //            Assert.assertEquals("HtmlUnit – Welcome to HtmlUnit", page.getTitleText());
+//    return webClient;
+//    }
 
     private final static String driver = "webdriver.chrome.driver";
     private final static String chromeDriver =
