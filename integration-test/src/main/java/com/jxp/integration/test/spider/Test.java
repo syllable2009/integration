@@ -13,6 +13,7 @@ import org.openqa.selenium.Pdf;
 import org.openqa.selenium.PrintsPage;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.print.PrintOptions;
@@ -102,22 +103,22 @@ public class Test {
         executor.executeScript(js);
         webDriver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 
-//        try {
-//            // 找到了登录的iframe
-//            WebElement element = webDriver.findElement(By.xpath("/html/body/div[3]/div[1]/div[1]/div/iframe"));
-//            if (null != element){
-//                WebDriver frame = webDriver.switchTo().frame(element);
-//                WebElement kk = frame.findElement(By.id("username_sso"));
-//                kk.sendKeys("jiaxiaopeng");
-//                WebElement kp = frame.findElement(By.id("password_sso"));
-//                kp.sendKeys("Jxp@13261573576");
-//                WebElement btn = frame.findElement(By.xpath("/html/body/div[2]/div/div/div[2]/div/div[2]/form/section[8]/input[4]"));
-//                btn.click();
-//                webDriver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
-//            }
-//        }catch (Exception e){
-//            log.error("没有找到iframe:",e);
-//        }
+        try {
+            // 找到了登录的iframe
+            WebElement element = webDriver.findElement(By.xpath("/html/body/div[3]/div[1]/div[1]/div/iframe"));
+            if (null != element){
+                WebDriver frame = webDriver.switchTo().frame(element);
+                WebElement kk = frame.findElement(By.id("username_sso"));
+                kk.sendKeys("jiaxiaopeng");
+                WebElement kp = frame.findElement(By.id("password_sso"));
+                kp.sendKeys("Jxp");
+                WebElement btn = frame.findElement(By.xpath("/html/body/div[2]/div/div/div[2]/div/div[2]/form/section[8]/input[4]"));
+                btn.click();
+                webDriver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
+            }
+        }catch (Exception e){
+            log.error("没有找到iframe:",e);
+        }
 
 //        Set<Cookie> cookies2 = webDriver.manage().getCookies();
 //        log.info("**********************************");
