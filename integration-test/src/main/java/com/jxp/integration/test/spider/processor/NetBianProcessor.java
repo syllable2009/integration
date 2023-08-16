@@ -31,7 +31,7 @@ public class NetBianProcessor implements PageProcessor {
 
     private static String domain = "http://www.netbian.com";
     private static String BASE_URL = "http://www.netbian.com/meinv/index_{}.htm";
-    private static AtomicInteger atomicInteger = new AtomicInteger(1);
+    private static AtomicInteger atomicInteger = new AtomicInteger(28);
 
     @Override
     // process是定制爬虫逻辑的核心接口，在这里编写抽取逻辑
@@ -45,14 +45,14 @@ public class NetBianProcessor implements PageProcessor {
             String newUrl = domain + s;
             Spider.create(new NetBianDownProcessor())
                     .addUrl(newUrl)
-                    .thread(1)
+                    .thread(5)
                     .addPipeline(new JuejinPipeline())
                     .run();
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException interruptedException) {
-                interruptedException.printStackTrace();
-            }
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException interruptedException) {
+//                interruptedException.printStackTrace();
+//            }
 
         });
         String target = StrUtil.format(BASE_URL, atomicInteger.addAndGet(1));
