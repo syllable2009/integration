@@ -33,8 +33,7 @@ public class IdentifyInterceptor extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        log.info("IdentifyInterceptor");
-
+//        log.info("IdentifyInterceptor");
         // 优先级 testUserId > 登录 > 匿名
         // 先要判断环境
         String env = "test";

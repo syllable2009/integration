@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @ServerEndpoint(path = "/ws/{arg}", host = "${ws.host}", port = "${ws.port}")
-public class MyWebsocket {
+public class MyWebsocketEndpoint {
 
 //    @Resource
 //    WsService wsService;
@@ -42,6 +42,7 @@ public class MyWebsocket {
             session.close();
         }
         String cookie = headers.get("Cookie");
+        // 身份识别
         log.info("cookie:{}", cookie);
 
     }

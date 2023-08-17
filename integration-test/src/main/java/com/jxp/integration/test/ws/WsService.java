@@ -20,18 +20,19 @@ public class WsService {
         try {
             //            synchronized (connectIdentityDto.getSession()) {   }
             if (connectIdentityDto.getSession().isOpen()) {
-                Thread.sleep(500);
-//                ChannelFuture cf = connectIdentityDto.getSession().channel().writeAndFlush(new TextWebSocketFrame(message));
+                //                Thread.sleep(5000);
+                //                ChannelFuture cf = connectIdentityDto.getSession().channel().writeAndFlush(new
+                //                TextWebSocketFrame(message));
                 ChannelFuture cf = connectIdentityDto.getSession().sendText(message);
 
                 //添加ChannelFutureListener以便在写操作完成后接收通知
                 cf.addListener((ChannelFutureListener) future -> {
                     //写操作完成，并没有错误发生
                     if (future.isSuccess()) {
-                        System.out.println("successful");
+
                     } else {
                         //记录错误
-                        System.out.println("error");
+                        log.info("send message fail,message:{}", message);
                         future.cause().printStackTrace();
                     }
                 });
