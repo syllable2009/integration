@@ -1,7 +1,5 @@
 package com.jxp.integration.test.luckydraw;
 
-import javax.annotation.Resource;
-
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -12,8 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PrizeService {
 
-    @Resource
-    private RedisListTools<String> listTools;
+//    @Resource
+//    private RedisListTools<String> listTools;
 
     /**
      * 累计的key
@@ -45,7 +43,7 @@ public class PrizeService {
         // 判断该用户是否已经中奖
         // 是否可以重复抽奖配置
         // 分布式数据需要再redis中初始化，通过redis拿到当前的prize_count的大小
-        Long prizeCount = listTools.increCount(PRIZE_COUNT);
+//        Long prizeCount = listTools.increCount(PRIZE_COUNT);
 
     }
 }

@@ -16,6 +16,7 @@
         <java.version>1.8</java.version>
         <!-- Define the version of OPEN HTML TO PDF in the properties section of your POM. -->
         <openhtml.version>1.0.10</openhtml.version>
+        <docker.image.prefix>springboot</docker.image.prefix>
     </properties>
     <dependencies>
 
@@ -253,6 +254,18 @@
             <artifactId>openhtmltopdf-mathml-support</artifactId>
             <version>${openhtml.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.13.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
+            <version>5.13.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -267,6 +280,23 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <!-- Docker maven plugin -->
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <configuration>
+                    <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+                    <dockerDirectory>src/main/docker</dockerDirectory>
+                    <resources>
+                        <resource>
+                            <targetPath>/</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
                 </configuration>
             </plugin>
         </plugins>

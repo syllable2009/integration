@@ -6,12 +6,17 @@ import java.util.List;
 import org.apache.poi.ss.formula.functions.T;
 import org.icepear.echarts.Bar;
 import org.icepear.echarts.Line;
+import org.icepear.echarts.Option;
 import org.icepear.echarts.Pie;
 import org.icepear.echarts.Scatter;
+import org.icepear.echarts.charts.bar.BarSeries;
 import org.icepear.echarts.charts.line.LineAreaStyle;
 import org.icepear.echarts.charts.line.LineSeries;
 import org.icepear.echarts.charts.pie.PieDataItem;
+import org.icepear.echarts.components.coord.CategoryAxisLabel;
 import org.icepear.echarts.components.coord.cartesian.CategoryAxis;
+import org.icepear.echarts.components.coord.cartesian.ValueAxis;
+import org.icepear.echarts.origin.util.SeriesOption;
 import org.icepear.echarts.render.Engine;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -153,6 +158,35 @@ public class EchartsController {
                 });
         Engine engine = new Engine();
         return engine.renderHtml(pie);
+    }
+
+    public static void main(String[] args) {
+        CategoryAxisLabel categoryAxisLabel = new CategoryAxisLabel();
+        categoryAxisLabel.setRotate(25);
+        CategoryAxis xAxis = new CategoryAxis()
+                .setType("category")
+                .setData(new String[] {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"})
+                .setNameRotate(Double.valueOf(0.45))
+                .setNameLocation("start")
+                .setAxisLabel(categoryAxisLabel)
+                .setMin("dataMin");
+
+        ValueAxis yAxis = new ValueAxis().setType("value")
+                .setNameRotate(25);
+
+        BarSeries series = new BarSeries()
+                .setData(new Number[] {120, 200, 150, 80, 70, 110, 130})
+                .setType("bar");
+
+        Option option = new Option()
+                .setXAxis(xAxis)
+                .setYAxis(yAxis)
+                .setSeries(new SeriesOption[] {series});
+
+        Engine engine = new Engine();
+        String s = engine.renderHtml(option);
+        log.info("s:{}", s);
+
     }
 
 }

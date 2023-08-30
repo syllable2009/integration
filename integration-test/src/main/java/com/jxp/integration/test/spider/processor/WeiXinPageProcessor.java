@@ -1,20 +1,16 @@
 package com.jxp.integration.test.spider.processor;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.jxp.integration.test.spider.pipeline.JuejinPipeline;
+import com.jxp.integration.test.spider.selector.CustomSelector;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.selector.Html;
-import us.codecraft.webmagic.selector.Selectable;
 
 /**
  * @author jiaxiaopeng
@@ -35,14 +31,17 @@ public class WeiXinPageProcessor implements PageProcessor {
     @Override
     // process是定制爬虫逻辑的核心接口，在这里编写抽取逻辑
     public void process(Page page) {
+        Html html = page.getHtml();
+        List<String> ret = html.selectDocumentForList(new CustomSelector());
 
+        log.info("ret:{}", ret);
         // 选择器
         //        <h1 class="article-title" data-v-066b2e60="">
         //                多端登录如何实现踢人下线
         //                <!----> <!----></h1>
-        String rawText = page.getRawText();
+        //        String rawText = page.getRawText();
         //        log.info("rawText:{}", rawText);
-        Html plainText = new Html(rawText);
+        //        Html plainText = new Html(rawText);
 
 
         //        Html html = page.getHtml();
@@ -52,47 +51,47 @@ public class WeiXinPageProcessor implements PageProcessor {
         //            return;
         //        }
 
-        Selectable xpath = plainText.xpath("//div[@id=img-content]");
+        //        Selectable xpath = plainText.xpath("//div[@id=img-content]");
         //        Selectable xpath = html.xpath("//div[@id=img-content]");
-        String title = xpath.xpath("//h1[@id=activity-name]/text()").get();
-        page.putField("title", StrUtil.trim(title));
+        //        String title = xpath.xpath("//h1[@id=activity-name]/text()").get();
+        //        page.putField("title", StrUtil.trim(title));
         //        String title = xpath.xpath("//h1[@id=meta_content]/text()").get();
         //        List<String> all = xpath.xpath("//div[@id=js_content]/section/p/text()").all();
-        List<Selectable> nodes = plainText.xpath("//div[@id=js_content]").nodes();
+        //            List<Selectable> nodes = plainText.xpath("//div[@id=js_content]").nodes();
 
-        List<String> smart = nodes.stream()
-                .map(e -> e.smartContent().all())
-                .flatMap(Collection::stream)
-                .filter(s -> StrUtil.isNotBlank(s))
-                .map(s -> StrUtil.trim(s))
-                .collect(Collectors.toList());
-        log.info("smart:{}", JSONUtil.toJsonStr(smart));
+        //        List<String> smart = nodes.stream()
+        //                .map(e -> e.smartContent().all())
+        //                .flatMap(Collection::stream)
+        //                .filter(s -> StrUtil.isNotBlank(s))
+        //                .map(s -> StrUtil.trim(s))
+        //                .collect(Collectors.toList());
+        //        log.info("smart:{}", JSONUtil.toJsonStr(smart));
         //        nodes.forEach(e->{
         //            log.info("{}",e.xpath("//img/@data-src").all());
         //        });
-        log.info("***********************************");
+        //        log.info("***********************************");
         //        nodes.forEach(e -> {
         //            //            log.info("{}", e.smartContent().get());
         //            log.info("{}", e.smartContent().all());
         //        });
 
 
-        log.info("***********************************");
-        // 自己写的
-        List<String> self = plainText.xpath("//div[@id=js_content]").nodes()
-                .stream()
-                .map(e -> e.xpath("//*//text()").all())
-                .flatMap(Collection::stream)
-                .filter(s -> StrUtil.isNotBlank(s))
-                .map(s -> {
-                    return s.replaceAll("\\s+", " ")
-                            .replaceAll("\u00A0", " ").trim();
-                    //                    return StrUtil.removeAllLineBreaks(s).trim();
-                    //                    s.replaceAll("(\\\\u00a0+|)", " ");
-                    //                    return StrUtil.trim(s);
-                })
-                .collect(Collectors.toList());
-        log.info("self:{}", JSONUtil.toJsonStr(self));
+        //        log.info("***********************************");
+        //        // 自己写的
+        //        List<String> self = plainText.xpath("//div[@id=js_content]").nodes()
+        //                .stream()
+        //                .map(e -> e.xpath("//*//text()").all())
+        //                .flatMap(Collection::stream)
+        //                .filter(s -> StrUtil.isNotBlank(s))
+        //                .map(s -> {
+        //                    return s.replaceAll("\\s+", " ")
+        //                            .replaceAll("\u00A0", " ").trim();
+        //                    //                    return StrUtil.removeAllLineBreaks(s).trim();
+        //                    //                    s.replaceAll("(\\\\u00a0+|)", " ");
+        //                    //                    return StrUtil.trim(s);
+        //                })
+        //                .collect(Collectors.toList());
+        //        log.info("self:{}", JSONUtil.toJsonStr(self));
 
         //        Selectable select = html.xpath("//body");
         //        page.putField("title", StrUtil.trim(html.xpath("//body//h1[@class=article-title]/text()").get()));
@@ -131,7 +130,7 @@ public class WeiXinPageProcessor implements PageProcessor {
                 //从"https://github.com/code4craft"开始抓
                 //                .addUrl("https://github.com/code4craft/webmagic")
                 //                .addUrl("https://mp.weixin.qq.com/s/3EvY2ZozaNwNpWehi3z8kQ")
-                .addUrl("https://mp.weixin.qq.com/s/ceZ3LVXBaWBcOV0eIAnXMw")
+                .addUrl("https://github.com/alist-org/alist")
                 //开启5个线程抓取
                 .thread(1)
                 .addPipeline(new JuejinPipeline())
