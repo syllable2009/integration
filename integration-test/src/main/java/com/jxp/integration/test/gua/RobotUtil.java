@@ -1,7 +1,9 @@
 package com.jxp.integration.test.gua;
 
 import java.awt.AWTException;
+import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -9,7 +11,13 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -46,6 +54,17 @@ public class RobotUtil {
         } else {
             User32.INSTANCE.ShowWindow(hwnd, 9);
             User32.INSTANCE.SetForegroundWindow(hwnd); // bring to front
+            User32.INSTANCE.SetFocus(hwnd);
+            // 获取窗口大小
+            WinDef.RECT rect = new WinDef.RECT();
+            User32.INSTANCE.GetWindowRect(hwnd, rect);
+            int width = rect.right - rect.left;
+            int height = rect.bottom - rect.top;
+            System.out.println("窗口大小: " + width + "x" + height);
+            // 获取窗口坐标
+            WinDef.POINT point = new WinDef.POINT();
+            User32.INSTANCE.GetCursorPos(point);
+            System.out.println("窗口坐标: (" + point.x + ", " + point.y + ")");
         }
         return flag;
     }
@@ -53,7 +72,7 @@ public class RobotUtil {
     /**
      * 初始化全局变量
      */
-    private static void init() {
+    private static void init() throws IOException {
         try {
             robot = new Robot();
         } catch (AWTException e) {
@@ -61,8 +80,42 @@ public class RobotUtil {
             e.printStackTrace();
         }
         kit = Toolkit.getDefaultToolkit();
+        //获取屏幕分辨率
+        Dimension d = kit.getScreenSize();
+        System.out.println(d);
+        Rectangle screenRect = new Rectangle(d);
+        //截图
+        BufferedImage bufferedImage = robot.createScreenCapture(screenRect);
+        //保存截图
+        File file = new File("screenRect.png");
+        ImageIO.write(bufferedImage, "png", file);
+
+        //移动鼠标
+        robot.mouseMove(500, 500);
+
+        //点击鼠标
+        //鼠标左键
+        System.out.println("单击");
+        robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+        robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+
+        //鼠标右键
+        System.out.println("右击");
+        robot.mousePress(InputEvent.BUTTON3_DOWN_MASK);
+        robot.mouseRelease(InputEvent.BUTTON3_DOWN_MASK);
+
+        //按下ESC，退出右键状态
+        System.out.println("按下ESC");
+        robot.keyPress(KeyEvent.VK_ESCAPE);
+        robot.keyRelease(KeyEvent.VK_ESCAPE);
+        //滚动鼠标滚轴
+        System.out.println("滚轴");
+        robot.mouseWheel(5);
+
         clip = kit.getSystemClipboard();
+
     }
+
 
     public static void main(String[] args) throws Exception {
 
