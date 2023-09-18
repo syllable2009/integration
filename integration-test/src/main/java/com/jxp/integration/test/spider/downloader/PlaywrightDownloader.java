@@ -51,8 +51,10 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
         com.microsoft.playwright.Page page = browserContext.newPage();
         Response navigate = page.navigate(request.getUrl());
         if (!navigate.ok()) {
+            log.error("spider download page fail,url:{}", request.getUrl());
             return Page.fail();
         }
+        log.info("spider download page success,url:{}", request.getUrl());
         Page ret = new Page();
         ret.setStatusCode(navigate.status());
         ret.setDownloadSuccess(true);
