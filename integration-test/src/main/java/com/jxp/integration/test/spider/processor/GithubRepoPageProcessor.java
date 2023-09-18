@@ -45,7 +45,7 @@ public class GithubRepoPageProcessor implements PageProcessor {
 //                    e.xpath("//h2/a/span/text()").get() + StrUtil.trim(e.xpath("//h2/a/text()").get()));
 //        });
 
-        List<String> all = html.xpath("//div[@id=readme]//article/p/h1|h3|h2|div//text()").all();
+        List<String> all = html.xpath("//div[@id=readme]//article/p/h1|h3|h2|div//tidyText()").all();
 
         log.info("html:{}",all);
         // 部分二：定义如何抽取页面信息，并保存下来
