@@ -7,13 +7,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.jxp.integration.test.spider.domain.dto.CrawlerMetaDataConfig;
+import com.jxp.integration.test.spider.domain.dto.CrawlerTaskDataConfig;
 import com.jxp.integration.test.spider.domain.dto.SingleAddressReq;
 import com.jxp.integration.test.spider.domain.dto.SingleAddressResp;
 import com.jxp.integration.test.spider.domain.dto.SpiderTaskResp;
 import com.jxp.integration.test.spider.domain.entity.RecommendCrawlerTaskData;
 import com.jxp.integration.test.spider.downloader.PlaywrightDownloader;
 import com.jxp.integration.test.spider.helper.SpiderHelper;
+import com.jxp.integration.test.spider.helper.SpiderTaskHelper;
 import com.jxp.integration.test.spider.processor.PlaywrightProcessor;
+import com.jxp.integration.test.spider.processor.PlaywrightTaskProcessor;
 import com.jxp.integration.test.spider.service.SpiderService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -82,7 +85,33 @@ public class SpiderServiceImpl implements SpiderService {
     }
 
     @Override
-    public SpiderTaskResp taskSpiderRun(RecommendCrawlerTaskData req) {
-        return null;
+    public SpiderTaskResp taskSpiderRun(RecommendCrawlerTaskData taskData) {
+        if (null == taskData) {
+            log.info("spider task handle fail,data not found");
+            return null;
+        }
+        // 获取config
+        CrawlerTaskDataConfig config = null;
+        if (null == config) {
+            log.info("spider task handle fail,config not found,url:{}", taskData.getLink());
+            return null;
+        }
+        log.info("spider task start request,url:{}", taskData.getLink());
+        SpiderTaskHelper spiderHelper = SpiderTaskHelper.builder()
+                .taskData(taskData)
+                .downloader(new PlaywrightDownloader())
+                .processor(PlaywrightTaskProcessor.builder()
+                        .config(config)
+                        .site(null)
+                        .taskData(taskData)
+                        .build())
+                .pipeline(defaultPipeline)
+                .build();
+        spiderHelper.run();
+        PlaywrightTaskProcessor processor = (PlaywrightTaskProcessor) spiderHelper.getProcessor();
+        log.info("spider task success end request,url:{}", taskData.getLink());
+        return processor.getProcessorData();
+
+
     }
 }
