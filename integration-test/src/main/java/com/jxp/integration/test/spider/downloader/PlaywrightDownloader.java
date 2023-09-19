@@ -3,8 +3,10 @@ package com.jxp.integration.test.spider.downloader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
@@ -15,7 +17,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jxp.integration.test.config.PlaywrightConfig;
 import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.ElementHandle;
+import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Response;
+import com.microsoft.playwright.options.ScreenshotType;
 
 import lombok.extern.slf4j.Slf4j;
 import us.codecraft.webmagic.Page;
@@ -77,14 +82,33 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         // 自己关闭自己的context
+
         BrowserContext browserContext = PlaywrightConfig.BROWSER_CONTEXT;
         com.microsoft.playwright.Page page = browserContext.newPage();
         Response navigate = page.navigate("https://www.36kr.com/newsflashes/2368027471505793");
-        log.info("content:{}", navigate.text());
-        log.info("charset:{}", getHtmlCharset(navigate.allHeaders(), navigate.body()));
-        log.info("allHeaders:{}", navigate.allHeaders());
+//        log.info("content:{}", navigate.text());
+//        log.info("charset:{}", getHtmlCharset(navigate.allHeaders(), navigate.body()));
+//        log.info("allHeaders:{}", navigate.allHeaders());
+        page.screenshot(new com.microsoft.playwright.Page.ScreenshotOptions()
+                .setFullPage(true)
+                .setType(ScreenshotType.PNG)
+                .setPath(Paths.get("/Users/jiaxiaopeng/screenshot2.png")));
+        Locator l1 = page.getByText("原文链接");
+        log.info("l1:{}",l1.isVisible());
+        Locator l2 = page.getByText(Pattern.compile("原文链接$", Pattern.CASE_INSENSITIVE));
+        log.info("l2:{}",l2.isVisible());
+//        Locator l3 = page.locator("//a[@class=article-link-icon]");
+//        log.info("l3:{}",l3.isVisible());
+        ElementHandle elementHandle = page.querySelector(".article-link-icon");
+        log.info("l4:{}",elementHandle.isVisible());
+        l1.hover();
+        l1.click();
+        page.waitForTimeout(60_000);
+        page.screenshot(new com.microsoft.playwright.Page.ScreenshotOptions()
+                .setPath(Paths.get("/Users/jiaxiaopeng/screenshot3.png")));
+        page.close();
         PlaywrightConfig.close();
     }
 
