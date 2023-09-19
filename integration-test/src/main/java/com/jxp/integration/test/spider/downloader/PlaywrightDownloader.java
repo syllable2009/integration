@@ -108,7 +108,6 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
         page.waitForTimeout(60_000);
         page.screenshot(new com.microsoft.playwright.Page.ScreenshotOptions()
                 .setPath(Paths.get("/Users/jiaxiaopeng/screenshot3.png")));
-        page.close();
         PlaywrightConfig.close();
     }
 

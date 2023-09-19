@@ -11,6 +11,7 @@ import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
+import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.ScreenshotType;
 
 import cn.hutool.core.lang.Assert;
@@ -126,7 +127,24 @@ public class PlaywrightMain {
     }
 
     public static void test4() {
+        try (Playwright playwright = Playwright.create()) {
+            Browser browser = playwright.chromium()
+                    .launch(new BrowserType.LaunchOptions().setArgs(Collections.singletonList("--start-maximized"))
+                            .setHeadless(false).setSlowMo(1000));
+            BrowserContext browserContext = browser.newContext(new Browser.NewContextOptions()
+                    .setIgnoreHTTPSErrors(true)
+                    .setJavaScriptEnabled(true));
 
+            Page page1 = browserContext.newPage();
+            //            page.onDialog(dialog -> dialog.dismiss());
+
+            //            page.waitForTimeout(60_000); = thread.sleep
+            page1.navigate("http://www.netbian.com/2560x1440/", new Page.NavigateOptions().setTimeout(120 * 1000));
+            log.info("pageInfo1:{},url:{}", page1.toString(), page1.url());
+
+            page1.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Sign in"));
+//            page1.getAttribute(AriaRole.LINK,new Page.GetAttributeOptions().);
+        }
     }
 
     public static void test5() {
