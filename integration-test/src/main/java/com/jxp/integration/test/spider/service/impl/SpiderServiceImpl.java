@@ -97,8 +97,16 @@ public class SpiderServiceImpl implements SpiderService {
             return null;
         }
         // 获取config
-        String domain = UrlUtils.getDomain(taskData.getLink());
-        CrawlerTaskDataConfig config = crawlerTaskDataConfigMap.get(domain);
+        String processor = null;
+        if (StringUtils.isNotBlank(taskData.getProcessor())) {
+            processor = taskData.getProcessor();
+        } else if (StringUtils.isNotBlank(taskData.getDomain())) {
+            processor = taskData.getDomain();
+        } else {
+            processor = UrlUtils.getDomain(taskData.getLink());
+        }
+
+        CrawlerTaskDataConfig config = crawlerTaskDataConfigMap.get(processor);
         if (null == config) {
             log.info("spider task handle fail,config not found,url:{}", taskData.getLink());
             return null;
@@ -106,7 +114,7 @@ public class SpiderServiceImpl implements SpiderService {
         log.info("spider task start request,url:{}", taskData.getLink());
         SpiderTaskHelper spiderHelper = SpiderTaskHelper.builder()
                 .taskData(taskData)
-                .downloader(new PlaywrightDownloader())
+                .downloader(playwrightDownloader)
                 .processor(DefaultTaskProcessor.builder()
                         .config(config)
                         .site(null)
@@ -115,9 +123,9 @@ public class SpiderServiceImpl implements SpiderService {
                 .pipeline(defaultPipeline)
                 .build();
         spiderHelper.run();
-        DefaultTaskProcessor processor = (DefaultTaskProcessor) spiderHelper.getProcessor();
+        DefaultTaskProcessor processorData = (DefaultTaskProcessor) spiderHelper.getProcessor();
         log.info("spider task success end request,url:{}", taskData.getLink());
-        return processor.getProcessorData();
+        return processorData.getProcessorData();
 
 
     }

@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -38,7 +37,6 @@ public class RecommendCrawlerTaskData implements Serializable {
     @ApiModelProperty(value = "uuid")
     private String id;
 
-    @NotEmpty
     @ApiModelProperty(value = "标题")
     private String title;
 
@@ -46,23 +44,18 @@ public class RecommendCrawlerTaskData implements Serializable {
     @ApiModelProperty(value = "原始链接")
     private String link;
 
-    @NotEmpty
     @ApiModelProperty(value = "域")
     private String domain;
 
-    @NotNull
     @ApiModelProperty(value = "状态")
     private Integer state;
 
-    @NotEmpty
     @ApiModelProperty(value = "解析器名称")
     private String processor;
 
-    @NotEmpty
     @ApiModelProperty(value = "用户邮箱前缀")
     private String loginId;
 
-    @NotEmpty
     @ApiModelProperty(value = "用户id")
     private Long userId;
 
@@ -74,7 +67,6 @@ public class RecommendCrawlerTaskData implements Serializable {
     @ApiModelProperty(value = "更新时间")
     private LocalDateTime updateTime;
 
-    @NotEmpty
     @ApiModelProperty(value = "cron")
     private String cron;
 
