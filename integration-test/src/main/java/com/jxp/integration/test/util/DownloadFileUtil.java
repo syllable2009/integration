@@ -66,7 +66,7 @@ public class DownloadFileUtil {
         String fineName = IdUtil.simpleUUID() + ".jpg";
         downloadByPlaywright(fileUrl, path, fineName);
         DownloadFileUtil.downloadByHutool(fileUrl, "/Users/jiaxiaopeng/", "222.jpg");
-        PlaywrightConfig.close();
+        PlaywrightConfig.closeChromium();
     }
 
     public static boolean saveFileBytes(byte[] body, String path, String fileName) {

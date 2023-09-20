@@ -33,6 +33,7 @@ import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.downloader.AbstractDownloader;
 import us.codecraft.webmagic.selector.PlainText;
 import us.codecraft.webmagic.utils.CharsetUtils;
+import us.codecraft.webmagic.utils.UrlUtils;
 
 /**
  * @author jiaxiaopeng
@@ -46,7 +47,7 @@ import us.codecraft.webmagic.utils.CharsetUtils;
 @Data
 public class PlaywrightDownloader extends AbstractDownloader implements Closeable {
 
-    @Resource
+    @Resource(name = "chromiumBrowserContext")
     BrowserContext browserContext;
 
     @Override
@@ -56,19 +57,24 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
     @Override
     public Page download(Request request, Task task) {
         if (task == null || task.getSite() == null) {
-            throw new NullPointerException("task or site can not be null");
+            throw new NullPointerException("PlaywrightDownloader download page fail,task or site can not be null");
         }
-        // BrowserContext用于内存中隔离的浏览器配置文件，以确保它们不会相互干扰。
-        //        BrowserContext browserContext = browser.newContext();
-        com.microsoft.playwright.Page page = browserContext.newPage();
-        Response navigate = page.navigate(request.getUrl());
+        com.microsoft.playwright.Page page = null;
+        if (null != browserContext) {
+            page = browserContext.newPage();
+        } else {
+            page = PlaywrightConfig.BROWSER_CONTEXT.newPage();
+        }
+        String referer = UrlUtils.getHost(request.getUrl());
+        Response navigate = page.navigate(request.getUrl(),
+                new com.microsoft.playwright.Page.NavigateOptions().setTimeout(60000).setReferer(referer));
         if (!navigate.ok()) {
-            log.error("spider download page fail,url:{}", request.getUrl());
+            log.error("PlaywrightDownloader download page fail,url:{}", request.getUrl());
             return Page.fail();
         }
         browserContext.storageState(
                 new BrowserContext.StorageStateOptions().setPath(Paths.get("/Users/jiaxiaopeng/cookies.json")));
-        log.info("spider download page success,url:{}", request.getUrl());
+        log.info("PlaywrightDownloader download page success,url:{}", request.getUrl());
         Page ret = new Page();
         ret.setStatusCode(navigate.status());
         ret.setDownloadSuccess(true);
@@ -88,7 +94,6 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
 
     @Override
     public void setThread(int threadNum) {
-
     }
 
     public static void main(String[] args) throws InterruptedException {
@@ -97,9 +102,6 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
         BrowserContext browserContext = PlaywrightConfig.BROWSER_CONTEXT;
         com.microsoft.playwright.Page page = browserContext.newPage();
         Response navigate = page.navigate("https://www.36kr.com/newsflashes/2368027471505793");
-        //        log.info("content:{}", navigate.text());
-        //        log.info("charset:{}", getHtmlCharset(navigate.allHeaders(), navigate.body()));
-        //        log.info("allHeaders:{}", navigate.allHeaders());
         page.screenshot(new com.microsoft.playwright.Page.ScreenshotOptions()
                 .setFullPage(true)
                 .setType(ScreenshotType.PNG)
@@ -117,7 +119,7 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
         page.waitForTimeout(60_000);
         page.screenshot(new com.microsoft.playwright.Page.ScreenshotOptions()
                 .setPath(Paths.get("/Users/jiaxiaopeng/screenshot3.png")));
-        PlaywrightConfig.close();
+        PlaywrightConfig.closeChromium();
     }
 
     private static String getHtmlCharset(Map<String, String> allHeaders, byte[] contentBytes) {
@@ -129,11 +131,11 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
         try {
             charset = CharsetUtils.detectCharset(contentType, contentBytes);
             if (null == charset) {
-                log.error("getHtmlCharset null,contentType:{}", contentType);
+                log.error("PlaywrightDownloader getHtmlCharset null,contentType:{}", contentType);
             }
             return charset;
         } catch (Exception e) {
-            log.error("getHtmlCharset exception,contentType:{}", contentType);
+            log.error("PlaywrightDownloader getHtmlCharset exception,contentType:{}", contentType);
         }
         return Charset.defaultCharset().name();
     }

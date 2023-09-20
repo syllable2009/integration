@@ -23,6 +23,7 @@ import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.selector.Html;
 import us.codecraft.webmagic.selector.Json;
+import us.codecraft.webmagic.utils.UrlUtils;
 
 /**
  * @author jiaxiaopeng
@@ -131,17 +132,23 @@ public class DefaultTaskProcessor implements PageProcessor {
         return;
     }
 
+    // 部分一：抓取网站的相关配置，包括编码、抓取间隔、重试次数等
+    private static Site getDefaultSite() {
+        return Site.me().setRetryTimes(3).setSleepTime(100)
+                .setRetrySleepTime(1000)
+                .setTimeOut(30 * 1000)
+                .addHeader("user-agent",
+                        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) "
+                                + "Chrome/112.0.0.0 Safari/537.36");
+    }
+
     @Override
     public Site getSite() {
         if (null == site) {
-            site = Site.me().setRetryTimes(3).setSleepTime(100)
-                    .setRetrySleepTime(1000)
-                    .setTimeOut(30 * 1000)
-                    .addHeader("user-agent",
-                            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) "
-                                    + "Chrome/112.0.0.0 Safari/537.36");
+            site = getDefaultSite();
+            site.addHeader("referer", UrlUtils.getHost(taskData.getLink()));
         }
-        return site;
+        return this.site;
     }
 
 

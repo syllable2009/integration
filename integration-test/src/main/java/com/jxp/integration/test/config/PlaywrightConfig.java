@@ -38,14 +38,12 @@ public class PlaywrightConfig {
     //    public static Browser WEBKIT =
     //            PLAYWRIGHT.webkit().launch(new BrowserType.LaunchOptions().setSlowMo(1000).setHeadless(false));
 
-    //  默认的隔离的浏览器上下文
+    // BrowserContext用于内存中隔离的浏览器配置文件，以确保它们不会相互干扰。
     public static BrowserContext BROWSER_CONTEXT =
             CHROMIUM.newContext(
                     new Browser.NewContextOptions().setStorageStatePath(Paths.get("/Users/jiaxiaopeng/cookies.json")));
 
-    // save
-    //        BROWSER_CONTEXT.storageState(new BrowserContext.StorageStateOptions().setPath(Paths.get("state
-    //        .json")));
+    // save BROWSER_CONTEXT.storageState(new BrowserContext.StorageStateOptions().setPath(Paths.get("cookies.json")));
 
     @Bean(name = "chromiumBrowser")
     public Browser chromiumBrowser() {
@@ -64,15 +62,15 @@ public class PlaywrightConfig {
     }
 
     // 默认的上下浏览器请求上下文
-    @Bean
-    public BrowserContext browserContext() {
+    @Bean(name = "chromiumBrowserContext")
+    public BrowserContext chromiumBrowserContext() {
         if (null != BROWSER_CONTEXT) {
             return BROWSER_CONTEXT;
         }
         return chromiumBrowser().newContext();
     }
 
-    public static void close() {
+    public static void closeChromium() {
         BrowserContext browserContext = PlaywrightConfig.BROWSER_CONTEXT;
         if (null != browserContext) {
             browserContext.close();

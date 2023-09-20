@@ -17,7 +17,7 @@ public class IntegrationTestApplication {
             @Override
             public void run() {
                 super.run();
-                PlaywrightConfig.close();
+                PlaywrightConfig.closeChromium();
             }
         });
     }
