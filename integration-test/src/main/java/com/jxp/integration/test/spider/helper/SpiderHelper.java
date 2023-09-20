@@ -1,9 +1,8 @@
 package com.jxp.integration.test.spider.helper;
 
 import com.jxp.integration.test.spider.domain.dto.SingleAddressReq;
-import com.jxp.integration.test.spider.downloader.PlaywrightDownloader;
 import com.jxp.integration.test.spider.pipeline.DefaultPipeline;
-import com.jxp.integration.test.spider.processor.PlaywrightProcessor;
+import com.jxp.integration.test.spider.processor.DefaultProcessor;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.downloader.Downloader;
+import us.codecraft.webmagic.downloader.HttpClientDownloader;
 import us.codecraft.webmagic.pipeline.Pipeline;
 import us.codecraft.webmagic.processor.PageProcessor;
 
@@ -34,10 +34,10 @@ public class SpiderHelper {
 
     public void run() {
         if (null == downloader) {
-            downloader = new PlaywrightDownloader();
+            downloader = new HttpClientDownloader();
         }
         if (null == processor) {
-            processor = new PlaywrightProcessor();
+            processor = new DefaultProcessor();
         }
         if (null == pipeline) {
             pipeline = new DefaultPipeline();

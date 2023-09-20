@@ -17,8 +17,8 @@ import com.jxp.integration.test.spider.domain.entity.RecommendCrawlerTaskData;
 import com.jxp.integration.test.spider.downloader.PlaywrightDownloader;
 import com.jxp.integration.test.spider.helper.SpiderHelper;
 import com.jxp.integration.test.spider.helper.SpiderTaskHelper;
-import com.jxp.integration.test.spider.processor.PlaywrightProcessor;
-import com.jxp.integration.test.spider.processor.PlaywrightTaskProcessor;
+import com.jxp.integration.test.spider.processor.DefaultProcessor;
+import com.jxp.integration.test.spider.processor.DefaultTaskProcessor;
 import com.jxp.integration.test.spider.service.SpiderService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -75,7 +75,7 @@ public class SpiderServiceImpl implements SpiderService {
         SpiderHelper spiderHelper = SpiderHelper.builder()
                 .req(req)
                 .downloader(playwrightDownloader)
-                .processor(PlaywrightProcessor.builder()
+                .processor(DefaultProcessor.builder()
                         .config(config)
                         .site(site)
                         .req(req)
@@ -83,7 +83,7 @@ public class SpiderServiceImpl implements SpiderService {
                 .pipeline(defaultPipeline)
                 .build();
         spiderHelper.run();
-        PlaywrightProcessor processor = (PlaywrightProcessor) spiderHelper.getProcessor();
+        DefaultProcessor processor = (DefaultProcessor) spiderHelper.getProcessor();
         if (null == processor) {
             return null;
         }
@@ -107,7 +107,7 @@ public class SpiderServiceImpl implements SpiderService {
         SpiderTaskHelper spiderHelper = SpiderTaskHelper.builder()
                 .taskData(taskData)
                 .downloader(new PlaywrightDownloader())
-                .processor(PlaywrightTaskProcessor.builder()
+                .processor(DefaultTaskProcessor.builder()
                         .config(config)
                         .site(null)
                         .taskData(taskData)
@@ -115,7 +115,7 @@ public class SpiderServiceImpl implements SpiderService {
                 .pipeline(defaultPipeline)
                 .build();
         spiderHelper.run();
-        PlaywrightTaskProcessor processor = (PlaywrightTaskProcessor) spiderHelper.getProcessor();
+        DefaultTaskProcessor processor = (DefaultTaskProcessor) spiderHelper.getProcessor();
         log.info("spider task success end request,url:{}", taskData.getLink());
         return processor.getProcessorData();
 

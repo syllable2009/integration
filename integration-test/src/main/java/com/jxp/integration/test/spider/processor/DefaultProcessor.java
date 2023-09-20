@@ -31,7 +31,7 @@ import us.codecraft.webmagic.selector.Html;
 @NoArgsConstructor
 @Data
 @Slf4j
-public class PlaywrightProcessor implements PageProcessor {
+public class DefaultProcessor implements PageProcessor {
 
     private Site site;
 

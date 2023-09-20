@@ -32,7 +32,7 @@ import us.codecraft.webmagic.selector.Json;
 @NoArgsConstructor
 @Data
 @Slf4j
-public class PlaywrightTaskProcessor implements PageProcessor {
+public class DefaultTaskProcessor implements PageProcessor {
 
     private Site site;
 

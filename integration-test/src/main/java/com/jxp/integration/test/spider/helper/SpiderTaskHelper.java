@@ -3,7 +3,7 @@ package com.jxp.integration.test.spider.helper;
 import com.jxp.integration.test.spider.domain.entity.RecommendCrawlerTaskData;
 import com.jxp.integration.test.spider.downloader.PlaywrightDownloader;
 import com.jxp.integration.test.spider.pipeline.DefaultPipeline;
-import com.jxp.integration.test.spider.processor.PlaywrightProcessor;
+import com.jxp.integration.test.spider.processor.DefaultProcessor;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,7 +37,7 @@ public class SpiderTaskHelper {
             downloader = new PlaywrightDownloader();
         }
         if (null == processor) {
-            processor = new PlaywrightProcessor();
+            processor = new DefaultProcessor();
         }
         if (null == pipeline) {
             pipeline = new DefaultPipeline();

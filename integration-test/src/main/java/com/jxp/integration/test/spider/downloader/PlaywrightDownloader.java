@@ -22,6 +22,10 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Response;
 import com.microsoft.playwright.options.ScreenshotType;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
@@ -36,6 +40,10 @@ import us.codecraft.webmagic.utils.CharsetUtils;
  */
 @Slf4j
 @Service
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 public class PlaywrightDownloader extends AbstractDownloader implements Closeable {
 
     @Resource
