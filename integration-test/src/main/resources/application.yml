@@ -19,7 +19,7 @@ integration-export:
 integration-wechat:
   enable: true
 integration-event:
-  enable: true
+  enable: false
 
 event:
     publishProperties:

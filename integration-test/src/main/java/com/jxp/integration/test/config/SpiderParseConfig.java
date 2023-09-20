@@ -9,11 +9,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ResourceUtils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
+import com.jxp.integration.base.tool.JacksonUtils;
 import com.jxp.integration.test.spider.domain.dto.CrawlerMetaDataConfig;
 import com.jxp.integration.test.spider.domain.dto.CrawlerTaskDataConfig;
 
-import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -45,8 +46,8 @@ public class SpiderParseConfig implements InitializingBean {
         if (null != spiderMetaData) {
             try {
                 String content = new String(Files.readAllBytes(spiderMetaData.toPath()));
-                Map<String, String> map = JSONUtil.toBean(content, Map.class);
-                map.forEach((k, v) -> ret.put(k, JSONUtil.toBean(v, CrawlerMetaDataConfig.class)));
+                ret = JacksonUtils.toBean(content, new TypeReference<Map<String, CrawlerMetaDataConfig>>() {
+                });
             } catch (Exception e) {
                 log.error("CrawlerMetaDataConfig initialize error,", e);
             }
@@ -60,8 +61,8 @@ public class SpiderParseConfig implements InitializingBean {
         if (null != spiderTaskData) {
             try {
                 String content = new String(Files.readAllBytes(spiderTaskData.toPath()));
-                Map<String, String> map = JSONUtil.toBean(content, Map.class);
-                map.forEach((k, v) -> ret.put(k, JSONUtil.toBean(v, CrawlerTaskDataConfig.class)));
+                ret = JacksonUtils.toBean(content, new TypeReference<Map<String, CrawlerTaskDataConfig>>() {
+                });
             } catch (Exception e) {
                 log.error("CrawlerTaskDataConfig initialize error,", e);
             }
