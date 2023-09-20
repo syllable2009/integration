@@ -1,8 +1,15 @@
 package com.jxp.integration.test.config;
 
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.microsoft.playwright.APIRequest.NewContextOptions;
+import com.microsoft.playwright.APIRequestContext;
+import com.microsoft.playwright.APIResponse;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
@@ -22,7 +29,8 @@ public class PlaywrightConfig {
 
     // 饿汉式确保第一次请求加载速度
     public static Browser CHROMIUM =
-            PLAYWRIGHT.chromium().launch(new BrowserType.LaunchOptions().setSlowMo(1000).setHeadless(false));
+            PLAYWRIGHT.chromium()
+                    .launch(new BrowserType.LaunchOptions().setTimeout(0).setSlowMo(1000).setHeadless(false));
 
     //    public static Browser FIREFOX =
     //            PLAYWRIGHT.firefox().launch(new BrowserType.LaunchOptions().setSlowMo(1000).setHeadless(false));
@@ -31,13 +39,19 @@ public class PlaywrightConfig {
     //            PLAYWRIGHT.webkit().launch(new BrowserType.LaunchOptions().setSlowMo(1000).setHeadless(false));
 
     //  默认的隔离的浏览器上下文
-    public static BrowserContext BROWSER_CONTEXT = CHROMIUM.newContext();
+    public static BrowserContext BROWSER_CONTEXT =
+            CHROMIUM.newContext(new Browser.NewContextOptions().setStorageStatePath(Paths.get("state.json")));
+
+    // save
+    //        BROWSER_CONTEXT.storageState(new BrowserContext.StorageStateOptions().setPath(Paths.get("state
+    //        .json")));
 
     @Bean(name = "chromiumBrowser")
     public Browser chromiumBrowser() {
         if (null != CHROMIUM) {
             return CHROMIUM;
         }
+
         if (null == PLAYWRIGHT) {
             synchronized (PlaywrightConfig.class) {
                 if (null == PLAYWRIGHT) {
@@ -70,5 +84,18 @@ public class PlaywrightConfig {
         if (null != playwright) {
             playwright.close();
         }
+    }
+
+    public static void main(String[] args) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Accept", "application/vnd.github.v3+json");
+        APIRequestContext apiRequestContext = PLAYWRIGHT.request().newContext(new NewContextOptions()
+                // All requests we send go to this API endpoint.
+                .setBaseURL("https://api.github.com")
+                .setExtraHTTPHeaders(headers));
+
+        APIResponse apiResponse = apiRequestContext.get("https://api.github.com");
+        apiResponse.text();
+        apiResponse.ok();
     }
 }
