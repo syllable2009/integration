@@ -24,11 +24,17 @@ public class PlaywrightConfig {
     public static Browser CHROMIUM =
             PLAYWRIGHT.chromium().launch(new BrowserType.LaunchOptions().setSlowMo(1000).setHeadless(false));
 
+    //    public static Browser FIREFOX =
+    //            PLAYWRIGHT.firefox().launch(new BrowserType.LaunchOptions().setSlowMo(1000).setHeadless(false));
+    //
+    //    public static Browser WEBKIT =
+    //            PLAYWRIGHT.webkit().launch(new BrowserType.LaunchOptions().setSlowMo(1000).setHeadless(false));
+
     //  默认的隔离的浏览器上下文
     public static BrowserContext BROWSER_CONTEXT = CHROMIUM.newContext();
 
-    @Bean
-    public Browser browser() {
+    @Bean(name = "chromiumBrowser")
+    public Browser chromiumBrowser() {
         if (null != CHROMIUM) {
             return CHROMIUM;
         }
@@ -39,7 +45,7 @@ public class PlaywrightConfig {
                 }
             }
         }
-        return PLAYWRIGHT.chromium().launch();
+        return PLAYWRIGHT.chromium().launch(new BrowserType.LaunchOptions().setSlowMo(1000).setHeadless(false));
     }
 
     // 默认的上下浏览器请求上下文
@@ -48,7 +54,7 @@ public class PlaywrightConfig {
         if (null != BROWSER_CONTEXT) {
             return BROWSER_CONTEXT;
         }
-        return browser().newContext();
+        return chromiumBrowser().newContext();
     }
 
     public static void close() {
