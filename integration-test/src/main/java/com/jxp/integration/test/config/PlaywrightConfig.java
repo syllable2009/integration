@@ -30,7 +30,7 @@ public class PlaywrightConfig {
     // 饿汉式确保第一次请求加载速度
     public static Browser CHROMIUM =
             PLAYWRIGHT.chromium()
-                    .launch(new BrowserType.LaunchOptions().setTimeout(0).setSlowMo(1000).setHeadless(false));
+                    .launch(new BrowserType.LaunchOptions().setTimeout(0).setSlowMo(1000).setHeadless(true));
 
     //    public static Browser FIREFOX =
     //            PLAYWRIGHT.firefox().launch(new BrowserType.LaunchOptions().setSlowMo(1000).setHeadless(false));
@@ -40,7 +40,8 @@ public class PlaywrightConfig {
 
     //  默认的隔离的浏览器上下文
     public static BrowserContext BROWSER_CONTEXT =
-            CHROMIUM.newContext(new Browser.NewContextOptions().setStorageStatePath(Paths.get("state.json")));
+            CHROMIUM.newContext(
+                    new Browser.NewContextOptions().setStorageStatePath(Paths.get("/Users/jiaxiaopeng/cookies.json")));
 
     // save
     //        BROWSER_CONTEXT.storageState(new BrowserContext.StorageStateOptions().setPath(Paths.get("state

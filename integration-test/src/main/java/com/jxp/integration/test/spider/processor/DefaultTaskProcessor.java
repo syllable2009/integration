@@ -12,6 +12,7 @@ import com.jxp.integration.test.spider.domain.dto.SingleAddressReq;
 import com.jxp.integration.test.spider.domain.dto.SpiderTaskResp;
 import com.jxp.integration.test.spider.domain.entity.RecommendCrawlerTaskData;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -46,7 +47,7 @@ public class DefaultTaskProcessor implements PageProcessor {
 
     @Override
     public void process(Page page) {
-        log.info("spider task start parse,url:{}", taskData.getLink());
+        log.info("spider task start parse,url:{}", page.getUrl());
         boolean downloadSuccess = page.isDownloadSuccess();
         if (!downloadSuccess) {
             log.error("spider task download page fail,url:{}", page.getUrl());
@@ -66,7 +67,7 @@ public class DefaultTaskProcessor implements PageProcessor {
         String contentType = taskData.getResponseContentType();
         List<String> content = Lists.newArrayList();
         List<String> cover = Lists.newArrayList();
-        if (contentType.startsWith("application/json")) {
+        if (StrUtil.startWith(contentType, "application/json")) {
             Json json = page.getJson();
             if (null == json) {
                 log.error("spider task json is null,{}", page.getUrl());
@@ -77,7 +78,7 @@ public class DefaultTaskProcessor implements PageProcessor {
             if (StringUtils.isNotBlank(config.getCover())) {
                 cover = analysisByJsonPath(json, config.getCover());
             }
-        } else if (contentType.startsWith("text/xml")) {
+        } else if (StrUtil.startWith(contentType, "text/xml")) {
             // TODO xml解析
             return;
         } else {
@@ -145,6 +146,9 @@ public class DefaultTaskProcessor implements PageProcessor {
 
 
     private static List<String> analysisElementList(Html html, String method, String c) {
+        if (null == html || StrUtil.isBlank(c)) {
+            return Lists.newArrayList();
+        }
         if (StringUtils.equals("xpath", method)) {
             return html.xpath(c).all()
                     .stream()
@@ -161,7 +165,7 @@ public class DefaultTaskProcessor implements PageProcessor {
     }
 
     private static List<String> analysisByJsonPath(Json json, String path) {
-        if (json == null) {
+        if (json == null || StrUtil.isBlank(path)) {
             return Lists.newArrayList();
         }
         return json.jsonPath(path).all();

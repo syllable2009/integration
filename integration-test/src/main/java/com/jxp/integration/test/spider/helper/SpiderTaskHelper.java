@@ -1,7 +1,6 @@
 package com.jxp.integration.test.spider.helper;
 
 import com.jxp.integration.test.spider.domain.entity.RecommendCrawlerTaskData;
-import com.jxp.integration.test.spider.downloader.PlaywrightDownloader;
 import com.jxp.integration.test.spider.pipeline.DefaultPipeline;
 import com.jxp.integration.test.spider.processor.DefaultProcessor;
 
@@ -11,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.downloader.Downloader;
+import us.codecraft.webmagic.downloader.HttpClientDownloader;
 import us.codecraft.webmagic.pipeline.Pipeline;
 import us.codecraft.webmagic.processor.PageProcessor;
 
@@ -34,7 +34,7 @@ public class SpiderTaskHelper {
 
     public void run() {
         if (null == downloader) {
-            downloader = new PlaywrightDownloader();
+            downloader = new HttpClientDownloader();
         }
         if (null == processor) {
             processor = new DefaultProcessor();
