@@ -38,8 +38,8 @@ public class SpiderParseConfig implements InitializingBean {
         }
     }
 
-    @Bean
-    public Map<String, CrawlerMetaDataConfig> crawlerMetaDataConfig() {
+    @Bean(name = "crawlerMetaDataConfigMap")
+    public Map<String, CrawlerMetaDataConfig> crawlerMetaDataConfigMap() {
 
         Map<String, CrawlerMetaDataConfig> ret = Maps.newHashMap();
         if (null != spiderMetaData) {
@@ -54,8 +54,8 @@ public class SpiderParseConfig implements InitializingBean {
         return ret;
     }
 
-    @Bean
-    public Map<String, CrawlerTaskDataConfig> crawlerTaskDataConfig() {
+    @Bean(name = "crawlerTaskDataConfigMap")
+    public Map<String, CrawlerTaskDataConfig> crawlerTaskDataConfigMap() {
         Map<String, CrawlerTaskDataConfig> ret = Maps.newHashMap();
         if (null != spiderTaskData) {
             try {

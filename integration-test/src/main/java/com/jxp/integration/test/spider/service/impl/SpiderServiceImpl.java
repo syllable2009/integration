@@ -1,5 +1,7 @@
 package com.jxp.integration.test.spider.service.impl;
 
+import java.util.Map;
+
 import javax.annotation.Resource;
 import javax.validation.constraints.NotEmpty;
 
@@ -36,6 +38,10 @@ public class SpiderServiceImpl implements SpiderService {
     PlaywrightDownloader playwrightDownloader;
     @Resource
     private Pipeline defaultPipeline;
+    @Resource
+    private Map<String, CrawlerMetaDataConfig> crawlerMetaDataConfigMap;
+    @Resource
+    private Map<String, CrawlerTaskDataConfig> crawlerTaskDataConfigMap;
 
     @Override
     public SingleAddressResp parse(SingleAddressReq req) {
@@ -48,8 +54,8 @@ public class SpiderServiceImpl implements SpiderService {
             return null;
         }
         // 获取配置
-        CrawlerMetaDataConfig config = null;
         String domain = UrlUtils.getDomain(url);
+        CrawlerMetaDataConfig config = crawlerMetaDataConfigMap.get(domain);
         // 准备请求配置
         SingleAddressResp processorData = parseRun(req, config, null);
         // 按照domain获取配置，结合请求对象构造最终的配置对象，优先级：default < kconf < request
@@ -91,7 +97,8 @@ public class SpiderServiceImpl implements SpiderService {
             return null;
         }
         // 获取config
-        CrawlerTaskDataConfig config = null;
+        String domain = UrlUtils.getDomain(taskData.getLink());
+        CrawlerTaskDataConfig config = crawlerTaskDataConfigMap.get(domain);
         if (null == config) {
             log.info("spider task handle fail,config not found,url:{}", taskData.getLink());
             return null;
