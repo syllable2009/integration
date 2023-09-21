@@ -1,6 +1,5 @@
 package com.jxp.integration.test.spider;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
@@ -25,12 +24,13 @@ import com.microsoft.playwright.Browser.NewContextOptions;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Page.ScreenshotOptions;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.ScreenshotType;
 
 import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.URLUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,25 +43,26 @@ public class PlaywrightMain {
 
     private static final String BASE_URL = "https://www.36kr.com/newsflashes/2368027471505793";
 
-    private static final Path path = Paths.get("/Users/jiaxiaopeng/");
+    private static final String PATH = "/Users/jiaxiaopeng/";
 
     public static void main(String[] args) {
         //        test5();
-        String s = URLUtil.completeUrl("http://www.netbian.com", "https://pic.netbian.com/tupian/27978.html");
-        log.info("s:{}", s);
+        //        String s = URLUtil.completeUrl("http://www.netbian.com", "https://pic.netbian.com/tupian/27978.html");
+        //        log.info("s:{}", s);
+        test1();
     }
 
     public static void test1() {
         try (Playwright playwright = Playwright.create()) {
             Browser browser = playwright.chromium()
                     .launch(new BrowserType.LaunchOptions().setArgs(Collections.singletonList("--start-maximized"))
-                            .setHeadless(false).setSlowMo(5000));
-            BrowserContext browserContext = browser.newContext(new NewContextOptions()
-                    .setViewportSize(1920, 1080));
+                            .setHeadless(true).setSlowMo(5000));
+            BrowserContext browserContext = browser.newContext(new NewContextOptions().setScreenSize(700, 400));
             Page page = browserContext.newPage();
             page.navigate(BASE_URL);
-            page.screenshot(new Page.ScreenshotOptions().setType(ScreenshotType.PNG)
-                    .setPath(path));
+            page.screenshot(new ScreenshotOptions().setType(ScreenshotType.JPEG)
+                    .setFullPage(false).setQuality(90)
+                    .setPath(Paths.get(PATH + IdUtil.simpleUUID() + ".jpg")));
         }
     }
 

@@ -3,6 +3,7 @@ package com.jxp.integration.test.spider.downloader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,8 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
     @Resource(name = "chromiumBrowserContext")
     BrowserContext browserContext;
 
+    private static final Path path = Paths.get("/Users/jiaxiaopeng/");
+
     @Override
     public void close() throws IOException {
     }
@@ -73,6 +76,8 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
             log.error("PlaywrightDownloader download page fail,url:{}", request.getUrl());
             return Page.fail();
         }
+        //        page.screenshot(new com.microsoft.playwright.Page.ScreenshotOptions().setType(ScreenshotType.PNG)
+        //                .setPath(path));
         browserContext.storageState(
                 new BrowserContext.StorageStateOptions().setPath(Paths.get("/Users/jiaxiaopeng/cookies.json")));
         log.info("PlaywrightDownloader download page success,url:{}", request.getUrl());
