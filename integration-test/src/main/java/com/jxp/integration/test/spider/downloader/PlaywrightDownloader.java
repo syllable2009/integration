@@ -63,7 +63,8 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
         if (null != browserContext) {
             page = browserContext.newPage();
         } else {
-            page = PlaywrightConfig.BROWSER_CONTEXT.newPage();
+            browserContext = PlaywrightConfig.BROWSER_CONTEXT;
+            page = browserContext.newPage();
         }
         String referer = UrlUtils.getHost(request.getUrl());
         Response navigate = page.navigate(request.getUrl(),

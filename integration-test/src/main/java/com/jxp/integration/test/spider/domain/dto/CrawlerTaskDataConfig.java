@@ -19,7 +19,7 @@ public class CrawlerTaskDataConfig {
     private String method;
     private String link; //$.data[*].item_info.article_info.article_id
     private String linkMethod; //jsonpath
-    private String prefix; // https://juejin.cn/post/
+    private String linkPrefix; // https://juejin.cn/post/
 
     private String coverMethod;
     private String cover;

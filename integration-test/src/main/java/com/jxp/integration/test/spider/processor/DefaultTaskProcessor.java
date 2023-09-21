@@ -66,7 +66,7 @@ public class DefaultTaskProcessor implements PageProcessor {
             taskData.setResponseContentType("text/html");
         }
         String contentType = taskData.getResponseContentType();
-        List<String> content = Lists.newArrayList();
+        List<String> link = Lists.newArrayList();
         List<String> cover = Lists.newArrayList();
         if (StrUtil.startWith(contentType, "application/json")) {
             Json json = page.getJson();
@@ -74,7 +74,7 @@ public class DefaultTaskProcessor implements PageProcessor {
                 log.error("spider task json is null,{}", page.getUrl());
                 return;
             }
-            content = analysisByJsonPath(json, config.getLink());
+            link = analysisByJsonPath(json, config.getLink());
             // 解析封面
             if (StringUtils.isNotBlank(config.getCover())) {
                 cover = analysisByJsonPath(json, config.getCover());
@@ -89,7 +89,7 @@ public class DefaultTaskProcessor implements PageProcessor {
                 return;
             }
             if (StringUtils.isNotBlank(config.getLink())) {
-                content = analysisElementList(html,
+                link = analysisElementList(html,
                         StringUtils.isBlank(config.getLinkMethod()) ? config.getMethod() : config.getLinkMethod(),
                         config.getLink());
             }
@@ -100,10 +100,10 @@ public class DefaultTaskProcessor implements PageProcessor {
                         config.getCover());
             }
         }
-        if (CollectionUtils.isNotEmpty(content)) {
-            if (StringUtils.isNotBlank(config.getPrefix())) {
-                content = content.stream()
-                        .map(i -> config.getPrefix() + i)
+        if (CollectionUtils.isNotEmpty(link)) {
+            if (StringUtils.isNotBlank(config.getLinkPrefix())) {
+                link = link.stream()
+                        .map(i -> config.getLinkPrefix() + i)
                         .collect(Collectors.toList());
             }
             if (StringUtils.isNotBlank(config.getCoverPrefix())) {
@@ -114,13 +114,16 @@ public class DefaultTaskProcessor implements PageProcessor {
         } else {
             log.error("spider task parse fail,processor list is empty,url,{}", page.getUrl());
         }
-        if (cover.size() < content.size()) {
+        if (cover.size() < link.size()) {
             cover = null;
         }
         List<SingleAddressReq> singleAddressReqList = Lists.newArrayList();
-        for (int i = 0; i < content.size(); i++) {
+        String url = null;
+        for (int i = 0; i < link.size(); i++) {
+            url = link.get(i);
             singleAddressReqList.add(SingleAddressReq.builder()
-                    .url(content.get(i))
+                    .url(url)
+                    .link(url)
                     .customCoverUrl(cover != null ? cover.get(i) : null)
                     .base("task")
                     .build());

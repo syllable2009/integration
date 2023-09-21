@@ -20,6 +20,7 @@ public class CrawlerMetaDataConfig {
     // 原始链接
     private String link;
     private String linkMethod;
+    private String linkPrefix;
 
     private String title;
     private String titleMethod;

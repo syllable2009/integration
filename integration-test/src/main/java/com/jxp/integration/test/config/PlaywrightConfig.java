@@ -30,7 +30,7 @@ public class PlaywrightConfig {
     // 饿汉式确保第一次请求加载速度
     public static Browser CHROMIUM =
             PLAYWRIGHT.chromium()
-                    .launch(new BrowserType.LaunchOptions().setTimeout(0).setSlowMo(0).setHeadless(true));
+                    .launch(new BrowserType.LaunchOptions().setTimeout(0).setSlowMo(1000).setHeadless(true));
 
     //    public static Browser FIREFOX =
     //            PLAYWRIGHT.firefox().launch(new BrowserType.LaunchOptions().setSlowMo(1000).setHeadless(false));
