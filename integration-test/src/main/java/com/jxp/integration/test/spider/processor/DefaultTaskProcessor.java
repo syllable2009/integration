@@ -3,7 +3,6 @@ package com.jxp.integration.test.spider.processor;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Lists;
@@ -12,7 +11,9 @@ import com.jxp.integration.test.spider.domain.dto.SingleAddressReq;
 import com.jxp.integration.test.spider.domain.dto.SpiderTaskResp;
 import com.jxp.integration.test.spider.domain.entity.RecommendCrawlerTaskData;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -62,12 +63,12 @@ public class DefaultTaskProcessor implements PageProcessor {
             initConfig(this.config);
         }
 
-        if (StringUtils.isBlank(taskData.getResponseContentType())) {
-            taskData.setResponseContentType("text/html");
-        }
+        initTaskData(taskData);
+
         String contentType = taskData.getResponseContentType();
         List<String> link = Lists.newArrayList();
         List<String> cover = Lists.newArrayList();
+        List<String> title = Lists.newArrayList();
         if (StrUtil.startWith(contentType, "application/json")) {
             Json json = page.getJson();
             if (null == json) {
@@ -76,9 +77,10 @@ public class DefaultTaskProcessor implements PageProcessor {
             }
             link = analysisByJsonPath(json, config.getLink());
             // 解析封面
-            if (StringUtils.isNotBlank(config.getCover())) {
-                cover = analysisByJsonPath(json, config.getCover());
-            }
+            cover = analysisByJsonPath(json, config.getCover());
+            // 解析标题
+            title = analysisByJsonPath(json, config.getTitile());
+
         } else if (StrUtil.startWith(contentType, "text/xml")) {
             // TODO xml解析
             return;
@@ -88,35 +90,41 @@ public class DefaultTaskProcessor implements PageProcessor {
                 log.error("spider task parse fail,html is null,{}", page.getUrl());
                 return;
             }
-            if (StringUtils.isNotBlank(config.getLink())) {
-                link = analysisElementList(html,
-                        StringUtils.isBlank(config.getLinkMethod()) ? config.getMethod() : config.getLinkMethod(),
-                        config.getLink());
+            link = analysisElementList(html,
+                    StringUtils.isBlank(config.getLinkMethod()) ? config.getMethod() : config.getLinkMethod(),
+                    config.getLink());
+            if (CollUtil.isEmpty(link)) {
+                log.error("spider task parse fail,processor link list is empty,url,{}", page.getUrl());
+                return;
+            }
+            if (StringUtils.isNotBlank(config.getLinkPrefix()) && CollUtil.isNotEmpty(link)) {
+                link = link.stream()
+                        .map(i -> URLUtil.completeUrl(config.getLinkPrefix(), i))
+                        .collect(Collectors.toList());
             }
             // 解析封面
-            if (StringUtils.isNotBlank(config.getCover())) {
-                cover = analysisElementList(html,
-                        StringUtils.isBlank(config.getCoverMethod()) ? config.getMethod() : config.getCoverMethod(),
-                        config.getCover());
-            }
-        }
-        if (CollectionUtils.isNotEmpty(link)) {
-            if (StringUtils.isNotBlank(config.getLinkPrefix())) {
-                link = link.stream()
-                        .map(i -> config.getLinkPrefix() + i)
-                        .collect(Collectors.toList());
-            }
-            if (StringUtils.isNotBlank(config.getCoverPrefix())) {
+            cover = analysisElementList(html,
+                    StringUtils.isBlank(config.getCoverMethod()) ? config.getMethod() : config.getCoverMethod(),
+                    config.getCover());
+            if (StringUtils.isNotBlank(config.getCoverPrefix()) && CollUtil.isNotEmpty(cover)) {
                 cover = cover.stream()
-                        .map(i -> config.getCoverPrefix() + i)
+                        .map(i -> URLUtil.completeUrl(config.getCoverPrefix(), i))
                         .collect(Collectors.toList());
             }
-        } else {
-            log.error("spider task parse fail,processor list is empty,url,{}", page.getUrl());
+
+            title = analysisElementList(html,
+                    StringUtils.isBlank(config.getTitileMethod()) ? config.getMethod() : config.getTitileMethod(),
+                    config.getTitile());
         }
+
         if (cover.size() < link.size()) {
             cover = null;
         }
+
+        if (title.size() < link.size()) {
+            title = null;
+        }
+
         List<SingleAddressReq> singleAddressReqList = Lists.newArrayList();
         String url = null;
         for (int i = 0; i < link.size(); i++) {
@@ -125,6 +133,7 @@ public class DefaultTaskProcessor implements PageProcessor {
                     .url(url)
                     .link(url)
                     .customCoverUrl(cover != null ? cover.get(i) : null)
+                    .title(title != null ? title.get(i) : null)
                     .base("task")
                     .build());
         }
@@ -159,19 +168,17 @@ public class DefaultTaskProcessor implements PageProcessor {
         if (null == html || StrUtil.isBlank(c)) {
             return Lists.newArrayList();
         }
+        List<String> ret = null;
         if (StringUtils.equals("xpath", method)) {
-            return html.xpath(c).all()
-                    .stream()
-                    .filter(e -> StringUtils.isNotBlank(e))
-                    .collect(Collectors.toList());
+            ret = html.xpath(c).all();
         } else if (StringUtils.equals("css", method)) {
-            return html.$(c, "text").all()
-                    .stream()
-                    .filter(e -> StringUtils.isNotBlank(e))
-                    .collect(Collectors.toList());
+            ret = html.$(c, "text").all();
         } else {
-            return Lists.newArrayList();
+            ret = Lists.newArrayList();
         }
+        return ret.stream()
+                .map(e -> StrUtil.trim(e))
+                .collect(Collectors.toList());
     }
 
     private static List<String> analysisByJsonPath(Json json, String path) {
@@ -187,6 +194,12 @@ public class DefaultTaskProcessor implements PageProcessor {
         }
         if (StringUtils.isBlank(config.getMethod())) {
             config.setMethod("xpath");
+        }
+    }
+
+    private static void initTaskData(RecommendCrawlerTaskData taskData) {
+        if (StringUtils.isBlank(taskData.getResponseContentType())) {
+            taskData.setResponseContentType("text/html");
         }
     }
 }

@@ -12,6 +12,7 @@ import com.jxp.integration.test.spider.domain.dto.SingleAddressReq;
 import com.jxp.integration.test.spider.domain.dto.SingleAddressResp;
 import com.jxp.integration.test.spider.selector.CustomSelector;
 
+import cn.hutool.core.util.URLUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -70,6 +71,10 @@ public class DefaultProcessor implements PageProcessor {
             String link = parseLink(req.getLink(), config, html);
             if (StringUtils.isBlank(link)) {
                 link = req.getUrl();
+            } else {
+                if (StringUtils.isNotBlank(config.getLinkPrefix())) {
+                    link = URLUtil.completeUrl(config.getLinkPrefix(), link);
+                }
             }
             // 解析正文
             List<String> content = parseContent(config, html);
@@ -157,7 +162,7 @@ public class DefaultProcessor implements PageProcessor {
                                                                          : config.getCoverMethod(),
                             config.getCover());
                     if (StringUtils.isNotBlank(config.getCoverPrefix()) && StringUtils.isNotBlank(cover)) {
-                        cover = config.getCoverPrefix() + cover;
+                        cover = URLUtil.completeUrl(config.getCoverPrefix(), cover);
                     }
                     break;
                 case "sourceIdentity":
@@ -170,6 +175,9 @@ public class DefaultProcessor implements PageProcessor {
                     cover = null;
                     break;
                 case "none":
+                    cover = null;
+                    break;
+                case "screenshot":
                     cover = null;
                     break;
                 default:

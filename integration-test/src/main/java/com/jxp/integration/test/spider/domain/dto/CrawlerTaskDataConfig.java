@@ -17,11 +17,18 @@ public class CrawlerTaskDataConfig {
 
     // 默认的解析方式：支持css，xpath1.0，css-list只适合content，不必做成配置
     private String method;
+
+    // 解析链接
     private String link; //$.data[*].item_info.article_info.article_id
     private String linkMethod; //jsonpath
     private String linkPrefix; // https://juejin.cn/post/
 
+    // 解析封面
     private String coverMethod;
     private String cover;
     private String coverPrefix;
+
+    // 解析标题-as文件价名称
+    private String titileMethod;
+    private String titile;
 }
