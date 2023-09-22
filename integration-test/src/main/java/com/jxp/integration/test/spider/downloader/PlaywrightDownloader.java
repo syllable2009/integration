@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.entity.ContentType;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableMap;
@@ -54,7 +55,8 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
 
     private static final Path path = Paths.get("/Users/jiaxiaopeng/");
 
-    public static final Map<String, String> BINARY_MAP = ImmutableMap.of("image/jpeg", ".jpg");
+    public static final Map<String, String> BINARY_MAP =
+            ImmutableMap.of("image/jpeg", ".jpg", ContentType.IMAGE_PNG.getMimeType(), ".png");
 
     @Override
     public void close() throws IOException {
@@ -74,7 +76,7 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
         }
         String referer = UrlUtils.getHost(request.getUrl());
         Response response = page.navigate(request.getUrl(),
-                new com.microsoft.playwright.Page.NavigateOptions().setTimeout(60000).setReferer(referer));
+                new com.microsoft.playwright.Page.NavigateOptions().setTimeout(60_000).setReferer(referer));
         if (!response.ok()) {
             log.error("PlaywrightDownloader download page fail,url:{}", request.getUrl());
             return Page.fail();
