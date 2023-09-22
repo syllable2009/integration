@@ -2,24 +2,24 @@
   "github.com/trending/java": {
     "link": "//div[@class=Box]//article[@class=Box-row]/h2/a/@href",
     "method": "xpath",
-    "prefix": "https://github.com"
+    "linkPrefix": "https://github.com"
   },
   "juejin.cn": {
     "link": "$.data[*].item_info.article_info.article_id",
     "method": "jsonpath",
     "requestMethod": "POST",
-    "prefix": "https://juejin.cn/post/"
+    "linkPrefix": "https://juejin.cn/post/"
   },
   "juejin.cn/backend": {
     "link": "$.data[*].article_id",
     "method": "jsonpath",
     "requestMethod": "POST",
-    "prefix": "https://juejin.cn/post/"
+    "linkPrefix": "https://juejin.cn/post/"
   },
   "juejin.cn/frontend": {
     "link": "$.data[*].article_id",
     "method": "jsonpath",
-    "prefix": "https://juejin.cn/post/"
+    "linkPrefix": "https://juejin.cn/post/"
   },
   "www.dochub.wiki": {
     "link": "//div[@class=post_box]//div[@class=post_def_title]//a/@href",
@@ -46,22 +46,22 @@
   "blog.chinaunix.net": {
     "link": "//div[@class=box]//div[@class=classify_middle1]/div/div[@class=two_cont2_1]/a/@href",
     "method": "xpath",
-    "prefix": "http://blog.chinaunix.net"
+    "linkPrefix": "http://blog.chinaunix.net"
   },
   "www.helloworld.net": {
     "link": "$.data.list[*].uuid",
     "method": "jsonpath",
-    "prefix": "https://www.helloworld.net/p/"
+    "linkPrefix": "https://www.helloworld.net/p/"
   },
   "segmentfault.com": {
     "link": "$.rows[*].url",
     "method": "jsonpath",
-    "prefix": "https://segmentfault.com"
+    "linkPrefix": "https://segmentfault.com"
   },
   "toutiao.io": {
     "link": "//div[@id=main]//div[@class=posts]//div[@class=content]/@data-url",
     "method": "xpath",
-    "prefix": "https://toutiao.io"
+    "linkPrefix": "https://toutiao.io"
   },
   "www.oschina.net": {
     "link": "//div[@id=recommendArticleList]//div[@class='item blog-item']//a[@class=header]/@href|[@id=dailyArticleList]//div[@class='item blog-item']//a[@class=header]/@href",

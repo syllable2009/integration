@@ -10,8 +10,11 @@ import com.google.common.collect.Lists;
 import com.jxp.integration.test.spider.domain.dto.CrawlerMetaDataConfig;
 import com.jxp.integration.test.spider.domain.dto.SingleAddressReq;
 import com.jxp.integration.test.spider.domain.dto.SingleAddressResp;
+import com.jxp.integration.test.spider.downloader.PlaywrightDownloader;
 import com.jxp.integration.test.spider.selector.CustomSelector;
+import com.jxp.integration.test.util.DownloadFileUtil;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.URLUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -52,6 +55,16 @@ public class DefaultProcessor implements PageProcessor {
         boolean downloadSuccess = page.isDownloadSuccess();
         if (!downloadSuccess) {
             log.error("spider download page fail,url:{}", page.getUrl());
+            return;
+        }
+        // 处理文件下载
+        if (page.getRequest().isBinaryContent()) {
+            DownloadFileUtil.saveFileBytes(page.getBytes(), "/Users/jiaxiaopeng/", IdUtil.fastSimpleUUID() +
+                    PlaywrightDownloader.BINARY_MAP.get(page.getResultItems().get("content-type")));
+            log.info("recommend spider end process,binaryContent downloaded,url:{}", page.getUrl());
+            processorData = SingleAddressResp.builder()
+                    .state(0)
+                    .build();
             return;
         }
         // 单页面都处理html页面

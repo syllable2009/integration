@@ -66,9 +66,10 @@ public class DefaultTaskProcessor implements PageProcessor {
         initTaskData(taskData);
 
         String contentType = taskData.getResponseContentType();
-        List<String> link = Lists.newArrayList();
-        List<String> cover = Lists.newArrayList();
-        List<String> title = Lists.newArrayList();
+        List<String> link = null;
+        List<String> cover = null;
+        List<String> title = null;
+        List<String> thirdId = null;
         if (StrUtil.startWith(contentType, "application/json")) {
             Json json = page.getJson();
             if (null == json) {
@@ -80,6 +81,7 @@ public class DefaultTaskProcessor implements PageProcessor {
             cover = analysisByJsonPath(json, config.getCover());
             // 解析标题
             title = analysisByJsonPath(json, config.getTitile());
+            thirdId = analysisByJsonPath(json, config.getThirdId());
 
         } else if (StrUtil.startWith(contentType, "text/xml")) {
             // TODO xml解析
@@ -115,6 +117,9 @@ public class DefaultTaskProcessor implements PageProcessor {
             title = analysisElementList(html,
                     StringUtils.isBlank(config.getTitileMethod()) ? config.getMethod() : config.getTitileMethod(),
                     config.getTitile());
+            thirdId = analysisElementList(html,
+                    StringUtils.isBlank(config.getThirdIdMethod()) ? config.getMethod() : config.getThirdIdMethod(),
+                    config.getThirdId());
         }
 
         if (cover.size() < link.size()) {
@@ -123,6 +128,9 @@ public class DefaultTaskProcessor implements PageProcessor {
 
         if (title.size() < link.size()) {
             title = null;
+        }
+        if (thirdId.size() < link.size()) {
+            thirdId = null;
         }
 
         List<SingleAddressReq> singleAddressReqList = Lists.newArrayList();
@@ -134,6 +142,7 @@ public class DefaultTaskProcessor implements PageProcessor {
                     .link(url)
                     .customCoverUrl(cover != null ? cover.get(i) : null)
                     .title(title != null ? title.get(i) : null)
+                    .thirdId(thirdId != null ? thirdId.get(i) : null)
                     .base("task")
                     .build());
         }
@@ -141,7 +150,6 @@ public class DefaultTaskProcessor implements PageProcessor {
                 .singleAddressReqList(singleAddressReqList)
                 .build();
         log.info("spider task success end process,url:{}", page.getUrl());
-        return;
     }
 
     // 部分一：抓取网站的相关配置，包括编码、抓取间隔、重试次数等

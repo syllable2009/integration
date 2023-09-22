@@ -28,7 +28,11 @@ public class CrawlerTaskDataConfig {
     private String cover;
     private String coverPrefix;
 
-    // 解析标题-as文件价名称
+    // 解析标题-as文件夹名称
     private String titileMethod;
     private String titile;
+
+    // 第三方业务id
+    private String thirdIdMethod;
+    private String thirdId;
 }

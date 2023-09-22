@@ -60,6 +60,10 @@ public class SpiderServiceImpl implements SpiderService {
         SingleAddressResp processorData = parseRun(req, config, null);
         // 按照domain获取配置，结合请求对象构造最终的配置对象，优先级：default < kconf < request
         String processorName = config == null ? "default" : domain;
+        if (null == processorData) {
+            return null;
+        }
+        // processorData的state=0代表处理正确且完成
         processorData.setProcessor(processorName);
         fillData(processorData);
         log.info("spider end request,url:{}", url);

@@ -46,4 +46,7 @@ public class SingleAddressReq {
     @JsonIgnore
     @ApiModelProperty(value = "来源")
     private String base;
+
+    @ApiModelProperty(value = "三方业务id")
+    private String thirdId;
 }

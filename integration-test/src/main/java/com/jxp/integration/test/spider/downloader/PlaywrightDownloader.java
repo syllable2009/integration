@@ -14,6 +14,7 @@ import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jxp.integration.test.config.PlaywrightConfig;
@@ -53,6 +54,8 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
 
     private static final Path path = Paths.get("/Users/jiaxiaopeng/");
 
+    public static final Map<String, String> BINARY_MAP = ImmutableMap.of("image/jpeg", ".jpg");
+
     @Override
     public void close() throws IOException {
     }
@@ -70,9 +73,9 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
             page = browserContext.newPage();
         }
         String referer = UrlUtils.getHost(request.getUrl());
-        Response navigate = page.navigate(request.getUrl(),
+        Response response = page.navigate(request.getUrl(),
                 new com.microsoft.playwright.Page.NavigateOptions().setTimeout(60000).setReferer(referer));
-        if (!navigate.ok()) {
+        if (!response.ok()) {
             log.error("PlaywrightDownloader download page fail,url:{}", request.getUrl());
             return Page.fail();
         }
@@ -82,17 +85,24 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
                 new BrowserContext.StorageStateOptions().setPath(Paths.get("/Users/jiaxiaopeng/cookies.json")));
         log.info("PlaywrightDownloader download page success,url:{}", request.getUrl());
         Page ret = new Page();
-        ret.setStatusCode(navigate.status());
+
+        ret.setStatusCode(response.status());
         ret.setDownloadSuccess(true);
         ret.setRequest(request);
         ret.setUrl(new PlainText(request.getUrl()));
-        if (!request.isBinaryContent()) {
-            ret.setCharset(getHtmlCharset(navigate.allHeaders(), navigate.body()));
-            ret.setRawText(navigate.text());
+
+        String contentType = response.allHeaders().get("content-type");
+        ret.putField("content-type", contentType);
+        if (BINARY_MAP.containsKey(contentType)) {
+            request.setBinaryContent(true);
         }
-        ret.setBytes(navigate.body());
+        if (!request.isBinaryContent()) {
+            ret.setCharset(getHtmlCharset(response.allHeaders(), response.body()));
+            ret.setRawText(response.text());
+        }
+        ret.setBytes(response.body());
         Map<String, List<String>> headers = Maps.newHashMap();
-        navigate.allHeaders().forEach((k, v) -> headers.put(k, Lists.newArrayList(v)));
+        response.allHeaders().forEach((k, v) -> headers.put(k, Lists.newArrayList(v)));
         ret.setHeaders(headers);
         page.close();
         return ret;
