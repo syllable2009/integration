@@ -9,9 +9,6 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
-import com.google.common.base.Function;
-import com.google.common.base.Functions;
-import com.google.common.collect.Maps;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,9 +22,10 @@ public class GuavaRetryTest {
 
 
     public static void main(String[] args) {
-        Function<Object, Object> objectObjectFunction = Functions.forMap(Maps.newHashMap());
-        objectObjectFunction.apply("");
+//        Function<Object, Object> objectObjectFunction = Functions.forMap(Maps.newHashMap());
+//        objectObjectFunction.apply("");
         //        guavaRetry(2);
+        log.info(":::::{}","本文是关于我开发工程师必备的异常排查技能的摘要。文章介绍了四种内存分析工具的评测结".length());
     }
 
 

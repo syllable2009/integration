@@ -27,20 +27,21 @@ public class PlayWrightTest {
             Browser browser = playwright.chromium().launch(launchOptions);
 
 
-//            BrowserContext context = browser.newContext(new Browser.NewContextOptions()
-//                    .setIgnoreHTTPSErrors(true)
-//                    .setJavaScriptEnabled(true)
-//                    //此处可以理解为设定指定窗口启动
-//                    .setViewportSize(1980, 1080));
-//            Page page1 = context.newPage();
+            //            BrowserContext context = browser.newContext(new Browser.NewContextOptions()
+            //                    .setIgnoreHTTPSErrors(true)
+            //                    .setJavaScriptEnabled(true)
+            //                    //此处可以理解为设定指定窗口启动
+            //                    .setViewportSize(1980, 1080));
+            //            Page page1 = context.newPage();
 
             Page page = browser.newPage();
-            page.navigate("https://www.qcc.com/");
+            page.navigate("https://github.com/microsoft/playwright-java");
             System.out.println(page.title());
             String content = page.content();
-            log.info("hahaha:{}",content);
+            log.info("hahaha:{}", content);
             // 截图
-            page.screenshot(new ScreenshotOptions().setFullPage(true).setPath(Paths.get("/Users/jiaxiaopeng/example.png")));
+            page.screenshot(
+                    new ScreenshotOptions().setFullPage(true).setPath(Paths.get("/Users/jiaxiaopeng/example.png")));
 
             browser.close();
         }
