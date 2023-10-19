@@ -96,4 +96,12 @@ Servlet并不一定是随web容器启动而创建，一个web容器中可能有�
 @Configuration 仅表示当前类为 一个 JavaConfig 类
 @ComponentScan 配置扫描路径。不过需要注意，其仅仅用于配置组件扫描指令，并没有真正扫描，更没有装配其中的类，这个真正扫描是由@EnableAutoConfiguration完成的
 @EnableAutoConfiguration @EnableXxx 注解一般用于开启某一项功能，是为了简化代码的导入，即用了该类注解，就会自动导入某些类。所以该类注解是组合注解，一般都会组合一个@Import 注解，用于导入指定的多个类，而被导入的类一般分为三种：配置类、选择器，与注册器。
+该注解用于开启自动配置，是 Spring Boot 的核心注解，是一个组合注解。所谓自动配置是指，其会自动找到其所需要的类，然后交给 Spring 容器完成这些类的装配。
+@Import(AutoConfigurationImportSelector.class)，@import是spring framework提供的一个注解，是通过导入的方式把一个或多个bean或者bean的配置类注入到Spring容器中。@Import中可以放入三种类型
+普通的Bean（@Component、@Controller、@Service等）、@Configuration修饰的类里边的@Bean方法
+实现ImportSelector接口重写selectorImports方法返回的bean名组成的数组
+实现ImportBeanDefinitionRegistarar接口重写注册bean的方法
+
+# @AutoConfigurationPackage
+AutoConfigurationPackage注解的作用是将添加该注解的类所在的package 作为自动配置package 进行管理。 也就是说当SpringBoot应用启动时默认会将启动类所在的package作为自动配置的package。 然后使用@Import注解将其注入到ioc容器中。
 
