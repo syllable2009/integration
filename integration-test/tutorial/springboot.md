@@ -1,6 +1,6 @@
 # Spring、SpringMVC和SpringBoot
 Spring是一个开源容器框架，可以接管web层，业务层，dao层，持久层的组件，并且可以配置各种bean,和维护bean与bean之间的关系。其核心就是控制反转(IOC),和面向切面(AOP),简单的说就是一个分层的轻量级开源框架。
-SpringMVC属于SpringFrameWork的后续产品，已经融合在Spring Web Flow里面。SpringMVC是一种web层mvc框架，用于替代servlet（处理|响应请求，获取表单参数，表单校验等。SpringMVC是一个MVC的开源框架，SpringMVC=struts2+spring，springMVC就相当于是Struts2加上Spring的整合。
+Spring MVC框架提供了开发Web应用的分离方式。通过DispatcherServlet、ModelAndView、View Resolver等简单概念，处理|响应请求，获取表单参数，表单校验等，使Web应用开发变得更加简单。
 Springboot是一个微服务框架，延续了spring框架的核心思想IOC和AOP，简化了应用的开发和部署。Spring Boot是为了简化Spring应用的创建、运行、调试、部署等而出现的，使用它可以做到专注于Spring应用的开发，而无需过多关注XML的配置。提供了一堆依赖打包，并已经按照使用习惯解决了依赖问题--->习惯大于约定。
 # SpringMVC是如何代替servelt的
 些JavaEE的时候，知道了我们自己写Servlet，但是现在我们直接写controller，两种工作方式的差异，让我觉得自己的知识出现了断层；即，Spring框架是如何操作，让Controler来替代Servlet的？
@@ -82,9 +82,18 @@ https://www.cnblogs.com/chenjunjie12321/p/9357580.html
 Servlet并不一定是随web容器启动而创建，一个web容器中可能有非常多的Servlet，如果有百千个servlet，那服务器启动的时候就要实例化那么多个类，显然对于内存而言负载量相当的大。其实在web.xml的<servlet>标签中可以通过<load-on-startup>来控制Servlet的是否随web容器启动而初始化以及多个Servlet同时创建时的初始化顺序。
 
 #springbmvc的工作流程
+![image text](https://github.com/syllable2009/integration/blob/master/integration-test/pic/springmvc%E6%B5%81%E7%A8%8B%E5%9B%BE.jpeg?raw=true)
 
 
 #springboot是如何简化springbmvc的
 从Servlet技术到Spring和Spring MVC，开发Web应用变得越来越简捷。但是Spring和Spring MVC的众多配置有时却让人望而却步，相信有过Spring MVC开发经验的朋友能深刻体会到这一痛苦。因为即使是开发一个Hello-World的Web应用，都需要我们在pom文件中导入各种依赖，编写web.xml、spring.xml、springmvc.xml配置文件等。
 正如Spring Boot的名称一样，一键启动，Spring Boot提供了自动配置功能，为我们提供了开箱即用的功能，使我们将重心放在业务逻辑的开发上。
-![image text]()
+
+
+# Spring Boot Auto Configuration是如何实现的 - 自动配置源码解析
+
+# 解析@SpringBootApplication
+@Configuration 仅表示当前类为 一个 JavaConfig 类
+@ComponentScan 配置扫描路径。不过需要注意，其仅仅用于配置组件扫描指令，并没有真正扫描，更没有装配其中的类，这个真正扫描是由@EnableAutoConfiguration完成的
+@EnableAutoConfiguration @EnableXxx 注解一般用于开启某一项功能，是为了简化代码的导入，即用了该类注解，就会自动导入某些类。所以该类注解是组合注解，一般都会组合一个@Import 注解，用于导入指定的多个类，而被导入的类一般分为三种：配置类、选择器，与注册器。
+
