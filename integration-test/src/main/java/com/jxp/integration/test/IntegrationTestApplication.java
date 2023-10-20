@@ -21,4 +21,7 @@ public class IntegrationTestApplication {
             }
         });
     }
+
+    public void main(){
+    }
 }

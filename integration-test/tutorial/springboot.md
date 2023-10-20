@@ -105,3 +105,85 @@ Servlet并不一定是随web容器启动而创建，一个web容器中可能有�
 # @AutoConfigurationPackage
 AutoConfigurationPackage注解的作用是将添加该注解的类所在的package 作为自动配置package 进行管理。 也就是说当SpringBoot应用启动时默认会将启动类所在的package作为自动配置的package。 然后使用@Import注解将其注入到ioc容器中。
 
+
+# springboot的启动过程
+    public static ConfigurableApplicationContext run(Class<?>[] primarySources, String[] args) {
+        return (new SpringApplication(primarySources)).run(args);
+    }
+它实际上会构造一个SpringApplication的实例，并把我们的启动类HelloWorldMainApplication.class作为参数传进去，然后运行它的run方法。 
+    构造SpringApplication对象：
+    public SpringApplication(ResourceLoader resourceLoader, Class<?>... primarySources) {
+        this.sources = new LinkedHashSet();
+        this.bannerMode = Mode.CONSOLE;
+        this.logStartupInfo = true;
+        this.addCommandLineProperties = true;
+        this.addConversionService = true;
+        this.headless = true;
+        this.registerShutdownHook = true;
+        this.additionalProfiles = Collections.emptySet();
+        this.isCustomEnvironment = false;
+        this.lazyInitialization = false;
+        this.applicationContextFactory = ApplicationContextFactory.DEFAULT;
+        this.applicationStartup = ApplicationStartup.DEFAULT;
+        this.resourceLoader = resourceLoader;
+        Assert.notNull(primarySources, "PrimarySources must not be null");
+        // 把启动类设置为属性存储起来
+        this.primarySources = new LinkedHashSet(Arrays.asList(primarySources));
+        //设置应用类型是Standard还是Web
+        this.webApplicationType = WebApplicationType.deduceFromClasspath();
+        this.bootstrapRegistryInitializers = new ArrayList(this.getSpringFactoriesInstances(BootstrapRegistryInitializer.class));
+        //设置初始化器(Initializer),最后会调用这些初始化器
+        this.setInitializers(this.getSpringFactoriesInstances(ApplicationContextInitializer.class));
+        //设置监听器(Listener)
+        this.setListeners(this.getSpringFactoriesInstances(ApplicationListener.class));
+        this.mainApplicationClass = this.deduceMainApplicationClass();
+    }
+    完成了SpringApplication实例化，下面开始调用run方法：
+    public ConfigurableApplicationContext run(String... args) {
+        long startTime = System.nanoTime();
+        DefaultBootstrapContext bootstrapContext = this.createBootstrapContext();
+        ConfigurableApplicationContext context = null;
+        this.configureHeadlessProperty();
+           // 第一步：获取并启动监听器
+        SpringApplicationRunListeners listeners = this.getRunListeners(args);
+        listeners.starting(bootstrapContext, this.mainApplicationClass);
+        try {
+            ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
+            // 第二步：根据SpringApplicationRunListeners以及参数来准备环境
+            ConfigurableEnvironment environment = this.prepareEnvironment(listeners, bootstrapContext, applicationArguments);
+            this.configureIgnoreBeanInfo(environment);
+        // 准备Banner打印器 - 就是启动Spring Boot的时候打印在console上的ASCII艺术字体
+            Banner printedBanner = this.printBanner(environment);
+              // 第三步：创建Spring容器
+            context = this.createApplicationContext();
+            context.setApplicationStartup(this.applicationStartup);
+                // 第四步：Spring容器前置处理
+            this.prepareContext(bootstrapContext, context, environment, listeners, applicationArguments, printedBanner);
+                // 第五步：刷新容器
+           this.refreshContext(context);
+           　　 // 第六步：Spring容器后置处理
+            this.afterRefresh(context, applicationArguments);
+            Duration timeTakenToStartup = Duration.ofNanos(System.nanoTime() - startTime);
+            if (this.logStartupInfo) {
+                (new StartupInfoLogger(this.mainApplicationClass)).logStarted(this.getApplicationLog(), timeTakenToStartup);
+            }
+            　 // 第七步：发出结束执行的事件
+            listeners.started(context, timeTakenToStartup);
+              // 第八步：执行Runners
+            this.callRunners(context, applicationArguments);
+        } catch (Throwable var12) {
+            this.handleRunFailure(context, var12, listeners);
+            throw new IllegalStateException(var12);
+        }
+        try {
+            // 计时结束
+            Duration timeTakenToReady = Duration.ofNanos(System.nanoTime() - startTime);
+            listeners.ready(context, timeTakenToReady);
+            // 返回容器
+            return context;
+        } catch (Throwable var11) {
+            this.handleRunFailure(context, var11, (SpringApplicationRunListeners)null);
+            throw new IllegalStateException(var11);
+        }
+    }
+    https://www.cnblogs.com/java-chen-hao/p/11829344.html
