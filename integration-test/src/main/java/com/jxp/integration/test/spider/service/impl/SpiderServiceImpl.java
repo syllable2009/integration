@@ -19,6 +19,7 @@ import com.jxp.integration.test.spider.helper.SpiderHelper;
 import com.jxp.integration.test.spider.helper.SpiderTaskHelper;
 import com.jxp.integration.test.spider.processor.DefaultProcessor;
 import com.jxp.integration.test.spider.processor.DefaultTaskProcessor;
+import com.jxp.integration.test.spider.selector.CustomSelector;
 import com.jxp.integration.test.spider.service.SpiderService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,8 @@ public class SpiderServiceImpl implements SpiderService {
     @Resource
     private Pipeline defaultPipeline;
     @Resource
+    private CustomSelector customSelector;
+    @Resource
     private Map<String, CrawlerMetaDataConfig> crawlerMetaDataConfigMap;
     @Resource
     private Map<String, CrawlerTaskDataConfig> crawlerTaskDataConfigMap;
@@ -58,14 +61,17 @@ public class SpiderServiceImpl implements SpiderService {
         CrawlerMetaDataConfig config = crawlerMetaDataConfigMap.get(domain);
         // 准备请求配置
         SingleAddressResp processorData = parseRun(req, config, null);
-        // 按照domain获取配置，结合请求对象构造最终的配置对象，优先级：default < kconf < request
-        String processorName = config == null ? "default" : domain;
         if (null == processorData) {
             return null;
         }
+        // 按照domain获取配置，结合请求对象构造最终的配置对象，优先级：default < kconf < request
+        String processorName = config == null ? "default" : domain;
         // processorData的state=0代表处理正确且完成
         processorData.setProcessor(processorName);
         fillData(processorData);
+        // 处理封面
+        // 处理摘要
+        // 额外的图片转存
         log.info("spider end request,url:{}", url);
         return processorData;
     }
@@ -83,15 +89,22 @@ public class SpiderServiceImpl implements SpiderService {
                         .config(config)
                         .site(site)
                         .req(req)
+                        .selector(customSelector)
                         .build())
                 .pipeline(defaultPipeline)
                 .build();
-        spiderHelper.run();
-        DefaultProcessor processor = (DefaultProcessor) spiderHelper.getProcessor();
-        if (null == processor) {
-            return null;
+        try {
+            spiderHelper.run();
+            DefaultProcessor processor = (DefaultProcessor) spiderHelper.getProcessor();
+            if (null == processor) {
+                return null;
+            }
+            return processor.getProcessorData();
+        } catch (Exception e) {
+            log.info("spider exception,url:{},", req.getUrl(), e);
         }
-        return processor.getProcessorData();
+        return null;
+
     }
 
     @Override
@@ -109,7 +122,6 @@ public class SpiderServiceImpl implements SpiderService {
         } else {
             processor = UrlUtils.getDomain(taskData.getLink());
         }
-
         CrawlerTaskDataConfig config = crawlerTaskDataConfigMap.get(processor);
         if (null == config) {
             log.info("spider task handle fail,config not found,url:{}", taskData.getLink());
@@ -126,10 +138,15 @@ public class SpiderServiceImpl implements SpiderService {
                         .build())
                 .pipeline(defaultPipeline)
                 .build();
-        spiderHelper.run();
-        DefaultTaskProcessor processorData = (DefaultTaskProcessor) spiderHelper.getProcessor();
-        log.info("spider task success end request,url:{}", taskData.getLink());
-        return processorData.getProcessorData();
+        try {
+            spiderHelper.run();
+            DefaultTaskProcessor processorData = (DefaultTaskProcessor) spiderHelper.getProcessor();
+            log.info("spider task success end request,url:{}", taskData.getLink());
+            return processorData.getProcessorData();
+        } catch (Exception e) {
+            log.error("spider task handle exception,url:{}", taskData.getLink(), e);
+        }
+        return null;
 
 
     }

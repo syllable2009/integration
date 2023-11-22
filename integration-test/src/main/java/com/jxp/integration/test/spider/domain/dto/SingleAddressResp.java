@@ -1,6 +1,7 @@
 package com.jxp.integration.test.spider.domain.dto;
 
 import java.util.List;
+import java.util.Map;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -60,4 +61,13 @@ public class SingleAddressResp {
     private Long userId;
 
     private String base;
+
+    @ApiModelProperty(value = "三方业务id，用来支持获取列表数据时，无法用url来区分的情况，比如微博的最新回复")
+    private String thirdId;
+
+    @ApiModelProperty(value = "图片附件列表")
+    private List<String> picList;
+
+    @ApiModelProperty(value = "额外解析的数据")
+    private Map<String, String> ext;
 }

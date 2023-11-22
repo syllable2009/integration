@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import com.google.common.collect.Lists;
 
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import us.codecraft.webmagic.utils.Experimental;
  */
 @Slf4j
 @Experimental
+@Service
 public class CustomSelector implements Selector {
 
     private static final int THRESHOLD = 86;

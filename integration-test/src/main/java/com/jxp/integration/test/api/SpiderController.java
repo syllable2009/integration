@@ -16,7 +16,10 @@ import com.jxp.integration.test.spider.domain.entity.RecommendCrawlerTaskData;
 import com.jxp.integration.test.spider.service.SpiderService;
 
 import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import us.codecraft.webmagic.utils.UrlUtils;
 
 /**
  * @author jiaxiaopeng
@@ -25,14 +28,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @RequestMapping("/api/spider")
+@Tag(name = "SpiderController", description = "爬虫api")
 public class SpiderController {
 
     @Resource
     SpiderService spiderService;
 
+    @Operation(summary = "单地址解析", description = "用于解析单个地址")
     @ApiOperation(value = "单地址解析")
     @PostMapping("/parse")
-    public ResponseEntity<SingleAddressResp> createTag(@Validated @RequestBody SingleAddressReq req) {
+    public ResponseEntity<SingleAddressResp> parse(@Validated @RequestBody SingleAddressReq req) {
         return ResponseEntity
                 .ok(spiderService.parse(req));
     }
@@ -41,6 +46,11 @@ public class SpiderController {
     @PostMapping("/task/parse")
     public ResponseEntity<SpiderTaskResp> taskParse(@Validated @RequestBody RecommendCrawlerTaskData req) {
         return ResponseEntity.ok(spiderService.taskSpiderRun(req));
+    }
+
+    public static void main(String[] args) {
+        String domain = UrlUtils.getDomain("https://github.com/trending/java");
+        log.info("domain:{}",domain);
     }
 
 }

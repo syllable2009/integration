@@ -41,7 +41,7 @@ public class DownloadFileUtil {
             log.error("downloadByPlaywright fail, input has blank");
             return false;
         }
-        Page page = PlaywrightConfig.BROWSER_CONTEXT.newPage();
+        Page page = PlaywrightConfig.getChromiumBrowserPage(false);
         Response response = page.navigate(fileUrl);
         saveFileBytes(response.body(), path, fileName);
         return true;

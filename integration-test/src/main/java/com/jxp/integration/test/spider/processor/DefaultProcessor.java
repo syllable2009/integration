@@ -1,21 +1,22 @@
 package com.jxp.integration.test.spider.processor;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.jxp.integration.test.spider.domain.dto.CrawlerMetaDataConfig;
 import com.jxp.integration.test.spider.domain.dto.SingleAddressReq;
 import com.jxp.integration.test.spider.domain.dto.SingleAddressResp;
-import com.jxp.integration.test.spider.downloader.PlaywrightDownloader;
-import com.jxp.integration.test.spider.selector.CustomSelector;
-import com.jxp.integration.test.util.DownloadFileUtil;
 
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.URLUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +26,7 @@ import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.selector.Html;
+import us.codecraft.webmagic.selector.Selector;
 import us.codecraft.webmagic.utils.UrlUtils;
 
 /**
@@ -49,103 +51,12 @@ public class DefaultProcessor implements PageProcessor {
     // 请求对象
     private SingleAddressReq req;
 
-    @Override
-    public void process(Page page) {
-        log.info("spider start parse,url:{}", req.getUrl());
-        boolean downloadSuccess = page.isDownloadSuccess();
-        if (!downloadSuccess) {
-            log.error("spider download page fail,url:{}", page.getUrl());
-            return;
-        }
-        // 处理文件下载
-        if (page.getRequest().isBinaryContent()) {
-            DownloadFileUtil.saveFileBytes(page.getBytes(), "/Users/jiaxiaopeng/", IdUtil.fastSimpleUUID() +
-                    PlaywrightDownloader.BINARY_MAP.get(page.getResultItems().get("content-type")));
-            log.info("recommend spider end process,binaryContent downloaded,url:{}", page.getUrl());
-            processorData = SingleAddressResp.builder()
-                    .state(0)
-                    .build();
-            return;
-        }
-        // 单页面都处理html页面
-        Html html = page.getHtml();
-        if (null == html) {
-            log.error("spider parse html is null,{}", page.getUrl());
-            return;
-        }
-        if (this.config == null) {
-            // 默认解析实现
-            processorData = handleByDefault(page);
-        } else {
-            initConfig(config);
-            // 解析标题
-            String title = parseTitle(req.getTitle(), config, html);
-            // 解析链接
-            String link = parseLink(req.getLink(), config, html);
-            if (StringUtils.isBlank(link)) {
-                link = req.getUrl();
-            } else {
-                if (StringUtils.isNotBlank(config.getLinkPrefix())) {
-                    link = URLUtil.completeUrl(config.getLinkPrefix(), link);
-                }
-            }
-            // 解析正文
-            List<String> content = parseContent(config, html);
-            // 获取封面
-            String cover = getCoverUrl(req.getCustomCoverUrl(), config, html);
-
-            processorData = SingleAddressResp.builder()
-                    .content(content)
-                    .title(title)
-                    .link(link)
-                    .url(page.getUrl().get())
-                    .cover(cover)
-                    .build();
-        }
-        processorData.setId(UUID.randomUUID().toString().replace("-", ""));
-        processorData.setState(0);
-        processorData.setLoginId(req.getLoginId());
-        processorData.setUserId(req.getUserId());
-        page.putField("processorData", processorData);
-        log.info("spider success end parse,url:{}", req.getUrl());
-    }
-
-    private static String parseTitle(String customTitle, CrawlerMetaDataConfig config, Html html) {
-        if (StringUtils.isNotBlank(customTitle)) {
-            return customTitle;
-        }
-        if (StringUtils.isBlank(config.getTitle())) {
-            return html.getDocument().title();
-        }
-        return analysisElement(html,
-                StringUtils.isBlank(config.getTitleMethod()) ? config.getMethod() : config.getTitleMethod(),
-                config.getTitle());
-    }
-
-    private static String parseLink(String customLink, CrawlerMetaDataConfig config, Html html) {
-        if (StringUtils.isNotBlank(customLink)) {
-            return customLink;
-        }
-        if (StringUtils.isBlank(config.getLink())) {
-            return null;
-        }
-        return analysisElement(html,
-                StringUtils.isBlank(config.getLinkMethod()) ? config.getMethod() : config.getLinkMethod(),
-                config.getLink());
-    }
-
-    private static List<String> parseContent(CrawlerMetaDataConfig config, Html html) {
-        if (StringUtils.isBlank(config.getContent())) {
-            return Lists.newArrayList();
-        }
-        return analysisElementList(html,
-                StringUtils.isBlank(config.getContentMethod()) ? config.getMethod() : config.getContentMethod(),
-                config.getContent());
-    }
+    private Selector selector;
 
     // 部分一：抓取网站的相关配置，包括编码、抓取间隔、重试次数等
+    @SuppressWarnings("checkstyle:MagicNumber")
     private static Site getDefaultSite() {
-        return Site.me().setRetryTimes(3).setSleepTime(100)
+        return Site.me().setRetryTimes(3).setSleepTime(200)
                 .setRetrySleepTime(1000)
                 .setTimeOut(30 * 1000)
                 .addHeader("user-agent",
@@ -157,50 +68,221 @@ public class DefaultProcessor implements PageProcessor {
     public Site getSite() {
         if (null == site) {
             site = getDefaultSite();
-            site.addHeader("referer", UrlUtils.getHost(req.getLink()));
         }
+        site.addHeader("referer", UrlUtils.getHost(req.getUrl()));
         return this.site;
     }
 
-    private String getCoverUrl(String customCoverUrl, CrawlerMetaDataConfig config, Html html) {
-        if (StringUtils.isNotBlank(customCoverUrl)) {
-            return customCoverUrl;
+    @Override
+    public void process(Page page) {
+        log.info("spider start parse,url:{}", page.getUrl());
+        // 单页面都处理html页面
+        boolean downloadSuccess = page.isDownloadSuccess();
+        if (!downloadSuccess) {
+            log.info("spider end parse，downloadSuccess page fail,url:{}", page.getUrl());
+            return;
         }
-        String cover = null;
-        if (StringUtils.isNotBlank(config.getCover())) {
-            switch (config.getCoverType()) {
-                case "custom":
-                    cover = analysisElement(html,
-                            StringUtils.isBlank(config.getCoverMethod()) ? config.getMethod()
-                                                                         : config.getCoverMethod(),
-                            config.getCover());
-                    if (StringUtils.isNotBlank(config.getCoverPrefix()) && StringUtils.isNotBlank(cover)) {
-                        cover = URLUtil.completeUrl(config.getCoverPrefix(), cover);
-                    }
-                    break;
-                case "sourceIdentity":
-                    cover = null;
-                    break;
-                case "aigc":
-                    cover = null;
-                    break;
-                case "customUrl":
-                    cover = null;
-                    break;
-                case "none":
-                    cover = null;
-                    break;
-                case "screenshot":
-                    cover = null;
-                    break;
-                default:
-                    cover = null;
+        // 单页面都处理html页面
+        Html html = page.getHtml();
+        if (null == html) {
+            log.info("spider end parse, html is null,{}", page.getUrl());
+            return;
+        }
+        if (this.config == null) {
+            // 默认解析实现
+            processorData = handleByDefault(page);
+        } else {
+            initConfig(config);
+            processorData = SingleAddressResp.builder()
+                    .content(parseContent(config, html, selector))
+                    .title(parseTitle(req.getTitle(), config, html))
+                    .description(parseDescription(req, config, html))
+                    .link(parseLink(req, config, html))
+                    .url(page.getUrl().get())
+                    .cover(parseCover(req, config, html))
+                    .thirdId(parseThirdId(req.getThirdId(), config, html))
+                    .picList(parsePicList(config, html))
+                    .ext(parseExt(req, config, html))
+                    .build();
+        }
+        // 结尾校验，如果标题或者内容为空，则进行忽略
+        if (StringUtils.isBlank(processorData.getTitle()) || CollectionUtils.isEmpty(processorData.getContent())) {
+            log.info("recommend spider end,parse title or content is empty,{}", page.getUrl());
+            return;
+        }
+        processorData.setId(UUID.randomUUID().toString().replace("-", ""));
+        processorData.setState(0);
+        processorData.setBase(req.getBase());
+        page.putField("processorData", processorData);
+        log.info("recommend spider end process,url:{}", page.getUrl());
+        return;
+    }
+
+    /**
+     * 标题解析,可以是传入或者解析
+     */
+    private static String parseTitle(String customTitle, CrawlerMetaDataConfig config, Html html) {
+        if (StringUtils.isNotBlank(customTitle)) {
+            return customTitle;
+        }
+        String title = analysisElement(html,
+                StringUtils.isNotBlank(config.getTitleMethod()) ? config.getTitleMethod() : config.getMethod(),
+                config.getTitle());
+        // 保底取值
+        if (StringUtils.isBlank(title)) {
+            title = html.getDocument().title();
+        }
+        return title;
+    }
+
+    /**
+     * 解析链接，可以是传入或者解析，保底为url
+     */
+    private static String parseLink(SingleAddressReq req, CrawlerMetaDataConfig config, Html html) {
+        if (StringUtils.isNotBlank(req.getLink())) {
+            return req.getLink();
+        }
+        String link = analysisElement(html,
+                StringUtils.isBlank(config.getLinkMethod()) ? config.getMethod() : config.getLinkMethod(),
+                config.getLink());
+
+        if (StringUtils.isBlank(link)) {
+            link = req.getUrl();
+        } else {
+            if (StringUtils.isNotBlank(config.getLinkPrefix())) {
+                link = config.getLinkPrefix() + link;
             }
+        }
+        return link;
+    }
+
+    /**
+     * 解析摘要，如果请求中存在，直接取值
+     * 否则按照请求的摘要生成类型，配置的请求类型取值，当为parse时解析
+     */
+    private static String parseDescription(SingleAddressReq req, CrawlerMetaDataConfig config, Html html) {
+        if (StringUtils.isNotBlank(req.getDescription())) {
+            return req.getDescription();
+        }
+        String descriptionType = req.getDescriptionType();
+        if (StringUtils.isBlank(descriptionType)) {
+            descriptionType = config.getDescriptionType();
+        }
+        if (!StringUtils.equals("parse", descriptionType)) {
+            return null;
+        }
+        List<String> descList = analysisElementList(html,
+                StringUtils.isNotBlank(config.getDescriptionMethod()) ? config.getDescriptionMethod()
+                                                                      : config.getMethod(),
+                config.getDescription());
+        if (CollectionUtils.isEmpty(descList)) {
+            return null;
+        }
+        return Joiner.on("").skipNulls().join(descList);
+    }
+
+    /**
+     * 解析封面，优先以请求request为主，否则取配置config的值
+     * 如果不是封面的自定义类型不为解析，则直接返回空
+     */
+    private static String parseCover(SingleAddressReq req, CrawlerMetaDataConfig config,
+            Html html) {
+        String customCoverType = req.getCustomCoverType();
+        if (StringUtils.isBlank(customCoverType) && null != config) {
+            customCoverType = config.getCoverType();
+        }
+        if (null != config && StringUtils.isBlank(config.getCover()) || !StringUtils.equals("parse", customCoverType)) {
+            return null;
+        }
+        String cover = analysisElement(html,
+                StringUtils.isBlank(config.getCoverMethod()) ? config.getMethod() : config.getCoverMethod(),
+                config.getCover());
+
+        if (StringUtils.isNotBlank(config.getCoverPrefix()) && StringUtils.isNotBlank(cover)) {
+            cover = config.getCoverPrefix() + cover;
         }
         return cover;
     }
 
+    private static String parseThirdId(String thirdId, CrawlerMetaDataConfig config, Html html) {
+        if (StringUtils.isNotBlank(thirdId)) {
+            return thirdId;
+        }
+        if (StringUtils.isBlank(config.getThirdId())) {
+            return null;
+        }
+        return analysisElement(html,
+                StringUtils.isBlank(config.getThirdIdMethod()) ? config.getMethod() : config.getThirdIdMethod(),
+                config.getThirdId());
+    }
+
+    /**
+     * 解析正文，必须是解析出来的结果
+     */
+    private static List<String> parseContent(CrawlerMetaDataConfig config, Html html, Selector selector) {
+
+        List<String> contentList = null;
+        if (StringUtils.isNotBlank(config.getContent())) {
+            contentList = analysisElementList(html,
+                    StringUtils.isNotBlank(config.getContentMethod()) ? config.getContentMethod() : config.getMethod(),
+                    config.getContent());
+        }
+        // 默认采用default保底
+        if (CollectionUtils.isEmpty(contentList) && null != selector) {
+            contentList = html.selectDocumentForList(selector);
+        }
+        return contentList;
+    }
+
+    private static List<String> parsePicList(CrawlerMetaDataConfig config, Html html) {
+
+        if (BooleanUtils.isNotTrue(config.getIfDownloadPic())) {
+            return Lists.newArrayList();
+        }
+        List<String> picList = analysisElementList(html,
+                StringUtils.isBlank(config.getPicMethod()) ? config.getMethod() : config.getPicMethod(),
+                config.getPic());
+        if (CollectionUtils.isEmpty(picList)) {
+            return picList;
+        }
+        if (StringUtils.isNotBlank(config.getPicPrefix())) {
+            return picList.stream()
+                    .map(e -> config.getCoverPrefix() + e)
+                    .collect(Collectors.toList());
+        }
+        return picList;
+    }
+
+    private static Map<String, String> parseExt(SingleAddressReq req, CrawlerMetaDataConfig config,
+            Html html) {
+        Map<String, String> extMap = req.getExt();
+        if (CollectionUtils.isEmpty(config.getExtParseList())) {
+            return extMap;
+        }
+        if (MapUtils.isEmpty(extMap)) {
+            extMap = Maps.newHashMap();
+        }
+        String method = config.getMethod();
+        Map<String, String> finalExtMap = extMap;
+        config.getExtParseList().forEach(e -> {
+            String value =
+                    analysisElement(html, StringUtils.isNotBlank(e.getParseMethod()) ? e.getParseMethod() : method,
+                            e.getParseExpression());
+            if (StringUtils.isBlank(value)) {
+                return;
+            }
+            if (StringUtils.isNotBlank(e.getParsePrefix())) {
+                value = e.getParsePrefix() + value;
+            }
+            finalExtMap.put(e.getParseId(), value);
+        });
+        return finalExtMap;
+    }
+
     private static String analysisElement(Html html, String method, String c) {
+        if (StringUtils.isBlank(c)) {
+            return null;
+        }
         if (StringUtils.equals("xpath", method)) {
             return StringUtils.trim(html.xpath(c).get());
         } else if (StringUtils.equals("css", method)) {
@@ -211,14 +293,19 @@ public class DefaultProcessor implements PageProcessor {
     }
 
     private static List<String> analysisElementList(Html html, String method, String c) {
+        if (StringUtils.isBlank(c)) {
+            return Lists.newArrayList();
+        }
         if (StringUtils.equals("xpath", method)) {
             return html.xpath(c).all()
                     .stream()
+                    .map(e -> StringUtils.trim(e))
                     .filter(e -> StringUtils.isNotBlank(e))
                     .collect(Collectors.toList());
         } else if (StringUtils.equals("css", method)) {
             return html.$(c, "text").all()
                     .stream()
+                    .map(e -> StringUtils.trim(e))
                     .filter(e -> StringUtils.isNotBlank(e))
                     .collect(Collectors.toList());
         } else {
@@ -228,14 +315,21 @@ public class DefaultProcessor implements PageProcessor {
 
     private SingleAddressResp handleByDefault(Page page) {
         Html html = page.getHtml();
-        List<String> content = html.selectDocumentForList(new CustomSelector());
+        List<String> content = null;
+        if (null != selector) {
+            content = html.selectDocumentForList(selector);
+        }
         return SingleAddressResp.builder()
                 .content(content)
                 .title(StringUtils.isNotBlank(req.getTitle()) ? req.getTitle() : html.getDocument().title())
                 .link(StringUtils.isNotBlank(req.getLink()) ? req.getLink() : page.getUrl().get())
                 .url(page.getUrl().get())
-                .cover(StringUtils.isNotBlank(req.getCustomCoverUrl()) ? req.getCustomCoverUrl() : null)
-                .processor("default")
+                .cover(req.getCustomCoverUrl())
+                .description(req.getDescription())
+                .thirdId(req.getThirdId())
+                .picList(Lists.newArrayList())
+                .base(req.getBase())
+                .ext(req.getExt())
                 .build();
     }
 

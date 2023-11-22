@@ -4,6 +4,17 @@
     "method": "xpath",
     "linkPrefix": "https://github.com"
   },
+  "kstack.corp.*.com": {
+    "method": "xpath",
+    "group": "nodeList",
+    "groupMethod": "xpath",
+    "groupValue": "//div[@id=main-content]//div[@class='infinite-scroll-component ']/div",
+    "link": "/div/a/@href",
+    "title": "/div/a/div/p/text()",
+    "linkPrefix": "https://kstack.corp.*.com",
+    "descriptionType": "split",
+    "description": "/div/div//div[@class='ck ck-content ck-rounded-corners']/text()"
+  },
   "juejin.cn": {
     "link": "$.data[*].item_info.article_info.article_id",
     "method": "jsonpath",

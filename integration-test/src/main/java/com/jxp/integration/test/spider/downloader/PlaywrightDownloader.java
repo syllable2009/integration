@@ -1,29 +1,24 @@
 package com.jxp.integration.test.spider.downloader;
 
+import static com.jxp.integration.test.config.PlaywrightConfig.PAGE_NAV_OPTIONS;
+
 import java.io.Closeable;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.entity.ContentType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jxp.integration.test.config.PlaywrightConfig;
-import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.ElementHandle;
-import com.microsoft.playwright.Locator;
+import com.jxp.integration.test.spider.domain.dto.CrawlerMetaDataConfig;
 import com.microsoft.playwright.Response;
-import com.microsoft.playwright.options.ScreenshotType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,7 +30,6 @@ import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.downloader.AbstractDownloader;
 import us.codecraft.webmagic.selector.PlainText;
-import us.codecraft.webmagic.utils.CharsetUtils;
 import us.codecraft.webmagic.utils.UrlUtils;
 
 /**
@@ -50,13 +44,10 @@ import us.codecraft.webmagic.utils.UrlUtils;
 @Data
 public class PlaywrightDownloader extends AbstractDownloader implements Closeable {
 
-    @Resource(name = "chromiumBrowserContext")
-    BrowserContext browserContext;
-
-    private static final Path path = Paths.get("/Users/jiaxiaopeng/");
-
-    public static final Map<String, String> BINARY_MAP =
-            ImmutableMap.of("image/jpeg", ".jpg", ContentType.IMAGE_PNG.getMimeType(), ".png");
+    @Resource
+    private LoginService loginService;
+    @Resource
+    private Map<String, CrawlerMetaDataConfig> crawlerMetaDataConfigMap;
 
     @Override
     public void close() throws IOException {
@@ -67,94 +58,91 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
         if (task == null || task.getSite() == null) {
             throw new NullPointerException("PlaywrightDownloader download page fail,task or site can not be null");
         }
+        String url = request.getUrl();
+        String domain = UrlUtils.getDomain(url);
+        // 获取配置
+        CrawlerMetaDataConfig config = crawlerMetaDataConfigMap.get(domain);
+        // 判断是否需要代理
+        Boolean ifProxy = false;
+        if (config != null && BooleanUtils.isTrue(config.getIfProxy())) {
+            ifProxy = true;
+        }
+        // 判断是否需要登录
+        Boolean ifNeedLogin = false;
+        if (config != null && BooleanUtils.isTrue(config.getIfNeedLogin())) {
+            ifNeedLogin = true;
+        }
         com.microsoft.playwright.Page page = null;
-        if (null != browserContext) {
-            page = browserContext.newPage();
-        } else {
-            browserContext = PlaywrightConfig.BROWSER_CONTEXT;
-            page = browserContext.newPage();
+        StopWatch watcher = new StopWatch("PlaywrightDownloader");
+        try {
+            // 判断是否需要代理服务器的页面
+            watcher.start("open new page");
+            page = PlaywrightConfig.getChromiumBrowserPage(ifProxy);
+            watcher.stop();
+            watcher.start("navigate");
+            log.info("Playwright navigate::{}", url);
+            Response response = page.navigate(url, PAGE_NAV_OPTIONS);
+            watcher.stop();
+            // 如果需要登录，此处进行登录并且保存Cookie
+            if (ifNeedLogin) {
+                watcher.start("login");
+                // 目前只支持apsso登录
+                Boolean login = loginService.globelLogin(domain, page, url, config, response);
+                if (null == login) {
+                    log.info("PlaywrightDownloader login done domain:{},present:{}", domain, url);
+                    if (!StringUtils.equals(page.url(), url)) {
+                        response = page.navigate(url, PAGE_NAV_OPTIONS);
+                    }
+                } else if (BooleanUtils.isTrue(login)) {
+                    // 登录成功后才打开一次是为了像内网sso网站跨域停留列表页无法跳回到详细页面，偶尔可能需要二次跳转
+                    response = page.navigate(url, PAGE_NAV_OPTIONS);
+                    if (!StringUtils.equals(page.url(), url)) {
+                        response = page.navigate(url, PAGE_NAV_OPTIONS);
+                    }
+                    log.info("login domain:{} success,targetUrl:{},url:{}", domain, url, page.url());
+                } else {
+                    log.info("login domain:{} fail,targetUrl:{},url:{}", domain, url, page.url());
+                    return Page.fail();
+                }
+                watcher.stop();
+            }
+            log.info(watcher.prettyPrint());
+            // playwright的自动等待还不太智能，数据未能完全加载出来，这里强制等待3秒
+            Thread.sleep(3000L);
+            if (!response.ok()) {
+                log.error("PlaywrightDownloader download page fail,url:{}", request.getUrl());
+                return Page.fail();
+            }
+            log.info("PlaywrightDownloader download page success,url:{},page.url:{}", request.getUrl(), page.url());
+            Page ret = new Page();
+            ret.setStatusCode(response.status());
+            ret.setDownloadSuccess(true);
+            ret.setRequest(request);
+            ret.setUrl(new PlainText(page.url()));
+            String contentType = response.allHeaders().get("content-type");
+            ret.putField("content-type", contentType);
+            if (!request.isBinaryContent()) {
+                ret.setRawText(page.content());
+            } else {
+                ret.setBytes(response.body());
+            }
+            // 赋值请求头信息
+            Map<String, List<String>> headers = Maps.newHashMap();
+            response.allHeaders().forEach((k, v) -> headers.put(k, Lists.newArrayList(v)));
+            ret.setHeaders(headers);
+            return ret;
+        } catch (Exception e) {
+            log.error("PlaywrightDownloader download page exception,url:{}", request.getUrl(), e);
+        } finally {
+            if (null != page) {
+                page.close();
+            }
         }
-        String referer = UrlUtils.getHost(request.getUrl());
-        Response response = page.navigate(request.getUrl(),
-                new com.microsoft.playwright.Page.NavigateOptions().setTimeout(60_000).setReferer(referer));
-        if (!response.ok()) {
-            log.error("PlaywrightDownloader download page fail,url:{}", request.getUrl());
-            return Page.fail();
-        }
-        //        page.screenshot(new com.microsoft.playwright.Page.ScreenshotOptions().setType(ScreenshotType.PNG)
-        //                .setPath(path));
-        browserContext.storageState(
-                new BrowserContext.StorageStateOptions().setPath(Paths.get("/Users/jiaxiaopeng/cookies.json")));
-        log.info("PlaywrightDownloader download page success,url:{}", request.getUrl());
-        Page ret = new Page();
-
-        ret.setStatusCode(response.status());
-        ret.setDownloadSuccess(true);
-        ret.setRequest(request);
-        ret.setUrl(new PlainText(request.getUrl()));
-
-        String contentType = response.allHeaders().get("content-type");
-        ret.putField("content-type", contentType);
-        if (BINARY_MAP.containsKey(contentType)) {
-            request.setBinaryContent(true);
-        }
-        if (!request.isBinaryContent()) {
-            ret.setCharset(getHtmlCharset(response.allHeaders(), response.body()));
-            ret.setRawText(response.text());
-        }
-        ret.setBytes(response.body());
-        Map<String, List<String>> headers = Maps.newHashMap();
-        response.allHeaders().forEach((k, v) -> headers.put(k, Lists.newArrayList(v)));
-        ret.setHeaders(headers);
-        page.close();
-        return ret;
+        return Page.fail();
     }
 
     @Override
     public void setThread(int threadNum) {
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        // 自己关闭自己的context
-
-        BrowserContext browserContext = PlaywrightConfig.BROWSER_CONTEXT;
-        com.microsoft.playwright.Page page = browserContext.newPage();
-        Response navigate = page.navigate("https://www.36kr.com/newsflashes/2368027471505793");
-        page.screenshot(new com.microsoft.playwright.Page.ScreenshotOptions()
-                .setFullPage(true)
-                .setType(ScreenshotType.PNG)
-                .setPath(Paths.get("/Users/jiaxiaopeng/screenshot2.png")));
-        Locator l1 = page.getByText("原文链接");
-        log.info("l1:{}", l1.isVisible());
-        Locator l2 = page.getByText(Pattern.compile("原文链接$", Pattern.CASE_INSENSITIVE));
-        log.info("l2:{}", l2.isVisible());
-        //        Locator l3 = page.locator("//a[@class=article-link-icon]");
-        //        log.info("l3:{}",l3.isVisible());
-        ElementHandle elementHandle = page.querySelector(".article-link-icon");
-        log.info("l4:{}", elementHandle.isVisible());
-        l1.hover();
-        l1.click();
-        page.waitForTimeout(60_000);
-        page.screenshot(new com.microsoft.playwright.Page.ScreenshotOptions()
-                .setPath(Paths.get("/Users/jiaxiaopeng/screenshot3.png")));
-        PlaywrightConfig.closeChromium();
-    }
-
-    private static String getHtmlCharset(Map<String, String> allHeaders, byte[] contentBytes) {
-        String charset = allHeaders.get("charset");
-        if (StringUtils.isNotBlank(charset)) {
-            return charset;
-        }
-        String contentType = allHeaders.get("content-type");
-        try {
-            charset = CharsetUtils.detectCharset(contentType, contentBytes);
-            if (null == charset) {
-                log.error("PlaywrightDownloader getHtmlCharset null,contentType:{}", contentType);
-            }
-            return charset;
-        } catch (Exception e) {
-            log.error("PlaywrightDownloader getHtmlCharset exception,contentType:{}", contentType);
-        }
-        return Charset.defaultCharset().name();
-    }
 }
