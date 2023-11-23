@@ -109,6 +109,21 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
             log.info(watcher.prettyPrint());
             // playwright的自动等待还不太智能，数据未能完全加载出来，这里强制等待3秒
             Thread.sleep(3000L);
+            //            page.mouse().move(0, 0);  // 将鼠标移动到页面顶部
+            //            while (true) {
+            //                page.mouse().wheel(0, 1);  // 向下滚动鼠标滚轮
+            //                // 检查是否有新的增量数据加载
+            //                if (checkForNewData(page)) {
+            //                    break;
+            //                }
+            //            }
+            //            Locator locator = page.locator("xpath=//button");
+            //            boolean enabled = locator.isEnabled();
+            //            if (BooleanUtils.isNotTrue(enabled)) {
+            //                log.error("PlaywrightDownloader can not find define locator");
+            //            }else {
+            //                locator.click();
+            //            }
             if (!response.ok()) {
                 log.error("PlaywrightDownloader download page fail,url:{}", request.getUrl());
                 return Page.fail();
@@ -145,4 +160,10 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
     public void setThread(int threadNum) {
     }
 
+    public boolean checkForNewData(com.microsoft.playwright.Page page) {
+        // 在这里编写检查增量数据的逻辑
+        // 如果有新的增量数据加载，返回true；否则返回false
+        // 例如，可以检查页面上特定元素的数量或属性来判断是否有新数据加载
+        return true;
+    }
 }
