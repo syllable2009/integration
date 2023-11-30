@@ -3,9 +3,9 @@ package com.jxp.integration.test.auth.service.impl;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.compress.utils.Lists;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.jxp.integration.test.auth.bean.CosmoEntityValue;
 import com.jxp.integration.test.auth.service.CosmoEntityValueService;
 

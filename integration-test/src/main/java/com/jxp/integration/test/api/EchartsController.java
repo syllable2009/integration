@@ -2,8 +2,6 @@ package com.jxp.integration.test.api;
 
 import java.io.IOException;
 import java.util.List;
-
-import org.apache.poi.ss.formula.functions.T;
 import org.icepear.echarts.Bar;
 import org.icepear.echarts.Line;
 import org.icepear.echarts.Option;
@@ -54,7 +52,7 @@ public class EchartsController {
         return renderHtml(echartTypeEnum, Lists.newArrayList());
     }
 
-    private String renderHtml(EchartType echartType, List<T> dataList) {
+    private <T> String renderHtml(EchartType echartType, List<T> dataList) {
 
         //        if (T.class.isAssignableFrom(Map.class)) {
         //
