@@ -4,6 +4,8 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.BooleanUtils;
+
 import com.google.common.collect.Lists;
 import com.jxp.integration.test.spider.domain.dto.CrawlerMetaDataConfig;
 import com.jxp.integration.test.spider.domain.dto.CrawlerTaskDataConfig;
@@ -23,6 +25,7 @@ import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.Browser.NewContextOptions;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
+import com.microsoft.playwright.ElementHandle;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Page.ScreenshotOptions;
 import com.microsoft.playwright.Playwright;
@@ -41,7 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PlaywrightMain {
 
-    private static final String BASE_URL = "https://www.36kr.com/newsflashes/2368027471505793";
+    private static final String BASE_URL = "https://www.google.com";
 
     private static final String PATH = "/Users/jiaxiaopeng/";
 
@@ -55,14 +58,38 @@ public class PlaywrightMain {
     public static void test1() {
         try (Playwright playwright = Playwright.create()) {
             Browser browser = playwright.chromium()
-                    .launch(new BrowserType.LaunchOptions().setArgs(Collections.singletonList("--start-maximized"))
-                            .setHeadless(true).setSlowMo(5000));
-            BrowserContext browserContext = browser.newContext(new NewContextOptions().setScreenSize(700, 400));
+                    .launch(new BrowserType.LaunchOptions()
+                            .setHeadless(false).setSlowMo(1000).setDevtools(false));
+            BrowserContext browserContext = browser.newContext(new NewContextOptions().setLocale("zh-CN"));
             Page page = browserContext.newPage();
             page.navigate(BASE_URL);
+
+            ElementHandle input = page.waitForSelector("xpath=//textarea[@id=\"APjFqb\"]");
+            if (BooleanUtils.isTrue(input.isVisible())) {
+                input.fill("小米");
+            } else {
+                log.info("input not found");
+            }
+
+            ElementHandle button = page.waitForSelector("xpath=//input[@type=\"submit\"]");
+            if (BooleanUtils.isTrue(button.isVisible())) {
+                button.click();
+            } else {
+                log.info("button not found");
+            }
+            Thread.sleep(3000L);
+            int start = 0;
+            int step = 1000;
+            for (int i = 0; i < 20; i++) {
+                page.mouse().wheel(start, step);
+                start = start + step;
+                Thread.sleep(300L);
+            }
             page.screenshot(new ScreenshotOptions().setType(ScreenshotType.JPEG)
                     .setFullPage(false).setQuality(90)
                     .setPath(Paths.get(PATH + IdUtil.simpleUUID() + ".jpg")));
+        } catch (InterruptedException interruptedException) {
+            interruptedException.printStackTrace();
         }
     }
 
