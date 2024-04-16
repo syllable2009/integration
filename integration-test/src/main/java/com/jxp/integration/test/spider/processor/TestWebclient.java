@@ -48,7 +48,7 @@ public class TestWebclient {
 ////        java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
 //        WebRequest webRequest = new WebRequest(new URL("https:///detail?entryId=1eaa22c8ce32426af0abd90081adcf46&uuid=41b42952fd694488b177e53c758b2d77"));
 //        webRequest.setAdditionalHeader("Cookie",
-//                "_did=web_35512701325345A6; ksCorpDeviceid=d33d31d0-d6e4-41dd-9840-32b1cb60a43e; "
+//                "_did=web_35512701325345A6; Deviceid=d33d31d0-d6e4-41dd-9840-32b1cb60a43e; "
 //                        + "hdige2wqwoino=GPr7AfktnrCh3NZrN7te6wSctAe6zX7R084e139b; "
 //                        + "did=web_b0b09f485cdbba02cc31ba7871dcf1359720; "
 //                        + "Hm_lvt_86a27b7db2c5c0ae37fee4a8a35033ee=1677650476; _ga_VKXBFL78SD=GS1.1.1678333927.1.1"
@@ -156,7 +156,7 @@ public class TestWebclient {
                 + " like Gecko) \"\n"
                 + "                            + \"Chrome/112.0.0.0 Safari/537.36");
         options.addArguments(
-                "--Cookie=_did=web_35512701325345A6; ksCorpDeviceid=d33d31d0-d6e4-41dd-9840-32b1cb60a43e; "
+                "--Cookie=_did=web_35512701325345A6; Deviceid=d33d31d0-d6e4-41dd-9840-32b1cb60a43e; "
                         + "hdige2wqwoino=GPr7AfktnrCh3NZrN7te6wSctAe6zX7R084e139b; "
                         + "did=web_b0b09f485cdbba02cc31ba7871dcf1359720; "
                         + "Hm_lvt_86a27b7db2c5c0ae37fee4a8a35033ee=1677650476; _ga_VKXBFL78SD=GS1.1.1678333927.1.1"
@@ -167,7 +167,7 @@ public class TestWebclient {
         //实例化
         WebDriver webDriver = new ChromeDriver(options);
         String str =
-                "_did=web_35512701325345A6; ksCorpDeviceid=d33d31d0-d6e4-41dd-9840-32b1cb60a43e; "
+                "_did=web_35512701325345A6; Deviceid=d33d31d0-d6e4-41dd-9840-32b1cb60a43e; "
                         + "hdige2wqwoino=GPr7AfktnrCh3NZrN7te6wSctAe6zX7R084e139b; "
                         + "did=web_b0b09f485cdbba02cc31ba7871dcf1359720; "
                         + "Hm_lvt_86a27b7db2c5c0ae37fee4a8a35033ee=1677650476; _ga_VKXBFL78SD=GS1.1.1678333927.1.1"

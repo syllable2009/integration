@@ -13,6 +13,7 @@ public class RequestContext {
         if (null != requestContext) {
             return requestContext.getUserId();
         }
+
         return null;
     }
 

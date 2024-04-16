@@ -58,3 +58,11 @@ spring:
 
 elasticsearch:
   e
+
+milton:
+  filesystem_root: /tmp
+  exclude_paths:
+    - /static
+    - /templates
+    - /management
+    - /webjars

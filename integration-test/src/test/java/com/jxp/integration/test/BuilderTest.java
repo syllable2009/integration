@@ -23,6 +23,10 @@ public class BuilderTest {
         executeCommand("ps -ef | grep 'java'");
         log.info("---------------------------");
         executeCommand(PROCESS_AUX_COMMAND);
+
+        String s = StringUtils.substringAfterLast(
+                "https://ssss.com/bs2/docsfile/spider/6220e8a80eb6407e86f59ae4dae4481cd", "/");
+        log.info("s:{}", s);
     }
 
 

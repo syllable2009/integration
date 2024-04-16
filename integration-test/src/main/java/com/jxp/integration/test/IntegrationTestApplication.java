@@ -2,6 +2,7 @@ package com.jxp.integration.test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
 import com.jxp.integration.test.config.PlaywrightConfig;
@@ -12,7 +13,7 @@ import com.jxp.integration.test.config.PlaywrightConfig;
 public class IntegrationTestApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(IntegrationTestApplication.class, args);
+        ConfigurableApplicationContext applicationContext = SpringApplication.run(IntegrationTestApplication.class, args);
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {

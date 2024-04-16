@@ -17,8 +17,25 @@
         <!-- Define the version of OPEN HTML TO PDF in the properties section of your POM. -->
         <openhtml.version>1.0.10</openhtml.version>
         <docker.image.prefix>springboot</docker.image.prefix>
+        <milton.version>2.7.1.5</milton.version>
     </properties>
     <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.milton</groupId>
+            <artifactId>milton-server-ce</artifactId>
+            <version>2.8.0.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.milton</groupId>
+            <artifactId>milton-server-ce</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -55,11 +72,11 @@
             <version>1.0.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.jxp</groupId>
-            <artifactId>integration-es</artifactId>
-            <version>1.0.0</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.jxp</groupId>-->
+<!--            <artifactId>integration-es</artifactId>-->
+<!--            <version>1.0.0</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

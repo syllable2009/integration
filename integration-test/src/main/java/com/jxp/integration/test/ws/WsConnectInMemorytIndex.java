@@ -21,9 +21,11 @@ public class WsConnectInMemorytIndex {
     // 本机clientID对应的所有事项（包括关注的event列表，对应的用户，最后活跃时间等）
     private static final Map<String, ClientIdentity> CLIENT_ID_MAP = new ConcurrentHashMap<>();
 
-    //每个event对应的所有client列表
+    //每个event对应的所有client对象列表
     private static final Map<String, Map<String, Boolean>> EVENT_REVERSE_MAP =
             new ConcurrentHashMap<>();
+
+    // 如果需要按照人的维度进行多设备消息呢，人也可以当做一个事件
 
     public static boolean checkIfClientIdInInstance(String clientId) {
         if (CLIENT_ID_MAP.containsKey(clientId)) {
@@ -102,10 +104,10 @@ public class WsConnectInMemorytIndex {
                 .lastHeartbeatTimestamp(System.currentTimeMillis())
                 .build());
         // 更新内存中的心跳时间
-//        flushHeartbeatTime(connectIdentityDto.getClientId());
+//        refleshHeartbeatTime(connectIdentityDto.getClientId());
     }
 
-    private static void flushHeartbeatTime(String currentClientId) {
+    private static void refleshHeartbeatTime(String currentClientId) {
         if (CLIENT_ID_MAP.containsKey(currentClientId)) {
             CLIENT_ID_MAP.get(currentClientId).setLastHeartbeatTimestamp(System.currentTimeMillis());
         }

@@ -28,8 +28,8 @@ public class LoginService {
         // 每一个域都必须写自己的登录逻辑，有的还需要额外跳转一次防止跨域不自动进行跳转
         switch (domain) {
             case "*.com":
-                if (!page.url().startsWith("https://apsso.*.com")
-                        && !page.url().startsWith("https://sso.corp.*.com")
+                if (!page.url().startsWith("https://sso.*.com")
+                        && !page.url().startsWith("https://ssp.orp.*.com")
                 ) {
                     log.info("LoginService login done:{},url:{}", domain, url);
                     return true;
@@ -56,7 +56,7 @@ public class LoginService {
 
     public Boolean loginKSSO(Page page, String url, CrawlerMetaDataConfig config) {
         log.info("start loginKSSO,page.url:{},url:{}", page.url(), url);
-        page.navigate("https://sso.corp.*.com");
+        page.navigate("https://sso.www.*.com");
         ElementHandle ssoSubmit = page.waitForSelector("xpath=//*[@id=\"ssoSubmit\"]");
         ElementHandle ssoUsername = page.waitForSelector("xpath=//*[@id=\"ssoUsername\"]");
         ElementHandle ssoPassword = page.waitForSelector("xpath=//*[@id=\"ssoPassword\"]");
@@ -70,8 +70,8 @@ public class LoginService {
         }
         // 登录之后再去验证一次，防止成功不自动跳转
         page.navigate(url);
-        if (page.url().startsWith("https://apsso.corp.*.com")
-                || page.url().startsWith("https://sso.corp.*.com")) {
+        if (page.url().startsWith("https://apsso.www.*.com")
+                || page.url().startsWith("https://sso.www.*.com")) {
             log.info("end loginKSSO fail,submitVisible:{},url:{}", submitVisible, page.url());
             return false;
         }

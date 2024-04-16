@@ -4,14 +4,14 @@
     "method": "xpath",
     "linkPrefix": "https://github.com"
   },
-  "kstack.corp.*.com": {
+  "ksorp.*.com": {
     "method": "xpath",
     "group": "nodeList",
     "groupMethod": "xpath",
     "groupValue": "//div[@id=main-content]//div[@class='infinite-scroll-component ']/div",
     "link": "/div/a/@href",
     "title": "/div/a/div/p/text()",
-    "linkPrefix": "https://kstack.corp.*.com",
+    "linkPrefix": "https://.*.com",
     "descriptionType": "split",
     "description": "/div/div//div[@class='ck ck-content ck-rounded-corners']/text()"
   },
