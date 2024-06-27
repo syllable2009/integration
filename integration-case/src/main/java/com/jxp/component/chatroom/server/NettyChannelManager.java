@@ -1,4 +1,4 @@
-package com.jxp.component.chatroom;
+package com.jxp.component.chatroom.server;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

@@ -1,4 +1,4 @@
-package com.jxp.component.chatroom;
+package com.jxp.component.chatroom.server;
 
 import java.net.InetSocketAddress;
 
@@ -7,6 +7,7 @@ import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import io.netty.bootstrap.ServerBootstrap;
@@ -23,10 +24,10 @@ import lombok.extern.slf4j.Slf4j;
  * @author jiaxiaopeng
  * Created on 2024-06-27 16:30
  */
-
+@Order(1)
 @Slf4j
 @Component
-public class NettyBootsrapRunner {
+public class NettyServer {
 
     @Value("${netty.websocket.port}")
     private int port;
@@ -72,7 +73,7 @@ public class NettyBootsrapRunner {
 
     @PreDestroy
     public void shutdown() {
-        log.info("[stop][Netty Server 停止服务,ip:{},端口:{}]", ip, port);
+        log.info("[stop][Netty Server 关闭,ip:{},端口:{}]", ip, port);
         Future<?> bossGroupFuture = bossGroup.shutdownGracefully();
         Future<?> workerGroupFuture = workerGroup.shutdownGracefully();
         try {
