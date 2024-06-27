@@ -44,6 +44,10 @@ public class NettyServerHandlerInitializer extends ChannelInitializer<Channel> i
     @Resource
     private WebsocketMessageHandler websocketMessageHandler;
 
+    /**
+     * 在每一个客户端与服务端建立完成连接时，服务端会创建一个 Channel 与之对应。此时，NettyServerHandlerInitializer 会进行执行 #initChannel(Channel c) 方法，进行自定义的初始化。
+     * @param ch
+     */
     @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     protected void initChannel(Channel ch) {
@@ -71,6 +75,7 @@ public class NettyServerHandlerInitializer extends ChannelInitializer<Channel> i
                 })
                 .addLast(new WebSocketServerCompressionHandler())
                 .addLast(new WebSocketServerProtocolHandler(path, null, true, maxFrameSize))
+                // 服务端处理器
 //                .addLast(applicationContext.getBean(WebsocketMessageHandler.class));       // Get handler from IOC
                 .addLast(websocketMessageHandler);
     }

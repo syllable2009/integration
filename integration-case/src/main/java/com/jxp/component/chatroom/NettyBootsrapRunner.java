@@ -68,9 +68,7 @@ public class NettyBootsrapRunner {
         } else {
             log.error("[start][Netty Server 启动失败,ip:{},端口:{}]", ip, port);
         }
-
     }
-
 
     @PreDestroy
     public void shutdown() {
