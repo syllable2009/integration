@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -33,11 +34,6 @@
         </dependency>
 
         <dependency>
-            <groupId>io.milton</groupId>
-            <artifactId>milton-server-ce</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
@@ -48,11 +44,11 @@
             <version>3.0.6</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.jxp</groupId>-->
-<!--            <artifactId>integration-event</artifactId>-->
-<!--            <version>1.0.0</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.jxp</groupId>-->
+        <!--            <artifactId>integration-event</artifactId>-->
+        <!--            <version>1.0.0</version>-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>com.jxp</groupId>
@@ -72,11 +68,11 @@
             <version>1.0.0</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.jxp</groupId>-->
-<!--            <artifactId>integration-es</artifactId>-->
-<!--            <version>1.0.0</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.jxp</groupId>-->
+        <!--            <artifactId>integration-es</artifactId>-->
+        <!--            <version>1.0.0</version>-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -230,7 +226,8 @@
         <dependency>
             <groupId>com.microsoft.playwright</groupId>
             <artifactId>playwright</artifactId>
-            <version>1.36.0</version>
+            <version>1.44.0</version>
+            <!--            <version>1.36.0</version>-->
         </dependency>
 
         <dependency>
