@@ -1,11 +1,49 @@
 # Compiled class file
 *.class
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+*.flattened-pom.xml
 
 # Log file
 *.log
+*.diff
+*.patch
+*.tmp
+*.swap
+*.swp
+*.swo
+*.swn
+*.bk
+*.bak
+logs/
+log/
+
+.user*
+*.pdb
+*.db
+*.opendb
+*.autosave
+*.stash
+Makefile.*
 
 # BlueJ files
 *.ctxt
+
+.gradle
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/readme.md
+
+
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
@@ -36,6 +74,21 @@ replay_pid*
 *.iws
 *.iml
 *.ipr
+.settings/
+.project/
+.classpath
+cmake-build-debug
+cmake-build-release
+
+bin/
+gen/
+out/
+target/
+dist/
+[Dd]ebug/
+[Rr]elease/
+generated/
+
 ### NetBeans ###
 nbproject/private/
 build/
@@ -46,9 +99,12 @@ nbdist/
 
 ### Mac ###
 .DS_Store
+._.DS_Store
+Thumbs.db
 /.idea/
 
 ### log ###
 LOG_HOME_IS_UNDEFINED/
 
 **/.flattened-pom.xml
+hs_err_pid*
