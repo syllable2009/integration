@@ -7,7 +7,7 @@ import javax.annotation.Resource;
 import org.aopalliance.intercept.Invocation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -24,9 +24,9 @@ import lombok.extern.slf4j.Slf4j;
  * @author jiaxiaopeng
  * Created on 2024-06-27 20:18
  */
-@Order(2)
+@Order(20000)
 @Slf4j
-@Service
+@Component
 public class NettyClient {
 
     private EventLoopGroup eventGroup = new NioEventLoopGroup();
@@ -35,6 +35,8 @@ public class NettyClient {
     private int port;
     @Value("${netty.websocket.ip}")
     private String ip;
+    @Value("${netty.websocket.path}")
+    private String path;
 
     @Resource
     private NettyClientHandlerInitializer nettyClientHandlerInitializer;
@@ -42,13 +44,14 @@ public class NettyClient {
 
     @PostConstruct
     public void start() throws Exception {
+
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(eventGroup)
                 .channel(NioServerSocketChannel.class)
                 .remoteAddress(ip, port)
                 .option(ChannelOption.SO_KEEPALIVE, true) //TCP Keepalive 机制，实现 TCP 层级的心跳保活功能
-                .option(ChannelOption.TCP_NODELAY, true)
-                .handler(nettyClientHandlerInitializer); // 允许较小的数据包的发送，降低延迟
+                .option(ChannelOption.TCP_NODELAY, true)// 允许较小的数据包的发送，降低延迟
+                .handler(nettyClientHandlerInitializer);
         bootstrap.connect().addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
@@ -97,5 +100,9 @@ public class NettyClient {
         }
         // 发送消息
         clientChannel.writeAndFlush(invocation);
+    }
+
+    public static void main(String[] args) throws Exception {
+        new NettyClient().start();
     }
 }

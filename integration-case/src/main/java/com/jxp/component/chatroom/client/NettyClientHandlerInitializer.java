@@ -21,10 +21,12 @@ public class NettyClientHandlerInitializer extends ChannelInitializer<Channel> {
     @Resource
     private NettyClientHandler nettyClientHandler;
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     protected void initChannel(Channel channel) throws Exception {
         channel.pipeline()
                 // 客户端处理器
-                .addLast(nettyClientHandler);
+                .addLast(nettyClientHandler)
+                ;
     }
 }
