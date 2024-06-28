@@ -20,8 +20,8 @@ public class HeartbeatHandle implements MsgHandle {
     }
 
     @Override
-    public void execute(Channel channel, String message) {
-        log.info("[Server][HeartbeatHandle][execute],message:{}", message);
+    public void execute(Channel channel, Invocation invocation) {
+        log.info("[Server][HeartbeatHandle][execute],invocation:{}", invocation);
         channel.writeAndFlush(Invocation.builder()
                 .type("Heartbeat")
                 .message("Pong")

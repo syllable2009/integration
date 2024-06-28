@@ -57,10 +57,11 @@ public class NettyServer {
         serverBootstrap.channel(NioServerSocketChannel.class);
         // 设置 Netty Server 的端口
         serverBootstrap.localAddress(new InetSocketAddress(this.ip, this.port));
-
-        serverBootstrap.option(ChannelOption.SO_BACKLOG, 1024)  // 服务端 accept 队列的大小
+        // 服务端 accept 队列的大小
+        serverBootstrap.option(ChannelOption.SO_BACKLOG, 1024)
                 .handler(new LoggingHandler(LogLevel.INFO))
-//                .childOption(ChannelOption.SO_KEEPALIVE, true) //TCP Keepalive 机制，实现 TCP
+                //TCP Keepalive 机制，实现 TCP
+//                .childOption(ChannelOption.SO_KEEPALIVE, true)
                 // 层级的心跳保活功能, TCP 自带的空闲检测机制，默认是 2 小时。这样的检测机制，从系统资源层面上来说是可以接受的,但是在业务层面，如果 2 小时才发现客户端与服务端的连接实际已经断开，会导致中间非常多的消息丢失，影响客户的使用体验
                 .childOption(ChannelOption.TCP_NODELAY, true); // 允许较小的数据包的发送，降低延迟
         // childHandler指定处理新连接数据的读写处理逻辑, ChannelInitializer，它用于 Channel 创建时，实现自定义的初始化逻辑
@@ -69,15 +70,15 @@ public class NettyServer {
         ChannelFuture future = serverBootstrap.bind().sync();
         if (future.isSuccess()) {
             this.serverChannel = future.channel();
-            log.info("[start][Netty Server 启动成功,ip:{},端口:{}]", ip, port);
+            log.info("[start][Netty Server 启动成功],ip:{},端口:{}", ip, port);
         } else {
-            log.error("[start][Netty Server 启动失败,ip:{},端口:{}]", ip, port);
+            log.error("[start][Netty Server 启动失败],ip:{},端口:{}", ip, port);
         }
     }
 
     @PreDestroy
     public void shutdown() {
-        log.info("[stop][Netty Server 关闭,ip:{},端口:{}]", ip, port);
+        log.info("[stop][Netty Server 关闭],ip:{},端口:{}", ip, port);
         Future<?> bossGroupFuture = bossGroup.shutdownGracefully();
         Future<?> workerGroupFuture = workerGroup.shutdownGracefully();
         try {

@@ -2,15 +2,11 @@ package com.jxp.component.chatroom.server;
 
 import javax.annotation.Resource;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 import com.jxp.component.chatroom.codec.InvocationDecoder;
 import com.jxp.component.chatroom.codec.InvocationEncoder;
-import com.jxp.component.chatroom.handle.MessageDispatcher;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -22,7 +18,7 @@ import io.netty.handler.timeout.IdleStateHandler;
  * Created on 2024-06-27 17:28
  */
 @Component
-public class NettyServerHandlerInitializer extends ChannelInitializer<Channel> implements ApplicationContextAware {
+public class NettyServerHandlerInitializer extends ChannelInitializer<Channel> {
 
     @Value("${netty.websocket.path}")
     private String path;
@@ -36,10 +32,6 @@ public class NettyServerHandlerInitializer extends ChannelInitializer<Channel> i
 
     private static final Integer ALL_TIMEOUT_SECONDS = 0;
 
-    private ApplicationContext applicationContext;
-
-    @Resource
-    private MessageDispatcher messageDispatcher;
     @Resource
     private NettyServerHandler nettyServerHandler;
 
@@ -57,7 +49,7 @@ public class NettyServerHandlerInitializer extends ChannelInitializer<Channel> i
                 .addLast(new IdleStateHandler(READ_TIMEOUT_SECONDS, WRITE_TIMEOUT_SECONDS, ALL_TIMEOUT_SECONDS))
                 .addLast(new InvocationEncoder())
                 .addLast(new InvocationDecoder())
-                .addLast(messageDispatcher)
+//                .addLast(messageDispatcher)
 //                .addLast(new HttpServerCodec())
 //                .addLast(new ChunkedWriteHandler())
 //                .addLast(new HttpObjectAggregator(65536))
@@ -82,10 +74,5 @@ public class NettyServerHandlerInitializer extends ChannelInitializer<Channel> i
                 // 服务端处理器
 //                .addLast(applicationContext.getBean(WebsocketMessageHandler.class));       // Get handler from IOC
                 .addLast(nettyServerHandler);
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
     }
 }

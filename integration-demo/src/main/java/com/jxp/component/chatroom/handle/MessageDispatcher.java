@@ -2,8 +2,6 @@ package com.jxp.component.chatroom.handle;
 
 import javax.annotation.Resource;
 
-import org.springframework.stereotype.Component;
-
 import com.jxp.component.chatroom.codec.Invocation;
 
 import io.netty.channel.ChannelHandler;
@@ -16,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
  * Created on 2024-06-27 22:00
  */
 @Slf4j
-@Component
+//@Component
 @ChannelHandler.Sharable
 public class MessageDispatcher extends SimpleChannelInboundHandler<Invocation> {
 
@@ -28,6 +26,6 @@ public class MessageDispatcher extends SimpleChannelInboundHandler<Invocation> {
         // <3.1> 获得 type 对应的 MessageHandler 处理器
         final MsgHandle messageHandler = msgHandleContainer.getMessageHandler(invocation.getType());
         final String message = invocation.getMessage();
-        messageHandler.execute(ctx.channel(), message);
+        messageHandler.execute(ctx.channel(), invocation);
     }
 }

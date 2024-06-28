@@ -5,6 +5,8 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Component;
 
 import com.jxp.component.chatroom.codec.Invocation;
+import com.jxp.component.chatroom.handle.MsgHandle;
+import com.jxp.component.chatroom.handle.MsgHandleContainer;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -26,6 +28,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Invocation> 
 
     @Resource
     private NettyChannelManager channelManager;
+    @Resource
+    private MsgHandleContainer msgHandleContainer;
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
@@ -55,8 +59,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Invocation> 
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, Invocation invocation) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Invocation invocation) throws Exception {
         log.info("[server][channelRead0],invocation:{}", invocation.getMessage());
+        final MsgHandle messageHandler = msgHandleContainer.getMessageHandler(invocation.getType());
+        messageHandler.execute(ctx.channel(), invocation);
     }
 
     @Override

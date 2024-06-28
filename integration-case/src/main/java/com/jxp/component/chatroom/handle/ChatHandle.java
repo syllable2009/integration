@@ -2,6 +2,8 @@ package com.jxp.component.chatroom.handle;
 
 import org.springframework.stereotype.Component;
 
+import com.jxp.component.chatroom.codec.Invocation;
+
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,7 +20,7 @@ public class ChatHandle implements MsgHandle {
     }
 
     @Override
-    public void execute(Channel channel, String message) {
-        log.info("[Server][ChatHandle][execute],message:{}", message);
+    public void execute(Channel channel, Invocation invocation) {
+        log.info("[Server][ChatHandle][execute],invocation:{}", invocation);
     }
 }

@@ -1,8 +1,12 @@
 package com.jxp.component.chatroom.client;
 
+import javax.annotation.Resource;
+
 import org.springframework.stereotype.Component;
 
 import com.jxp.component.chatroom.codec.Invocation;
+import com.jxp.component.chatroom.handle.MsgHandle;
+import com.jxp.component.chatroom.handle.MsgHandleContainer;
 
 import cn.hutool.json.JSONUtil;
 import io.netty.channel.ChannelHandler;
@@ -21,6 +25,9 @@ import lombok.extern.slf4j.Slf4j;
 @ChannelHandler.Sharable
 public class NettyClientHandler extends SimpleChannelInboundHandler<Invocation> {
 
+    @Resource
+    private MsgHandleContainer msgHandleContainer;
+
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
@@ -34,8 +41,10 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Invocation> 
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, Invocation invocation) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Invocation invocation) throws Exception {
         log.info("[Client][channelRead0],invocation:{}", JSONUtil.toJsonStr(invocation));
+        final MsgHandle messageHandler = msgHandleContainer.getMessageHandler(invocation.getType());
+        messageHandler.execute(ctx.channel(), invocation);
     }
 
     /**
