@@ -19,6 +19,7 @@ public class ChatHandle implements MsgHandle {
 
     @Override
     public void execute(Channel channel, String message) {
+        log.info("[Client][ChatHandle],id:{},message:{}", channel.id(), message);
 
     }
 }

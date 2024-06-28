@@ -19,6 +19,6 @@ public class HeartbeatHandle implements MsgHandle {
 
     @Override
     public void execute(Channel channel, String message) {
-
+        log.info("[Client][HeartbeatHandle],id:{},message:{}", channel.id(), message);
     }
 }

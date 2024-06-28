@@ -2,6 +2,8 @@ package com.jxp.component.chatroom.handle;
 
 import org.springframework.stereotype.Component;
 
+import com.jxp.component.chatroom.codec.Invocation;
+
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,6 +21,10 @@ public class HeartbeatHandle implements MsgHandle {
 
     @Override
     public void execute(Channel channel, String message) {
-        log.info("[HeartbeatHandle][execute],message:{}", message);
+        log.info("[Server][HeartbeatHandle][execute],message:{}", message);
+        channel.writeAndFlush(Invocation.builder()
+                .type("Heartbeat")
+                .message("Pong")
+                .build());
     }
 }

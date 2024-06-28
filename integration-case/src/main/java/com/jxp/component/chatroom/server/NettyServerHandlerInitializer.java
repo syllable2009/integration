@@ -15,6 +15,7 @@ import com.jxp.component.chatroom.handle.MessageDispatcher;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
+import io.netty.handler.timeout.IdleStateHandler;
 
 /**
  * @author jiaxiaopeng
@@ -29,11 +30,11 @@ public class NettyServerHandlerInitializer extends ChannelInitializer<Channel> i
     private long maxFrameSize;
 
     // 心跳超时时间
-    private static final Integer READ_TIMEOUT_SECONDS = 3 * 60;
+    private static final Integer READ_TIMEOUT_SECONDS = 30;
 
-    private static final Integer WRITE_TIMEOUT_SECONDS = 3 * 60;
+    private static final Integer WRITE_TIMEOUT_SECONDS = 0;
 
-    private static final Integer ALL_TIMEOUT_SECONDS = 3 * 60;
+    private static final Integer ALL_TIMEOUT_SECONDS = 0;
 
     private ApplicationContext applicationContext;
 
@@ -53,10 +54,10 @@ public class NettyServerHandlerInitializer extends ChannelInitializer<Channel> i
         ChannelPipeline channelPipeline = ch.pipeline();
         // <2> 添加一堆 NettyServerHandler 到 ChannelPipeline 中
         channelPipeline
-//                .addLast(new ReadTimeoutHandler(READ_TIMEOUT_SECONDS, WRITE_TIMEOUT_SECONDS, ALL_TIMEOUT_SECONDS))
+                .addLast(new IdleStateHandler(READ_TIMEOUT_SECONDS, WRITE_TIMEOUT_SECONDS, ALL_TIMEOUT_SECONDS))
                 .addLast(new InvocationEncoder())
                 .addLast(new InvocationDecoder())
-//                .addLast(messageDispatcher)
+                .addLast(messageDispatcher)
 //                .addLast(new HttpServerCodec())
 //                .addLast(new ChunkedWriteHandler())
 //                .addLast(new HttpObjectAggregator(65536))

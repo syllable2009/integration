@@ -20,6 +20,6 @@ public class AuthHandle implements MsgHandle {
 
     @Override
     public void execute(Channel channel, String message) {
-        log.info("[AuthHandle][execute],message:{}", message);
+        log.info("[Server][AuthHandle][execute],message:{}", message);
     }
 }
