@@ -8,17 +8,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import com.jxp.component.chatroom.codec.InvocationDecoder;
+import com.jxp.component.chatroom.codec.InvocationEncoder;
+import com.jxp.component.chatroom.handle.MessageDispatcher;
+
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
-import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
-import io.netty.handler.stream.ChunkedWriteHandler;
 
 /**
  * @author jiaxiaopeng
@@ -35,10 +31,16 @@ public class NettyServerHandlerInitializer extends ChannelInitializer<Channel> i
     // 心跳超时时间
     private static final Integer READ_TIMEOUT_SECONDS = 3 * 60;
 
+    private static final Integer WRITE_TIMEOUT_SECONDS = 3 * 60;
+
+    private static final Integer ALL_TIMEOUT_SECONDS = 3 * 60;
+
     private ApplicationContext applicationContext;
 
     @Resource
-    private WebsocketMessageHandler websocketMessageHandler;
+    private MessageDispatcher messageDispatcher;
+    @Resource
+    private NettyServerHandler nettyServerHandler;
 
     /**
      * 在每一个客户端与服务端建立完成连接时，服务端会创建一个 Channel 与之对应。此时，NettyServerHandlerInitializer 会进行执行 #initChannel(Channel c) 方法，进行自定义的初始化。
@@ -50,30 +52,35 @@ public class NettyServerHandlerInitializer extends ChannelInitializer<Channel> i
         // <1> 获得 Channel 对应的 ChannelPipeline
         ChannelPipeline channelPipeline = ch.pipeline();
         // <2> 添加一堆 NettyServerHandler 到 ChannelPipeline 中
-        channelPipeline.addLast(new HttpServerCodec())
-                .addLast(new ChunkedWriteHandler())
-                .addLast(new HttpObjectAggregator(65536))
-                .addLast(new ChannelInboundHandlerAdapter() {
-                    @Override
-                    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                        if (msg instanceof FullHttpRequest) {
-                            FullHttpRequest fullHttpRequest = (FullHttpRequest) msg;
-                            String uri = fullHttpRequest.uri();
+        channelPipeline
+//                .addLast(new ReadTimeoutHandler(READ_TIMEOUT_SECONDS, WRITE_TIMEOUT_SECONDS, ALL_TIMEOUT_SECONDS))
+                .addLast(new InvocationEncoder())
+                .addLast(new InvocationDecoder())
+//                .addLast(messageDispatcher)
+//                .addLast(new HttpServerCodec())
+//                .addLast(new ChunkedWriteHandler())
+//                .addLast(new HttpObjectAggregator(65536))
+//                .addLast(new ChannelInboundHandlerAdapter() {
+//                    @Override
+//                    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+//                        if (msg instanceof FullHttpRequest) {
+//                            FullHttpRequest fullHttpRequest = (FullHttpRequest) msg;
+//                            String uri = fullHttpRequest.uri();
 //                            if (!uri.equals(path)) {
 //                                // Not websocket uri, return 404
 //                                ctx.channel().writeAndFlush(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND))
 //                                        .addListener(ChannelFutureListener.CLOSE);
 //                                return;
 //                            }
-                        }
-                        super.channelRead(ctx, msg);
-                    }
-                })
-                .addLast(new WebSocketServerCompressionHandler())
-                .addLast(new WebSocketServerProtocolHandler(path, null, true, maxFrameSize))
+//                        }
+//                        super.channelRead(ctx, msg);
+//                    }
+//                })
+//                .addLast(new WebSocketServerCompressionHandler())
+//                .addLast(new WebSocketServerProtocolHandler(path, null, true, maxFrameSize))
                 // 服务端处理器
 //                .addLast(applicationContext.getBean(WebsocketMessageHandler.class));       // Get handler from IOC
-                .addLast(websocketMessageHandler);
+                .addLast(nettyServerHandler);
     }
 
     @Override

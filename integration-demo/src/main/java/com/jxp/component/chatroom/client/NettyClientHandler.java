@@ -20,5 +20,18 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         // 发起重连
         super.channelInactive(ctx);
+        log.info("[NettyClientHandler][channelInactive]");
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+        log.info("[NettyClientHandler][channelActive]");
+    }
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        super.channelRead(ctx, msg);
+        log.info("[NettyClientHandler][channelRead],msg:{}", msg);
     }
 }

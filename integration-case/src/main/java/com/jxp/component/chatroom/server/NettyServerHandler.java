@@ -4,13 +4,11 @@ import javax.annotation.Resource;
 
 import org.springframework.stereotype.Component;
 
-import io.netty.channel.ChannelFutureListener;
+import com.jxp.component.chatroom.codec.Invocation;
+
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketCloseStatus;
-import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -22,22 +20,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @ChannelHandler.Sharable // 注解，标记这个 ChannelHandler 可以被多个 Channel 使用
-public class WebsocketMessageHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
+public class NettyServerHandler extends SimpleChannelInboundHandler<Invocation> {
 
     @Resource
     private NettyChannelManager channelManager;
-
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, WebSocketFrame msg) throws Exception {
-        if (msg instanceof TextWebSocketFrame) {
-            TextWebSocketFrame textWebSocketFrame = (TextWebSocketFrame) msg;
-            // Reply to client
-            ctx.channel().writeAndFlush(new TextWebSocketFrame("Received your message -> " + textWebSocketFrame.text()));
-        } else {
-            // Invalid message type
-            ctx.channel().writeAndFlush(WebSocketCloseStatus.INVALID_MESSAGE_TYPE).addListener(ChannelFutureListener.CLOSE);
-        }
-    }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
@@ -53,6 +39,21 @@ public class WebsocketMessageHandler extends SimpleChannelInboundHandler<WebSock
         log.info("channelActive,remoteAddress:{}", ctx.channel().remoteAddress());
     }
 
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) {
+        // 从管理器中移除
+        channelManager.remove(ctx.channel());
+    }
 
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        log.error("[exceptionCaught][连接({}) 发生异常]", ctx.channel().id(), cause);
+        // 断开连接
+        ctx.channel().close();
+    }
 
+    @Override
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, Invocation invocation) throws Exception {
+        log.info("channelRead0:{}", invocation.getMessage());
+    }
 }

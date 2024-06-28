@@ -17,6 +17,8 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,7 +59,9 @@ public class NettyServer {
         serverBootstrap.localAddress(new InetSocketAddress(this.ip, this.port));
 
         serverBootstrap.option(ChannelOption.SO_BACKLOG, 1024)  // 服务端 accept 队列的大小
-                .childOption(ChannelOption.SO_KEEPALIVE, true) //TCP Keepalive 机制，实现 TCP 层级的心跳保活功能
+                .handler(new LoggingHandler(LogLevel.INFO))
+//                .childOption(ChannelOption.SO_KEEPALIVE, true) //TCP Keepalive 机制，实现 TCP
+                // 层级的心跳保活功能, TCP 自带的空闲检测机制，默认是 2 小时。这样的检测机制，从系统资源层面上来说是可以接受的,但是在业务层面，如果 2 小时才发现客户端与服务端的连接实际已经断开，会导致中间非常多的消息丢失，影响客户的使用体验
                 .childOption(ChannelOption.TCP_NODELAY, true); // 允许较小的数据包的发送，降低延迟
         // childHandler指定处理新连接数据的读写处理逻辑, ChannelInitializer，它用于 Channel 创建时，实现自定义的初始化逻辑
         serverBootstrap.childHandler(nettyServerHandlerInitializer);

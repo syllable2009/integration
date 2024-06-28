@@ -7,19 +7,18 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author jiaxiaopeng
- * Created on 2024-06-27 21:53
+ * Created on 2024-06-27 21:54
  */
-
 @Slf4j
 @Component
-public class AuthHandle implements MsgHandle {
+public class HeartbeatHandle implements MsgHandle {
     @Override
     public String getType() {
-        return "Auth";
+        return "Heartbeat";
     }
 
     @Override
     public void execute(Channel channel, String message) {
-        log.info("[AuthHandle][execute],message:{}", message);
+
     }
 }

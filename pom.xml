@@ -32,6 +32,7 @@
         <module>integration-wechat</module>
         <module>integration-event</module>
         <module>integration-case</module>
+        <module>integration-demo</module>
     </modules>
 
     <dependencyManagement>
