@@ -2,9 +2,12 @@ package com.jxp.component.chatroom.client;
 
 import org.springframework.stereotype.Component;
 
+import com.jxp.component.chatroom.codec.Invocation;
+
+import cn.hutool.json.JSONUtil;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -14,24 +17,22 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @ChannelHandler.Sharable
-public class NettyClientHandler extends ChannelInboundHandlerAdapter {
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        // 发起重连
-        super.channelInactive(ctx);
-        log.info("[NettyClientHandler][channelInactive]");
-    }
+public class NettyClientHandler extends SimpleChannelInboundHandler<Invocation> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        log.info("[NettyClientHandler][channelActive]");
+        log.info("[Client][channelActive],id:{}", ctx.channel().id());
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        super.channelRead(ctx, msg);
-        log.info("[NettyClientHandler][channelRead],msg:{}", msg);
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        log.info("[Client][channelInactive],id:{}", ctx.channel().id());
+    }
+
+    @Override
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, Invocation invocation) throws Exception {
+        log.info("[Client][channelRead0],invocation:{}", JSONUtil.toJsonStr(invocation));
     }
 }

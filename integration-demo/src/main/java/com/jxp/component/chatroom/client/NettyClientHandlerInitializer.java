@@ -13,7 +13,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
+import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -30,14 +32,14 @@ public class NettyClientHandlerInitializer extends ChannelInitializer<Channel> {
     @Resource
     private NettyClientHandler nettyClientHandler;
 
-    private static final Integer READ_TIMEOUT_SECONDS = 30;
+    private static final Integer READ_TIMEOUT_SECONDS = 10;
 
     @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     protected void initChannel(Channel channel) throws Exception {
         channel.pipeline()
                 // 空闲检测
-//                .addLast(new IdleStateHandler(READ_TIMEOUT_SECONDS, 0, 0))
+                .addLast(new IdleStateHandler(5, 5, 10))
                 .addLast(new InvocationEncoder())
                 .addLast(new InvocationDecoder())
 //                .addLast(messageDispatcher)
@@ -54,16 +56,27 @@ public class NettyClientHandlerInitializer extends ChannelInitializer<Channel> {
      */
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        log.info("[userEventTriggered]");
-        // 空闲时向服务器发送一次心跳
+        log.info("[userEventTriggered],evt:{}", evt);
         if (evt instanceof IdleStateEvent) {
-            log.info("[userEventTriggered]发送一次心跳");
-            ctx.writeAndFlush(Invocation.builder()
-                            .type("Heartbeat")
-                            .message("Ping")
-                            .build())
-                    .addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+            IdleStateEvent event = (IdleStateEvent) evt;
+            if (event.state() == IdleState.READER_IDLE) {
+                System.out.println("读超时");
+                // 这里可以进行相应的处理，比如发送心跳包或者关闭连接
+                log.info("[userEventTriggered]发送一次心跳");
+                ctx.writeAndFlush(Invocation.builder()
+                                .type("Heartbeat")
+                                .message("Ping")
+                                .build())
+                        .addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+            } else if (event.state() == IdleState.WRITER_IDLE) {
+                System.out.println("写超时");
+                // 这里可以进行相应的处理，比如发送心跳包
+            } else if (event.state() == IdleState.ALL_IDLE) {
+                System.out.println("读写超时");
+                // 这里可以进行相应的处理，比如发送心跳包或者关闭连接
+            }
+        } else {
+            super.userEventTriggered(ctx, evt);
         }
-        super.userEventTriggered(ctx, evt);
     }
 }

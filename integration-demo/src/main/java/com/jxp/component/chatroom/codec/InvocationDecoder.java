@@ -22,7 +22,7 @@ public class InvocationDecoder extends ByteToMessageDecoder {
             List<Object> out) throws Exception {
         // 标记当前读取位置
         in.markReaderIndex();
-        // 判断能够读取的length长度
+        // 判断能够读取的length长度,一个int长度为4
         if (in.readableBytes() <= 4) {
             return;
         }

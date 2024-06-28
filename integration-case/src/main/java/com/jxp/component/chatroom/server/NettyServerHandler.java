@@ -55,5 +55,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Invocation> 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, Invocation invocation) throws Exception {
         log.info("channelRead0:{}", invocation.getMessage());
+        channelHandlerContext.writeAndFlush(Invocation.builder()
+                .type("Chat")
+                .message("服务器已收到你的消息:" + invocation.getMessage())
+                .build());
     }
 }
