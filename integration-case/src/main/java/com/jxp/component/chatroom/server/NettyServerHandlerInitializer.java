@@ -39,7 +39,7 @@ public class NettyServerHandlerInitializer extends ChannelInitializer<Channel> {
      * 在每一个客户端与服务端建立完成连接时，服务端会创建一个 Channel 与之对应。此时，NettyServerHandlerInitializer 会进行执行 #initChannel(Channel c) 方法，进行自定义的初始化。
      * @param ch
      */
-    @SuppressWarnings("checkstyle:MagicNumber")
+    @SuppressWarnings({"checkstyle:MagicNumber", "checkstyle:LineLength", "checkstyle:RegexpSingleline"})
     @Override
     protected void initChannel(Channel ch) {
         // <1> 获得 Channel 对应的 ChannelPipeline
@@ -49,6 +49,13 @@ public class NettyServerHandlerInitializer extends ChannelInitializer<Channel> {
                 .addLast(new IdleStateHandler(READ_TIMEOUT_SECONDS, WRITE_TIMEOUT_SECONDS, ALL_TIMEOUT_SECONDS))
                 .addLast(new InvocationEncoder())
                 .addLast(new InvocationDecoder())
+
+                // Protobuf消息通常带有一个长度前缀，用于指示消息的长度，负责读取这个长度前缀，并确定接下来要读取的消息的长度。
+//                .addLast(new ProtobufVarint32FrameDecoder())
+//                .addLast(new ProtobufDecoder(MessageProtobuf.Msg.getDefaultInstance())) //是一个Netty的解码器，用于将字节流解码为Protobuf消息对象。它的作用是将接收到的字节数据解析成具体的Protobuf消息对象，方便后续的业务逻辑处理。
+//                .addLast(new ProtobufVarint32LengthFieldPrepender()) //是一个Netty的编码器，用于在消息前面添加一个长度字段。这个长度字段使用Varint32编码格式，表示消息的字节长度。它的作用是帮助接收方知道每个消息的边界，从而正确地解析消息。
+//                .addLast(new ProtobufEncoder())
+
 //                .addLast(messageDispatcher)
 //                .addLast(new HttpServerCodec())
 //                .addLast(new ChunkedWriteHandler())

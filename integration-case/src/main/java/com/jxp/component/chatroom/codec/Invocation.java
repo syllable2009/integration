@@ -19,7 +19,8 @@ public class Invocation {
     private String active; // recall,delete
     private String fromId;
     private String toId;
-    private String uuid;
+    private String uuid;  //唯一
+    private String seqId; //有序
     private Long timeStamp;
     private String content;
 }

@@ -26,5 +26,6 @@ public class ChatHandle implements MsgHandle {
     public void execute(Channel channel, Invocation invocation) {
         log.info("[Server][ChatHandle][execute],invocation:{}", invocation);
         NettyChannelManager.send(invocation.getToId(), invocation);
+        // 离线消息存储
     }
 }
