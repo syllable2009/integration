@@ -2,8 +2,9 @@ package com.jxp.component.chatroom.codec;
 
 import java.util.List;
 
+import com.jxp.integration.base.tool.JacksonUtils;
+
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -39,10 +40,11 @@ public class InvocationDecoder extends ByteToMessageDecoder {
         // 读取内容
         final byte[] bytes = new byte[length];
         in.readBytes(bytes);
+        final String str = StrUtil.str(bytes, "UTF-8");
+        log.info("[decode][连接({}) 解码了一条消息({})]", ctx.channel().id(), str);
         // 解析成对象
-        final Invocation bean = JSONUtil.toBean(StrUtil.str(bytes, "UTF-8"), Invocation.class);
+        final Invocation bean = JacksonUtils.toBean(str, Invocation.class);
         out.add(bean);
-        log.info("[decode][连接({}) 解码了一条消息({})]", ctx.channel().id(), JSONUtil.toJsonStr(bean));
     }
 
 }

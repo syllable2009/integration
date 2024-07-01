@@ -25,7 +25,7 @@ public class MessageDispatcher extends SimpleChannelInboundHandler<Invocation> {
     protected void channelRead0(ChannelHandlerContext ctx, Invocation invocation) throws Exception {
         // <3.1> 获得 type 对应的 MessageHandler 处理器
         final MsgHandle messageHandler = msgHandleContainer.getMessageHandler(invocation.getType());
-        final String message = invocation.getMessage();
+        final String content = invocation.getContent();
         messageHandler.execute(ctx.channel(), invocation);
     }
 }

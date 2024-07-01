@@ -3,6 +3,7 @@ package com.jxp.component.chatroom.handle;
 import org.springframework.stereotype.Component;
 
 import com.jxp.component.chatroom.codec.Invocation;
+import com.jxp.component.chatroom.enums.MsgTypeEnum;
 
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 public class HeartbeatHandle implements MsgHandle {
     @Override
     public String getType() {
-        return "Heartbeat";
+        return MsgTypeEnum.Heartbeat.getCode();
     }
 
     @Override
@@ -24,7 +25,7 @@ public class HeartbeatHandle implements MsgHandle {
         log.info("[Server][HeartbeatHandle][execute],invocation:{}", invocation);
         channel.writeAndFlush(Invocation.builder()
                 .type("Heartbeat")
-                .message("Pong")
+                .content("Pong")
                 .build());
     }
 }

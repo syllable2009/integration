@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.jxp.component.chatroom.codec.Invocation;
 
+import cn.hutool.core.thread.ThreadUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -36,13 +37,15 @@ public class NettyClient {
     private int port;
     @Value("${netty.websocket.ip}")
     private String ip;
+    private boolean ifReconnecting = false;
+    private boolean ifStart = false;
 
     @Resource
     private NettyClientHandlerInitializer nettyClientHandlerInitializer;
     private volatile Channel clientChannel;
 
     @PostConstruct
-    public void start() throws Exception {
+    public void start() {
         try {
             Bootstrap b = new Bootstrap();
             b.group(eventGroup)
@@ -57,19 +60,18 @@ public class NettyClient {
                 @Override
                 public void operationComplete(ChannelFuture future) throws Exception {
                     if (future.isSuccess()) {
+                        ifStart = true;
                         clientChannel = future.channel();
                         log.info("[start][Netty Client 启动成功,ip:{},端口:{}]", ip, port);
                     } else {
                         log.error("[start][Netty Client 启动失败,ip:{},端口:{}]", ip, port);
-                        reconnect();
+                        reconnect(true);
                     }
                 }
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("[start][Client start fail],message:{}", e.getMessage(), e);
         }
-
-
 //        Bootstrap bootstrap = new Bootstrap();
 //        bootstrap.group(eventGroup)
 //                .channel(NioServerSocketChannel.class)
@@ -90,8 +92,28 @@ public class NettyClient {
 //        });
     }
 
-    public void reconnect() {
-        log.info("[reconnect][Netty Client reconnect,ip:{},端口:{}]", ip, port);
+    @SuppressWarnings("checkstyle:MagicNumber")
+    public void reconnect(boolean ifFirst) {
+        log.info("[reconnect][Netty Client reconnect,ip:{},端口:{}],ifFirst:{}", ip, port, ifFirst);
+        ifStart = false;
+        // 尝试重连三次
+        for (int i = 0; i < 3; i++) {
+            if (!ifStart && !ifReconnecting) {
+                synchronized (this) {
+                    ifReconnecting = true;
+                    log.info("[reconnect][Netty Client reconnect {} time],result:{}", i + 1,
+                            ifStart);
+                    closeChannel();
+                    start();
+                    ifReconnecting = false;
+                }
+            }
+            if (ifStart) {
+                return;
+            }
+            ThreadUtil.sleep(10000);
+        }
+        log.info("[reconnect][Netty Client reconnect three times],result:{}", ifStart);
     }
 
     @PreDestroy
@@ -103,6 +125,10 @@ public class NettyClient {
         } catch (InterruptedException ignore) {
             ignore.printStackTrace();
         }
+        closeChannel();
+    }
+
+    private void closeChannel() {
         if (this.clientChannel != null) {
             try {
                 this.clientChannel.close();

@@ -14,6 +14,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class Invocation {
-    private String type;
-    private String message;
+    private String type; // auth,enter,leave,chat,chatroom,ack
+    private String state; // send,deliver,read
+    private String active; // recall,delete
+    private String fromId;
+    private String toId;
+    private String uuid;
+    private Long timeStamp;
+    private String content;
 }
