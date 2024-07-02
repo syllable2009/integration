@@ -33,6 +33,7 @@
         <module>integration-event</module>
         <module>integration-case</module>
         <module>integration-demo</module>
+        <module>front</module>
     </modules>
 
     <dependencyManagement>
