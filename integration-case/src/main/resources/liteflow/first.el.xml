@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE flow PUBLIC  "liteflow" "liteflow.dtd">
+
+<flow>
+    <nodes>
+        <node id="java1" name="普通脚本1" type="script" language="java">
+    <![CDATA[
+            import com.yomahub.liteflow.slot.DefaultContext;
+            import com.yomahub.liteflow.spi.holder.ContextAwareHolder;
+            import com.yomahub.liteflow.script.body.JaninoCommonScriptBody;
+            import com.yomahub.liteflow.script.ScriptExecuteWrap;
+
+            public class Demo implements JaninoCommonScriptBody {
+
+                public Void body(ScriptExecuteWrap wrap) {
+                    int v1 = 2;
+                    int v2 = 3;
+
+                    DefaultContext ctx = (DefaultContext) wrap.cmp.getFirstContextBean();
+                    ctx.setData("java1", v1 * v2);
+                    System.out.println("java1,result:" + v1 * v2 + ":" + defaultContext.getData("c"));
+//
+//                    TestDomain domain = (TestDomain) ContextAwareHolder.loadContextAware().getBean(TestDomain.class);
+//
+//                    String str = domain.sayHello("jack");
+//                    ctx.setData("hi", str);
+
+                    return null;
+                }
+            }
+            ]]>
+        </node>
+    </nodes>
+
+    <chain name="mainChain">
+        THEN(a, b, c, java1);
+    </chain>
+</flow>

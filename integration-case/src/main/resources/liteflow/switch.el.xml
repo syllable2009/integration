@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow>
+    <chain name="switch">
+        THEN(sub,SWITCH(s).to(a,b, c));
+    </chain>
+    <chain name="sub">
+        THEN(a,b, c);
+    </chain>
+</flow>

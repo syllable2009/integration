@@ -2,12 +2,13 @@ server:
   port: 8083
   servlet:
     context-path: /case/api
-
-
-
 netty:
   websocket:
     ip: localhost
     port: 3333
     path: /ws
     max-frame-size: 10240
+
+liteflow:
+  #规则文件路径
+  rule-source: liteflow/*.el.xml
