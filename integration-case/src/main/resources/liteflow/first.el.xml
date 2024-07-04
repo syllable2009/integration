@@ -15,10 +15,9 @@
                 public Void body(ScriptExecuteWrap wrap) {
                     int v1 = 2;
                     int v2 = 3;
-
                     DefaultContext ctx = (DefaultContext) wrap.cmp.getFirstContextBean();
                     ctx.setData("java1", v1 * v2);
-                    System.out.println("java1,result:" + v1 * v2 + ":" + defaultContext.getData("c"));
+                    System.out.println("java1,result:" + v1 * v2 + ":" + ctx.getData("c"));
 //
 //                    TestDomain domain = (TestDomain) ContextAwareHolder.loadContextAware().getBean(TestDomain.class);
 //
@@ -33,6 +32,6 @@
     </nodes>
 
     <chain name="mainChain">
-        THEN(a, b, c, java1);
+        THEN(a, b, c,checkCmp, java1);
     </chain>
 </flow>
