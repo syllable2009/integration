@@ -17,9 +17,9 @@ public class MyEx {
 
 
     public static void main(String[] args) {
-        String str1 = "https://s1-111286.kwimgs.com/bs2/docsfile/spider/32f914c9a58345bfb8fe412489c87d6f?src=VOcjc+5AmminY+m71tGVzzalrzGzXXzrfvZCjx+a&x-space-id=100000003";
+        String str1 = "https:///spider/32f914c9a58345bfb8fe412489c87d6f?src=VOcjc+5AmminY+m71tGVzzalrzGzXXzrfvZCjx+a&x-space-id=100000003";
         String str2 = "/spider/32f914c9a58345bfb8fe412489c87d6f?src=VOcjc+5AmminY+m71tGVzzalrzGzXXzrfvZCjx+a&x-space-id=100000003";
-        String str3 = "https://bs3-hb1.corp.kuaishou.com/is-docsfile/spider/465dbdb49e384077a2dafdd05fd98c34";
+        String str3 = "https:///is-docsfile/spider/465dbdb49e384077a2dafdd05fd98c34";
 
         log.info("Str1:{}", exp(str1));
         log.info("Str2:{}", exp(str2));
