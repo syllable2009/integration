@@ -1,13 +1,13 @@
 package com.jxp.thread;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-import com.jxp.thread.ThreadDemo.MyCallable;
-import com.jxp.thread.ThreadDemo.MyRunnable;
-
-import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -18,33 +18,51 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CompletableFutureDemo {
 
+    private static final ExecutorService COMMON_THREAD_POOL = new ThreadPoolExecutor(
+            Runtime.getRuntime().availableProcessors() * 4, // 核心线程数
+            100, // 最大线程数
+            3600L, // 空闲线程存活时间
+            TimeUnit.SECONDS, // 时间单位
+            new LinkedBlockingQueue<>(1024), // 任务队列
+            new ThreadPoolExecutor.CallerRunsPolicy() // 拒绝策略
+    );
+
     @SuppressWarnings("checkstyle:MagicNumber")
     public static void main(String[] args) throws Exception {
-        MyRunnable myRunnable = new MyRunnable();
+        final CompletableFuture<Integer> f1 =
+                CompletableFuture.supplyAsync(() -> getUnClaimNum("aaa"),
+                        COMMON_THREAD_POOL);
+        final CompletableFuture<Integer> f2 =
+                CompletableFuture.supplyAsync(() -> getUnClaimNum("bbb"),
+                        COMMON_THREAD_POOL);
 
-        final CompletableFuture<Void> voidCompletableFuture = CompletableFuture.runAsync(myRunnable);
-        voidCompletableFuture.get();
-        Supplier<String> supplier = () -> {
-            return String.valueOf(RandomUtil.randomChinese());
-        };
-        final CompletableFuture<String> stringCompletableFuture = CompletableFuture.supplyAsync(supplier);
-        log.info("stringCompletableFuture:{}", stringCompletableFuture.get());
+        final CompletableFuture<Object> objectCompletableFuture = CompletableFuture.anyOf(f1, f2);
+        try {
+            final Object o = objectCompletableFuture.get(3, TimeUnit.SECONDS);
+            if (null == o) {
+                log.info("请耐心等待1");
+            }
+        } catch (TimeoutException e) {
+            log.info("请耐心等待");
+        } catch (Exception e) {
+            log.info("结果出现异常", e);
+            return;
+        }
 
-        MyCallable myCallable = new MyCallable();
-        BiFunction<String, String, String> bf = (a, b) -> {
-            return "";
-        };
-        CompletableFuture.supplyAsync(() -> {
-                    return 1;
-                })
-                .whenComplete((r, e) -> {
-                    log.info("e:{},r:{}", e, r);
-                }).exceptionally(e -> {
-                    return -1;
-                });
+        objectCompletableFuture.join();
+        if (f1.isDone()) {
+            log.info("最终结果出来啦，1:{}", f1.get());
+        } else if (f2.isDone()) {
+            log.info("最终结果出来啦，2:{}", f2.get());
+        } else {
+            log.info("过去很久了，没有结果");
+        }
 
+    }
 
-
-
+    @SuppressWarnings("checkstyle:MagicNumber")
+    public static Integer getUnClaimNum(String assistantId) {
+        ThreadUtil.sleep(10000L);
+        return 100;
     }
 }
