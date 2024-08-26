@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -38,12 +39,9 @@ public class CompletableFutureDemo {
 
         final CompletableFuture<Object> objectCompletableFuture = CompletableFuture.anyOf(f1, f2);
         try {
-            final Object o = objectCompletableFuture.get(3, TimeUnit.SECONDS);
-            if (null == o) {
-                log.info("请耐心等待1");
-            }
+            objectCompletableFuture.get(3, TimeUnit.SECONDS);
         } catch (TimeoutException e) {
-            log.info("请耐心等待");
+            log.info("3s内没有出结果请耐心等待");
         } catch (Exception e) {
             log.info("结果出现异常", e);
             return;
@@ -62,7 +60,8 @@ public class CompletableFutureDemo {
 
     @SuppressWarnings("checkstyle:MagicNumber")
     public static Integer getUnClaimNum(String assistantId) {
-        ThreadUtil.sleep(10000L);
-        return 100;
+        final Integer l = RandomUtil.randomInt(0, 1000);
+        ThreadUtil.sleep(l);
+        return l;
     }
 }
