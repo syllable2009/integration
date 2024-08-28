@@ -64,4 +64,8 @@ public class CompletableFutureDemo {
         ThreadUtil.sleep(l);
         return l;
     }
+
+//    public static String tree() {
+//        TreeUtil.buildSingle();
+//    }
 }
