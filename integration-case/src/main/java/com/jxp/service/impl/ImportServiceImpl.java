@@ -39,17 +39,22 @@ public class ImportServiceImpl implements ImportService {
         dataMapList = fillExcel(dataMapList);
 
         final List<String> contentList = Lists.newArrayList();
-        contentList.add("<font color=\"#1f2329\"> **Q：${问题!}** </font>");
-        contentList.add("<font color=\"#1f2329\"> **相似问：${相似问!}** </font>");
-        contentList.add("<font color=\"#1f2329\"> **关键词：${关键词!}** </font>");
-        contentList.add("<font color=\"#1f2329\">`${答案!}`</font>");
-
+        contentList.add("<font color=\"#1f2329\">**标准问题：** </font><font color=\"#1f2329\"> " +
+                "**${问题!}** </font>");
+        contentList.add("<font color=\"#1f2329\">**相似问题：** </font><font " +
+                "color=\"#1f2329\">${相似问!}</font>");
+        contentList.add("<font color=\"#1f2329\">**关键词：** </font><font color=\"#1f2329\">${关键词!}</font>");
+        contentList.add("<font color=\"#1f2329\">**答案：**`${答案!}`</font>");
+//        contentList.add("<font color=\"#1f2329\">**Q：**${问题!}</font><br>");
+//        contentList.add("<font color=\"#1f2329\">**相似问：**${相似问!}** </font><br>");
+//        contentList.add("<font color=\"#1f2329\">**关键词：****${关键词!} </font><br>");
+//        contentList.add("<font color=\"#1f2329\">**A：**`${答案!}`</font>");
 
         final DocMarkDownConfig config = DocMarkDownConfig.builder()
-                .title("# <font color=\"#171a1f\"><center>**新模板**</center></font>")
+//                .title("# <font color=\"#171a1f\"><center>**新模板**</center></font>")
 //                .header("## <font color=\"#171a1f\">PR模块</font>")
                 .content(contentList)
-                .segment("<font color=\"#1f2329\">=========================================================================</font><br>")
+                .segment("<font color=\"#1f2329\">=========================================================================</font>")
                 .build();
         //
         // 生成文档
@@ -78,10 +83,9 @@ public class ImportServiceImpl implements ImportService {
                             }
                     )
                     .collect(Collectors.toList());
-            sb.append(LINE_SEPARATOR)
-                    .append(Joiner.on(LINE_SEPARATOR).skipNulls().join(result));
+            sb.append(Joiner.on(LINE_SEPARATOR + LINE_SEPARATOR).skipNulls().join(result));
             if (StringUtils.isNotBlank(segment)) {
-                sb.append(LINE_SEPARATOR).append(LINE_SEPARATOR).append(LINE_SEPARATOR).append(LINE_SEPARATOR).append(segment);
+                sb.append(LINE_SEPARATOR).append(LINE_SEPARATOR).append(segment).append(LINE_SEPARATOR).append(LINE_SEPARATOR);
             }
         });
         return sb.toString();
