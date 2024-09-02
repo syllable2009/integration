@@ -12,3 +12,11 @@ netty:
 liteflow:
   #规则文件路径，只要使用规则，则必须配置rule-source配置，但是如果你是用代码动态构建规则，则rule-source自动失效。
   rule-source: liteflow/*.el.xml
+spring:
+  profiles:
+    active: dev
+custom:
+  log:
+    pattern: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{90} - %msg%n"
+    dir: app-demo
+
