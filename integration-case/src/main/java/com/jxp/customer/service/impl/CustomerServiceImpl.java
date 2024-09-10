@@ -1,0 +1,130 @@
+package com.jxp.customer.service.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+import com.google.common.collect.Maps;
+import com.jxp.customer.RedisConstant;
+import com.jxp.customer.service.CustomerService;
+import com.jxp.customer.util.Jedis;
+
+import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * @author jiaxiaopeng
+ * Created on 2024-09-02 17:37
+ */
+@Slf4j
+@Service
+@SuppressWarnings("checkstyle:MagicNumber")
+public class CustomerServiceImpl implements CustomerService {
+
+    @Resource
+    private Jedis jedis;
+
+    @Override
+    public boolean manageSession(String appId, String askId, String messageKey, Long timeStamp) {
+        if (null == timeStamp) {
+            timeStamp = System.currentTimeMillis();
+        }
+        String sessionKey = RedisConstant.getSessionKey(appId, askId);
+        final List<String> hmget = jedis.get().hmget(sessionKey, RedisConstant.SESSION_STATE,
+                RedisConstant.SESSION_LAST_TIMESTAMP, RedisConstant.SESSION_SID);
+        // 设置会话id
+        // 获取当前session的状态
+        String lastSendTimestampStr = hmget.get(0);
+        Long lastSendTimestamp = StrUtil.isNotBlank(lastSendTimestampStr) ? Long.parseLong(lastSendTimestampStr) : null;
+        if (null == lastSendTimestamp) {
+            // 没有session，创建新会话
+            // redis分布式加锁处理,分布式锁过期时间10s
+            String res = jedis.get().set("lock:" + sessionKey, "1", "NX", "EX",
+                    10);
+            if (StrUtil.equals("OK", res)) {
+                // 加锁完再去查询一遍防止并发
+//                if (jedis.get().){
+//                    createNewSession(sessionKey, appId, askId, messageKey, timeStamp);
+//                    return true;
+//                }else {
+//                    ThreadUtil.sleep(500);
+//                    updateCurrentSession(sessionKey, messageKey, timeStamp);
+//                }
+            } else {
+                ThreadUtil.sleep(500);
+                updateCurrentSession(sessionKey, messageKey, timeStamp);
+            }
+        } else {
+            final String sessionStateStr = hmget.get(1);
+            // 根据session状态从配置获取session的有效期（毫秒）
+            Long sessionActiveStamp = 60_000L;
+            if (timeStamp - lastSendTimestamp > sessionActiveStamp) {
+                // 会话过期了，需要更新到db,并且创建新会话
+                String res = jedis.get().set("lock:" + sessionKey, "1", "NX", "EX",
+                        10);
+                if (StrUtil.equals("OK", res)) {
+                    // 再查询一遍防止并发
+                    endLastSession(sessionKey);
+                    createNewSession(sessionKey, appId, askId, messageKey, timeStamp);
+                    return true;
+                } else {
+                    ThreadUtil.sleep(500);
+                    updateCurrentSession(sessionKey, messageKey, timeStamp);
+                }
+            } else {
+                // 没有过期，缓存数据即可
+                updateCurrentSession(sessionKey, messageKey, timeStamp);
+            }
+        }
+        return false;
+    }
+
+    private void updateCurrentSession(String sessionKey, String messageKey,
+            Long lastSendTimestamp) {
+        if (null == lastSendTimestamp) {
+            lastSendTimestamp = System.currentTimeMillis();
+        }
+        Map<String, String> sessionMap = Maps.newHashMap();
+        String startTimeStr = String.valueOf(lastSendTimestamp);
+        sessionMap.put(RedisConstant.SESSION_LAST_TIMESTAMP, startTimeStr);
+        sessionMap.put(RedisConstant.SESSION_END_KEY, messageKey);
+        jedis.get().hmset(sessionKey, sessionMap);
+    }
+
+    private void createNewSession(String sessionKey, String botId, String askId,
+            String messageKey,
+            Long lastSendTimestamp) {
+        if (null == lastSendTimestamp) {
+            lastSendTimestamp = System.currentTimeMillis();
+        }
+        Map<String, String> sessionMap = Maps.newHashMap();
+        String startTimeStr = String.valueOf(lastSendTimestamp);
+        final String sid = IdUtil.fastSimpleUUID();
+        sessionMap.put(RedisConstant.SESSION_SID, sid);
+        sessionMap.put(RedisConstant.SESSION_LAST_TIMESTAMP, startTimeStr);
+        sessionMap.put(RedisConstant.SESSION_STATE, "robot");
+        sessionMap.put(RedisConstant.SESSION_KWAI_USER, askId);
+        sessionMap.put(RedisConstant.SESSION_KWAI_BOT, botId);
+        sessionMap.put(RedisConstant.SESSION_START_TIME, startTimeStr);
+        sessionMap.put(RedisConstant.SESSION_START_KEY, messageKey);
+        sessionMap.put(RedisConstant.SESSION_END_KEY, messageKey);
+        jedis.get().hmset(sessionKey, sessionMap);
+        // dbsave insert
+    }
+
+    private void endLastSession(String sessionKey) {
+        final Map<String, String> sessionMap = jedis.get().hgetAll(sessionKey);
+        final String sid = sessionMap.get(RedisConstant.SESSION_SID);
+        log.info("endLastSession,sid:{},sessionMap:{}", sid, sessionMap);
+        // 更新数据库，根据sid
+        boolean update = true;
+        if (update) {
+            jedis.get().del(sessionKey);
+        }
+    }
+}

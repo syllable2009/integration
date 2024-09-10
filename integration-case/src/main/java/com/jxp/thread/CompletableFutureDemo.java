@@ -31,11 +31,9 @@ public class CompletableFutureDemo {
     @SuppressWarnings("checkstyle:MagicNumber")
     public static void main(String[] args) throws Exception {
         final CompletableFuture<Integer> f1 =
-                CompletableFuture.supplyAsync(() -> getUnClaimNum("aaa"),
-                        COMMON_THREAD_POOL);
+                CompletableFuture.supplyAsync(() -> getUnClaimNum("aaa"));
         final CompletableFuture<Integer> f2 =
-                CompletableFuture.supplyAsync(() -> getUnClaimNum("bbb"),
-                        COMMON_THREAD_POOL);
+                CompletableFuture.supplyAsync(() -> getUnClaimNum("bbb"));
 
         final CompletableFuture<Object> objectCompletableFuture = CompletableFuture.anyOf(f1, f2);
         try {
@@ -46,7 +44,6 @@ public class CompletableFutureDemo {
             log.info("结果出现异常", e);
             return;
         }
-
         objectCompletableFuture.join();
         if (f1.isDone()) {
             log.info("最终结果出来啦，1:{}", f1.get());
@@ -60,7 +57,7 @@ public class CompletableFutureDemo {
 
     @SuppressWarnings("checkstyle:MagicNumber")
     public static Integer getUnClaimNum(String assistantId) {
-        final Integer l = RandomUtil.randomInt(0, 1000);
+        final Integer l = RandomUtil.randomInt(0, 10000);
         ThreadUtil.sleep(l);
         return l;
     }
