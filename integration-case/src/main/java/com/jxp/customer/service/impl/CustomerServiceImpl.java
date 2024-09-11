@@ -84,6 +84,27 @@ public class CustomerServiceImpl implements CustomerService {
         return false;
     }
 
+    @Override
+    public String distributeCustomer(String distributeCustomerStrategy, List<String> customerList) {
+        // 每一个客服维护自己的信息，上线添加，下线删除
+        // hashkey：hotline:cs:uid
+//        SATURATION(0, "按客服饱和度分配"),
+//                LEAST_RECENTLY_ALLOCATION(1, "优先分配给最久未分配客服"),
+//                FIXED_ORDER_COMPETITION(2, "按固定顺序分配"),
+        switch (distributeCustomerStrategy) {
+            case "SATURATION":
+                break;
+            case "LEAST_RECENTLY_ALLOCATION":
+                break;
+            case "FIXED_ORDER_COMPETITION":
+                break;
+            default:
+                break;
+        }
+        // 执行分配，如果cas执行失败，则尝试重新分配N次，如果分配失败，则后续进入留言等过程
+        return null;
+    }
+
     private void updateCurrentSession(String sessionKey, String messageKey,
             Long lastSendTimestamp) {
         if (null == lastSendTimestamp) {
