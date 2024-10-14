@@ -121,7 +121,8 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
                 log.info("PlaywrightDownloader download page fail,response not ok,url:{}", request.getUrl());
                 return Page.fail();
             }
-            log.info("PlaywrightDownloader download page success,url:{},page.url:{}", request.getUrl(), page.url());
+            log.info("PlaywrightDownloader download page success,url:{},currentUrl:{}",
+                    request.getUrl(), page.url());
             Page ret = new Page();
             ret.setStatusCode(response.status());
             ret.setDownloadSuccess(true);

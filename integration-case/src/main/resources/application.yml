@@ -20,3 +20,7 @@ custom:
     pattern: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{90} - %msg%n"
     dir: app-demo
 
+logging:
+  level:
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+

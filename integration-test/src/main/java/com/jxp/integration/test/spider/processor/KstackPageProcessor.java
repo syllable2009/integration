@@ -32,9 +32,8 @@ public class KstackPageProcessor implements PageProcessor {
 
     // 部分一：抓取网站的相关配置，包括编码、抓取间隔、重试次数等
     private Site site = Site.me().setRetryTimes(3).setSleepTime(1000)
-            .addHeader("referer","https://github.com")
-            .addHeader("user-agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36");
-
+            .addHeader("referer", "https://github.com")
+            .addHeader("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36");
 
 
     @Override
@@ -46,7 +45,7 @@ public class KstackPageProcessor implements PageProcessor {
 //                多端登录如何实现踢人下线
 //                <!----> <!----></h1>
         Html html = page.getHtml();
-        if (null == html){
+        if (null == html) {
             log.error("html is null,{}", page.getUrl());
             return;
         }
@@ -68,7 +67,7 @@ public class KstackPageProcessor implements PageProcessor {
 
     @Override
     public Site getSite() {
-        site.addHeader("Cookie","_did=web_35512701325345A6; Deviceid=d33d31d0-d6e4-41dd-9840-32b1cb60a43e; hdige2wqwoino=GPr7AfktnrCh3NZrN7te6wSctAe6zX7R084e139b; did=web_b0b09f485cdbba02cc31ba7871dcf1359720; Hm_lvt_86a27b7db2c5c0ae37fee4a8a35033ee=1677650476; _ga_VKXBFL78SD=GS1.1.1678333927.1.1.1678333945.42.0.0; intercom-device-id-pjrf3upr=81a2f76b-6b30-4c72-9dc2-b7023170abc6; logged_out_marketing_header_id=eyJfcmFpbHMiOnsibWVzc2FnZSI6IkltTXhZemd5TnpBd0xUZGtPR1l0TkRBd05pMDRabUppTFRWbU1USXlNRGN4TkRKallpST0iLCJleHAiOm51bGwsInB1ciI6ImNvb2tpZS5sb2dnZWRfb3V0X21hcmtldGluZ19oZWFkZXJfaWQifX0%3D--dcc568a3031a2656a358922ad27c8e29f93fcc80; apdid=686ab5e0-f6cb-4c7d-bd2d-eb8bb27baf317567b145a767badb03931f8b6013184c:1687682245:1; accessproxy_session=80d98724-29e6-4e50-8268-7a4624d638f4; didv=1689240364810; userSource=others; _gid=GA1.2.874043532.1691048681; k-token=a07f37b10c38491e79672c29361be4cf; _ga=GA1.2.2027780773.1664422375; _ga_F6CM1VE30P=GS1.1.1691048681.4.1.1691048760.0.0.0");
+        site.addHeader("Cookie", "_did=");
         return site;
     }
 

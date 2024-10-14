@@ -47,23 +47,24 @@ public class SpiderApiServiceImpl implements SpiderApiService {
     public SingleAddressResp parse(SingleAddressReq req, String userId) {
         // 参数校验
         req.setUrl(StrUtil.trim(req.getUrl()));
-        req.setUserId(userId);
-        if (StringUtils.isBlank(req.getBase())) {
-            req.setBase("singleAddress");
-        }
         @NotEmpty String url = req.getUrl();
         log.info("recommend spider start parse,url:{},userId:{}", url, userId);
         if (StringUtils.isBlank(url)) {
             log.info("recommend spider stop parse,url is blank,url:{},userId:{}", url, userId);
             return null;
         }
+        req.setUserId(userId);
+        if (StringUtils.isBlank(req.getBase())) {
+            req.setBase("singleAddress");
+        }
         // 获取域，后续根据域拦截，统计或者查找解析器
         String domain = UrlUtils.getDomain(url);
+        req.setDomain(domain);
         // 域白名单管理: whitelistSwitch=true表示打开白名单控制
         // 重复校验：url和link,thirdId为了解决相同地址下不同的id的问题
 //        RecommendCrawlerMetaData dbMetaData =
 //                recommendCrawlerMetaDataService.getByUrlOrLink(domain, url, req.getThirdId());
-        // 本次请求使用的解析器，jie
+        // 本次请求使用的解析器
         String processor = req.getProcessor();
         // 按照domain获取配置，结合请求对象构造最终的配置对象，优先级：default < kconf < request
         if (StrUtil.isBlank(processor)) {

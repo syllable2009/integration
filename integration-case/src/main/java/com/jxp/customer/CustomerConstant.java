@@ -12,7 +12,8 @@ public class CustomerConstant {
 
     public static String USER_ID = "userId"; // 注意区分sessionKey
     public static String LAST_ALLOCATE_TIME = "lastAllocateTime"; // 上次分配时间
-    public static String SATURATION = "saturation"; // 饱和度
+    public static String PROCESS_ORDER_NUM = "processOrderNum"; // 正在接单量
+    public static String TAKE_ORDER_NUM = "takeOrderNum"; // 已经接单量
 
     public static String getUserKey(String userId) {
         return StrUtil.format("kefuhao:user:{}", userId);

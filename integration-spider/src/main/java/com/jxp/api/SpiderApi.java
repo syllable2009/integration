@@ -28,6 +28,6 @@ public class SpiderApi {
 
     @PostMapping("/parse")
     public ResponseEntity<SingleAddressResp> parseSingleAddress(@Validated @RequestBody SingleAddressReq req) {
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(spiderApiService.parse(req, "zhangsan01"));
     }
 }

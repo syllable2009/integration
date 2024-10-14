@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.12</version>
+        <version>2.7.18</version>
     </parent>
     <groupId>com.jxp</groupId>
     <artifactId>integration</artifactId>
@@ -34,6 +34,7 @@
         <module>integration-case</module>
         <module>integration-demo</module>
         <module>front</module>
+        <module>integration-spider</module>
     </modules>
 
     <dependencyManagement>

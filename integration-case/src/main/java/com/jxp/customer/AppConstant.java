@@ -11,8 +11,9 @@ import cn.hutool.core.util.StrUtil;
 public class AppConstant {
 
     public static String APP_ID = "appId"; // 注意区分sessionKey
-    public static String ALLOCATE_QUEUE = "allocateQueue"; // 分配队列，全量客服，按照添加顺序，如果有变更需要刷新
-    public static String ALLOCATE_INDEX = "0"; // 分配索引
+    public static String ALL_CUSTOMER = "allCustomer"; // 分配队列，全量客服，按照添加顺序，如果有变更需要刷新
+    public static String ALLOCATE_INDEX = "0"; // 固定顺序分配索引
+    public static String ONLINE_CUSTOMER = "onlineCustomer"; // 在线客服，按上线顺序，如果有变更需要刷新，心跳机制检测变动
 
     public static String getAppKey(String appId) {
         return StrUtil.format("kefuhao:app:{}", appId);

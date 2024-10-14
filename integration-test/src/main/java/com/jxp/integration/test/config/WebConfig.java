@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.Ordered;
+import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -40,6 +41,17 @@ public class WebConfig implements WebMvcConfigurer {
             "/health",
             "/error"
     );
+
+    @Bean
+    public CommonsRequestLoggingFilter logFilter() {
+        CommonsRequestLoggingFilter filter = new CommonsRequestLoggingFilter();
+        filter.setIncludeQueryString(true);
+        filter.setIncludePayload(true);
+        filter.setIncludeHeaders(true);
+        filter.setIncludeClientInfo(true);
+        filter.setAfterMessagePrefix("REQUEST DATA-");
+        return filter;
+    }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
