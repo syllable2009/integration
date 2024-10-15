@@ -77,15 +77,15 @@ public class TaskProcessor implements PageProcessor {
     @SneakyThrows
     @Override
     public void process(Page page) {
-        log.info("recommend spider task start parse,url:{}", page.getUrl());
+        log.info("spider task start parse,url:{}", page.getUrl());
         boolean downloadSuccess = page.isDownloadSuccess();
         if (!downloadSuccess) {
-            log.info("recommend spider task download page fail,url:{}", page.getUrl());
+            log.error("spider task download page fail,url:{}", page.getUrl());
             return;
         }
 
         if (config == null) {
-            log.info("recommend spider task parse fail,config is null,url:{}", page.getUrl());
+            log.error("spider task parse fail,config is null,url:{}", page.getUrl());
             return;
         } else {
             // task的配置会尤其是摘要图片的生成方式会透传给每条记录，因此task解析时类型和value会不同，类型会透传，根据value判断即可
@@ -102,7 +102,8 @@ public class TaskProcessor implements PageProcessor {
         }
         // 数据校验
         if (CollectionUtils.isEmpty(taskProcessData)) {
-            log.info("recommend spider task fail end process,taskProcessData is empty,url:{}", page.getUrl());
+            log.error("spider task fail end process,taskProcessData is empty,url:{}",
+                    page.getUrl());
             return;
         }
         // 数据透传
@@ -176,7 +177,7 @@ public class TaskProcessor implements PageProcessor {
         List<TaskProcessData> ret = Lists.newArrayList();
         Html html = page.getHtml();
         if (null == html) {
-            log.info("spider task parse fail,html is null,{}", page.getUrl());
+            log.error("task parse fail,html is null,{}", page.getUrl());
             return ret;
         }
         List<TaskProcessData> taskProcessData = null;

@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CrawlerTaskDataConfig {
 
+    private String domain;
     // 默认的解析方式：支持css，xpath1.0，css-list只适合content，不必做成配置
     private String method;
     // 有时为了将标题，摘要，封面和链接对应上，可以先解析出一组节点，然后从节点中解析数据，nodeList strList(默认)

@@ -6,6 +6,7 @@ import com.jxp.dto.bo.RecommendCrawlerTaskData;
 import com.jxp.dto.bo.SingleAddressReq;
 import com.jxp.dto.bo.SingleAddressResp;
 import com.jxp.dto.bo.SpiderTaskResp;
+import com.jxp.dto.bo.TaskAddressReq;
 
 import us.codecraft.webmagic.Site;
 
@@ -20,4 +21,6 @@ public interface SpiderApiService {
     SingleAddressResp parseRun(SingleAddressReq req, CrawlerMetaDataConfig config, Site site);
 
     SpiderTaskResp taskSpiderRun(RecommendCrawlerTaskData taskData, CrawlerTaskDataConfig config);
+
+    SpiderTaskResp taskParseRun(TaskAddressReq req, String userId);
 }

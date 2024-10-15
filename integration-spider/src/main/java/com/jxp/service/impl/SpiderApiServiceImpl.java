@@ -16,6 +16,7 @@ import com.jxp.dto.bo.RecommendCrawlerTaskData;
 import com.jxp.dto.bo.SingleAddressReq;
 import com.jxp.dto.bo.SingleAddressResp;
 import com.jxp.dto.bo.SpiderTaskResp;
+import com.jxp.dto.bo.TaskAddressReq;
 import com.jxp.service.SpiderApiService;
 import com.jxp.service.SpiderHelper;
 import com.jxp.service.SpiderTaskHelper;
@@ -166,6 +167,7 @@ public class SpiderApiServiceImpl implements SpiderApiService {
                         .config(CrawlerMetaDataConfig.builder()
                                 .ifNeedLogin(false)
                                 .ifProxy(false)
+                                .domain(config.getDomain())
                                 .build())
                         .build())
                 .processor(TaskProcessor.builder()
@@ -183,9 +185,34 @@ public class SpiderApiServiceImpl implements SpiderApiService {
             }
             return processor.getProcessorData();
         } catch (Exception e) {
-            log.info("recommend spider task handle exception,aid:{}", taskData.getAid(), e);
+            log.error("spider task handle exception,aid:{}", taskData.getAid(), e);
         }
         return null;
+    }
+
+    @Override
+    public SpiderTaskResp taskParseRun(TaskAddressReq req, String userId) {
+        if (null == req || StrUtil.isBlank(req.getUrl())) {
+            log.error("spider task handle fail,data not found");
+            return null;
+        }
+        String domain = UrlUtils.getDomain(req.getUrl());
+        CrawlerTaskDataConfig config = null;
+        String processor = StrUtil.isNotBlank(req.getProcessor()) ? req.getProcessor() : domain;
+        // 按照domain获取配置，结合请求对象构造最终的配置对象，优先级：default < kconf < request
+        if (StrUtil.isNotBlank(processor)) {
+            // 后台按照域配置的解析器，如果有不同的分类，需要在请求中指定
+            config = crawlerTaskDataConfigMap.get(processor);
+        }
+        if (null == config) {
+            log.error("spider task handle fail,config not found");
+            return null;
+        }
+        config.setDomain(domain);
+        return taskSpiderRun(RecommendCrawlerTaskData.builder()
+                .aid(0L)
+                .link(req.getUrl())
+                .build(), config);
     }
 
     private void fillData(SingleAddressResp processorData, SingleAddressReq req, String domain, CrawlerMetaDataConfig config) {

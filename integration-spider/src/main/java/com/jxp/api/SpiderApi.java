@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jxp.dto.bo.SingleAddressReq;
 import com.jxp.dto.bo.SingleAddressResp;
+import com.jxp.dto.bo.SpiderTaskResp;
+import com.jxp.dto.bo.TaskAddressReq;
 import com.jxp.service.SpiderApiService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -29,5 +31,10 @@ public class SpiderApi {
     @PostMapping("/parse")
     public ResponseEntity<SingleAddressResp> parseSingleAddress(@Validated @RequestBody SingleAddressReq req) {
         return ResponseEntity.ok(spiderApiService.parse(req, "zhangsan01"));
+    }
+
+    @PostMapping("/task/parse")
+    public ResponseEntity<SpiderTaskResp> taskParse(@Validated @RequestBody TaskAddressReq req) {
+        return ResponseEntity.ok(spiderApiService.taskParseRun(req, "zhangsan01"));
     }
 }
