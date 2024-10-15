@@ -1,8 +1,11 @@
 package com.jxp.service;
 
 import com.jxp.dto.bo.CrawlerMetaDataConfig;
+import com.jxp.dto.bo.CrawlerTaskDataConfig;
+import com.jxp.dto.bo.RecommendCrawlerTaskData;
 import com.jxp.dto.bo.SingleAddressReq;
 import com.jxp.dto.bo.SingleAddressResp;
+import com.jxp.dto.bo.SpiderTaskResp;
 
 import us.codecraft.webmagic.Site;
 
@@ -15,4 +18,6 @@ public interface SpiderApiService {
     SingleAddressResp parse(SingleAddressReq req, String userId);
 
     SingleAddressResp parseRun(SingleAddressReq req, CrawlerMetaDataConfig config, Site site);
+
+    SpiderTaskResp taskSpiderRun(RecommendCrawlerTaskData taskData, CrawlerTaskDataConfig config);
 }

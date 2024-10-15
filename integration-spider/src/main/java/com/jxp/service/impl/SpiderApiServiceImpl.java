@@ -12,15 +12,19 @@ import org.springframework.stereotype.Service;
 
 import com.jxp.dto.bo.CrawlerMetaDataConfig;
 import com.jxp.dto.bo.CrawlerTaskDataConfig;
+import com.jxp.dto.bo.RecommendCrawlerTaskData;
 import com.jxp.dto.bo.SingleAddressReq;
 import com.jxp.dto.bo.SingleAddressResp;
+import com.jxp.dto.bo.SpiderTaskResp;
 import com.jxp.service.SpiderApiService;
 import com.jxp.service.SpiderHelper;
+import com.jxp.service.SpiderTaskHelper;
 import com.jxp.webmagic.CustomSelector;
 import com.jxp.webmagic.DefaultProcessor;
 import com.jxp.webmagic.FileDownloader;
 import com.jxp.webmagic.LoginService;
 import com.jxp.webmagic.PlaywrightDownloader;
+import com.jxp.webmagic.TaskProcessor;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -138,6 +142,48 @@ public class SpiderApiServiceImpl implements SpiderApiService {
             return processor.getProcessorData();
         } catch (Exception e) {
             log.info("spider exception,url:{},aid:{}", req.getUrl(), e);
+        }
+        return null;
+    }
+
+    @Override
+    public SpiderTaskResp taskSpiderRun(RecommendCrawlerTaskData taskData, CrawlerTaskDataConfig config) {
+        if (null == taskData) {
+            log.error("spider task handle fail,data not found");
+            return null;
+        }
+        if (null == config) {
+            log.error("spider task handle fail,config not found,aid:{},domain:{},url:{}",
+                    taskData.getAid(),
+                    taskData.getDomain(),
+                    taskData.getLink());
+            return null;
+        }
+        SpiderTaskHelper spiderHelper = SpiderTaskHelper.builder()
+                .taskData(taskData)
+                .downloader(PlaywrightDownloader.builder()
+                        .loginService(loginService)
+                        .config(CrawlerMetaDataConfig.builder()
+                                .ifNeedLogin(false)
+                                .ifProxy(false)
+                                .build())
+                        .build())
+                .processor(TaskProcessor.builder()
+                        .config(config)
+                        .site(null)
+                        .taskData(taskData)
+                        .build())
+                .pipeline(defaultPipeline)
+                .build();
+        try {
+            spiderHelper.run();
+            TaskProcessor processor = (TaskProcessor) spiderHelper.getProcessor();
+            if (null == processor) {
+                return null;
+            }
+            return processor.getProcessorData();
+        } catch (Exception e) {
+            log.info("recommend spider task handle exception,aid:{}", taskData.getAid(), e);
         }
         return null;
     }
