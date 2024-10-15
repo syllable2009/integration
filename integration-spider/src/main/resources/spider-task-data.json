@@ -80,6 +80,6 @@
   },
   "ppbc.iplant.cn": {
     "link": "//div[@id='demodiv']//div[@class='item_t']//a/@href",
-    "linkPrefix": "https://ppbc.iplant.cn/"
+    "linkPrefix": "https://ppbc.iplant.cn"
   }
 }
