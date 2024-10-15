@@ -3,7 +3,6 @@ package com.jxp.webmagic;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -18,6 +17,7 @@ import com.jxp.dto.bo.CrawlerMetaDataConfig;
 import com.jxp.dto.bo.SingleAddressReq;
 import com.jxp.dto.bo.SingleAddressResp;
 
+import cn.hutool.core.util.IdUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -82,19 +82,16 @@ public class DefaultProcessor implements PageProcessor {
     @SneakyThrows
     @Override
     public void process(Page page) {
-
         boolean downloadSuccess = page.isDownloadSuccess();
         if (!downloadSuccess) {
-            log.info("recommend spider download page fail,url:{}", page.getUrl());
+            log.info("spider download page fail,url:{}", page.getUrl());
             return;
-        } else {
-            log.info("recommend spider download page suscess,url:{}", page.getUrl());
         }
-        log.info("recommend spider start process,url:{}", page.getUrl());
+        log.info("spider process start,url:{}", page.getUrl());
         // 单页面都处理html页面
         Html html = page.getHtml();
         if (null == html) {
-            log.info("recommend spider start html is null,{}", page.getUrl());
+            log.info("spider process fail, html is null,{}", page.getUrl());
             return;
         }
         if (this.config == null) {
@@ -115,17 +112,21 @@ public class DefaultProcessor implements PageProcessor {
                     .build();
         }
         // 结尾校验，如果标题或者内容为空，则进行忽略
-        if (StringUtils.isBlank(processorData.getTitle()) || CollectionUtils.isEmpty(processorData.getContent())) {
-            log.info("recommend spider end,parse title or content is empty,{}", page.getUrl());
+        if (StringUtils.isBlank(processorData.getTitle())) {
+            log.info("spider process fail, parse title is empty,{}", page.getUrl());
             processorData = null;
             return;
         }
-        processorData.setUid(UUID.randomUUID().toString().replace("-", ""));
+        if (CollectionUtils.isEmpty(processorData.getContent())) {
+            log.info("spider process fail, parse content is empty,{}", page.getUrl());
+            processorData = null;
+            return;
+        }
+        processorData.setUid(IdUtil.fastSimpleUUID());
         processorData.setState(0);
         processorData.setBase(req.getBase());
         page.putField("processorData", processorData);
-        log.info("recommend spider end process,url:{}", page.getUrl());
-        return;
+        log.info("spider process end, process,url:{}", page.getUrl());
     }
 
     /**
@@ -177,7 +178,7 @@ public class DefaultProcessor implements PageProcessor {
         }
         List<String> descList = analysisElementList(html,
                 StringUtils.isNotBlank(config.getDescriptionMethod()) ? config.getDescriptionMethod()
-                                                                      : config.getMethod(),
+                        : config.getMethod(),
                 config.getDescription());
         if (CollectionUtils.isEmpty(descList)) {
             return null;

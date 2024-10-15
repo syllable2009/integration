@@ -17,6 +17,7 @@ import com.jxp.service.SpiderHelper;
 import com.jxp.webmagic.CustomSelector;
 import com.jxp.webmagic.DefaultProcessor;
 import com.jxp.webmagic.FileDownloader;
+import com.jxp.webmagic.LoginService;
 import com.jxp.webmagic.PlaywrightDownloader;
 
 import cn.hutool.core.util.StrUtil;
@@ -37,20 +38,21 @@ public class SpiderApiServiceImpl implements SpiderApiService {
     @Resource
     private Pipeline defaultPipeline;
     @Resource
-    private PlaywrightDownloader playwrightDownloader;
+    private LoginService loginService;
     @Resource
     private FileDownloader fileDownloader;
     @Resource
     private CustomSelector customSelector;
+
 
     @Override
     public SingleAddressResp parse(SingleAddressReq req, String userId) {
         // 参数校验
         req.setUrl(StrUtil.trim(req.getUrl()));
         @NotEmpty String url = req.getUrl();
-        log.info("recommend spider start parse,url:{},userId:{}", url, userId);
+        log.info("------>spider start parse,url:{},userId:{}", url, userId);
         if (StringUtils.isBlank(url)) {
-            log.info("recommend spider stop parse,url is blank,url:{},userId:{}", url, userId);
+            log.info("<------spider stop parse,url is blank,url:{},userId:{}", url, userId);
             return null;
         }
         req.setUserId(userId);
@@ -96,7 +98,7 @@ public class SpiderApiServiceImpl implements SpiderApiService {
         } else {
             log.info("spider fail,processorData is null,url:{},userId:{}", url, userId);
         }
-        log.info("spider end parse,url:{},userId:{}", url, userId);
+        log.info("<------spider end parse,url:{},userId:{}", url, userId);
         return processorData;
     }
 
@@ -104,7 +106,10 @@ public class SpiderApiServiceImpl implements SpiderApiService {
     public SingleAddressResp parseRun(SingleAddressReq req, CrawlerMetaDataConfig config, Site site) {
         SpiderHelper spiderHelper = SpiderHelper.builder()
                 .req(req)
-                .downloader(playwrightDownloader)
+                .downloader(PlaywrightDownloader.builder()
+                        .loginService(loginService)
+                        .config(config)
+                        .build())
                 .processor(DefaultProcessor.builder()
                         .config(config)
                         .site(site)

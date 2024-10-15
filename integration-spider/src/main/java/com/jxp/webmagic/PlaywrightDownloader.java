@@ -9,11 +9,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
 import com.google.common.collect.ImmutableMap;
@@ -40,15 +37,16 @@ import us.codecraft.webmagic.utils.UrlUtils;
  * Created on 2023-08-03 16:33
  */
 @Slf4j
-@Service
+//@Service
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 public class PlaywrightDownloader extends AbstractDownloader implements Closeable {
 
-    @Resource
     private LoginService loginService;
+
+    private CrawlerMetaDataConfig config;
 
     public static final Map<String, String> BINARY_MAP =
             ImmutableMap.of(IMAGE_JPEG_VALUE, ".jpg", IMAGE_PNG_VALUE, ".png",
