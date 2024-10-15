@@ -48,7 +48,7 @@ public class SingleAddressResp {
     private Boolean ifRepeated;
 
     // 解析器名称：默认实现为default
-    private String processor;
+    private String processorName;
 
     // 文档内容
     private List<String> content;

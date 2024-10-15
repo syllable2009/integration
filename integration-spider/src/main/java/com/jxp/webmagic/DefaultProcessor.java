@@ -84,14 +84,14 @@ public class DefaultProcessor implements PageProcessor {
     public void process(Page page) {
         boolean downloadSuccess = page.isDownloadSuccess();
         if (!downloadSuccess) {
-            log.info("spider download page fail,url:{}", page.getUrl());
+            log.error("spider download page fail,url:{}", page.getUrl());
             return;
         }
         log.info("spider process start,url:{}", page.getUrl());
         // 单页面都处理html页面
         Html html = page.getHtml();
         if (null == html) {
-            log.info("spider process fail, html is null,{}", page.getUrl());
+            log.error("spider process fail, html is null,{}", page.getUrl());
             return;
         }
         if (this.config == null) {
@@ -100,6 +100,7 @@ public class DefaultProcessor implements PageProcessor {
         } else {
             initConfig(config);
             processorData = SingleAddressResp.builder()
+                    .processorName(config.getName())
                     .content(parseContent(config, html, selector))
                     .title(parseTitle(null, config, html))
                     .description(parseDescription(req, config, html))
@@ -112,13 +113,13 @@ public class DefaultProcessor implements PageProcessor {
                     .build();
         }
         // 结尾校验，如果标题或者内容为空，则进行忽略
-        if (StringUtils.isBlank(processorData.getTitle())) {
-            log.info("spider process fail, parse title is empty,{}", page.getUrl());
-            processorData = null;
-            return;
-        }
+//        if (StringUtils.isBlank(processorData.getTitle())) {
+//            log.error("spider process fail, parse title is empty,{}", page.getUrl());
+//            processorData = null;
+//            return;
+//        }
         if (CollectionUtils.isEmpty(processorData.getContent())) {
-            log.info("spider process fail, parse content is empty,{}", page.getUrl());
+            log.error("spider process fail, parse content is empty,{}", page.getUrl());
             processorData = null;
             return;
         }
@@ -330,6 +331,7 @@ public class DefaultProcessor implements PageProcessor {
         }
         //        List<String> content = Lists.newArrayList(html.smartContent().get());
         return SingleAddressResp.builder()
+                .processorName(config.getName())
                 .content(content)
                 .title(StringUtils.isNotBlank(req.getTitle()) ? req.getTitle() : html.getDocument().title())
                 .link(StringUtils.isNotBlank(req.getLink()) ? req.getLink() : page.getUrl().get())
@@ -345,6 +347,7 @@ public class DefaultProcessor implements PageProcessor {
 
     private static void initConfig(CrawlerMetaDataConfig config) {
         if (config == null) {
+            log.error("spider process fail, config is null");
             return;
         }
         if (StringUtils.isBlank(config.getMethod())) {

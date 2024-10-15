@@ -108,7 +108,8 @@ public class FileDownloader {
                     log.info("FileDownloader login domain:{} success,targetUrl:{},present:{}", domain, url,
                             page.url());
                 } else {
-                    log.info("FileDownloader login domain:{} fail,targetUrl:{},present:{}", domain, url,
+                    log.error("FileDownloader login domain:{} fail,targetUrl:{},present:{}", domain,
+                            url,
                             page.url());
                 }
                 watcher.stop();
@@ -117,7 +118,7 @@ public class FileDownloader {
 //            Thread.sleep(3000L);
             log.info(watcher.prettyPrint());
             if (!response.ok()) {
-                log.info("FileDownloader page fail,url:{}", url);
+                log.error("FileDownloader page fail,url:{}", url);
                 return null;
             }
             if (BooleanUtils.isTrue(screenshot)) {
@@ -138,7 +139,8 @@ public class FileDownloader {
             String mediaType = response.allHeaders().get("content-type");
             String suffix = FILE_MEDIA_TYPE.get(mediaType);
             if (StringUtils.isEmpty(suffix)) {
-                log.info("FileDownloader cancel, mediaType not match,id:{},mediaType:{}", id, mediaType);
+                log.error("FileDownloader cancel, mediaType not match,id:{},mediaType:{}", id,
+                        mediaType);
                 return null;
             }
 //            String fileKey = COVER_PREFIX + id; // 前端处理不让有后缀+suffix

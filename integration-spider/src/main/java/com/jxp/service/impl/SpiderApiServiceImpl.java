@@ -1,6 +1,7 @@
 package com.jxp.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.validation.constraints.NotEmpty;
@@ -10,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.jxp.dto.bo.CrawlerMetaDataConfig;
+import com.jxp.dto.bo.CrawlerTaskDataConfig;
 import com.jxp.dto.bo.SingleAddressReq;
 import com.jxp.dto.bo.SingleAddressResp;
 import com.jxp.service.SpiderApiService;
@@ -43,7 +45,10 @@ public class SpiderApiServiceImpl implements SpiderApiService {
     private FileDownloader fileDownloader;
     @Resource
     private CustomSelector customSelector;
-
+    @Resource
+    private Map<String, CrawlerMetaDataConfig> crawlerMetaDataConfigMap;
+    @Resource
+    private Map<String, CrawlerTaskDataConfig> crawlerTaskDataConfigMap;
 
     @Override
     public SingleAddressResp parse(SingleAddressReq req, String userId) {
@@ -52,7 +57,7 @@ public class SpiderApiServiceImpl implements SpiderApiService {
         @NotEmpty String url = req.getUrl();
         log.info("------>spider start parse,url:{},userId:{}", url, userId);
         if (StringUtils.isBlank(url)) {
-            log.info("<------spider stop parse,url is blank,url:{},userId:{}", url, userId);
+            log.error("<------spider stop parse,url is blank,url:{},userId:{}", url, userId);
             return null;
         }
         req.setUserId(userId);
@@ -66,25 +71,30 @@ public class SpiderApiServiceImpl implements SpiderApiService {
         // 重复校验：url和link,thirdId为了解决相同地址下不同的id的问题
 //        RecommendCrawlerMetaData dbMetaData =
 //                recommendCrawlerMetaDataService.getByUrlOrLink(domain, url, req.getThirdId());
-        // 本次请求使用的解析器
-        String processor = req.getProcessor();
-        // 按照domain获取配置，结合请求对象构造最终的配置对象，优先级：default < kconf < request
-        if (StrUtil.isBlank(processor)) {
-            // 后台按照域配置的解析器，如果有不同的分类，需要在请求中指定
-            processor = null;
-        }
-        if (StrUtil.isBlank(processor)) {
-            processor = "default";
-        }
         // 根据domain获取配置
         CrawlerMetaDataConfig config = null;
+        String processor = StrUtil.isNotBlank(req.getProcessor()) ? req.getProcessor() : domain;
+        // 按照domain获取配置，结合请求对象构造最终的配置对象，优先级：default < kconf < request
+        if (StrUtil.isNotBlank(processor)) {
+            // 后台按照域配置的解析器，如果有不同的分类，需要在请求中指定
+            config = crawlerMetaDataConfigMap.get(processor);
+        }
+        if (null == config) {
+            config = CrawlerMetaDataConfig.builder()
+                    .name("default")
+                    .build();
+        } else {
+            // 设置解析器名字
+            config.setName(processor);
+        }
+        config.setDomain(domain);
         // 准备请求配置
         SingleAddressResp processorData = parseRun(req, config, null);
         if (null == processorData) {
             return null;
         }
         // 完善数据，这里是给前端同步返回的，真正的数据处理在pipeline处理
-        fillData(processorData, req, domain, processor);
+        fillData(processorData, req, domain, config);
         // 摘要
         improveDesc(processorData, req, config);
         // 统一在此处理封面,bean被spring管理，不想和webmagic框架混合
@@ -96,7 +106,7 @@ public class SpiderApiServiceImpl implements SpiderApiService {
             LocalDateTime now = LocalDateTime.now();
             // 图片落库
         } else {
-            log.info("spider fail,processorData is null,url:{},userId:{}", url, userId);
+            log.error("spider fail,processorData is null,url:{},userId:{}", url, userId);
         }
         log.info("<------spider end parse,url:{},userId:{}", url, userId);
         return processorData;
@@ -132,12 +142,11 @@ public class SpiderApiServiceImpl implements SpiderApiService {
         return null;
     }
 
-    private void fillData(SingleAddressResp processorData, SingleAddressReq req, String domain, String processorName) {
+    private void fillData(SingleAddressResp processorData, SingleAddressReq req, String domain, CrawlerMetaDataConfig config) {
         if (null == processorData) {
             return;
         }
         processorData.setBase(req.getBase());
-        processorData.setProcessor(processorName);
         processorData.setDomain(domain);
         processorData.setUrl(req.getUrl());
         processorData.setIfRepeated(false);

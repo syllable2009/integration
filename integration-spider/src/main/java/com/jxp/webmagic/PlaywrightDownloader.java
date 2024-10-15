@@ -30,7 +30,6 @@ import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.downloader.AbstractDownloader;
 import us.codecraft.webmagic.selector.PlainText;
-import us.codecraft.webmagic.utils.UrlUtils;
 
 /**
  * @author jiaxiaopeng
@@ -61,16 +60,17 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
     @Override
     public Page download(Request request, Task task) {
         if (task == null || task.getSite() == null) {
-            log.info("PlaywrightDownloader download page fail,task or site can not be null");
+            log.error("PlaywrightDownloader download page fail,task or site can not be null,url:{}",
+                    request.getUrl());
             return Page.fail();
         }
-        String url = request.getUrl();
-        String domain = UrlUtils.getDomain(url);
-        // 根据domain获取配置
-        CrawlerMetaDataConfig config = null;
+        // 配置校验
         if (config == null) {
-            config = CrawlerMetaDataConfig.builder().build();
+            log.error("PlaywrightDownloader download page fail,config can not be null,url:{}", request.getUrl());
+            return Page.fail();
         }
+        String domain = config.getDomain();
+        String url = request.getUrl();
         // 判断是否需要登录，登录拦截了才会去登录
         Boolean ifNeedLogin = false;
         if (config != null && BooleanUtils.isTrue(config.getIfNeedLogin())) {
@@ -80,7 +80,7 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
         com.microsoft.playwright.Page page = null;
         try {
             // 判断是否需要代理服务器的页面
-            watcher.start("open new page");
+            watcher.start("open new blank page");
             if (config != null && BooleanUtils.isTrue(config.getIfProxy())) {
                 page = PlaywrightConfig.getChromiumBrowserPage(true);
             } else {
@@ -88,7 +88,7 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
             }
             watcher.stop();
             watcher.start("navigate");
-            Response response = page.navigate(url, PlaywrightConfig.PAGE_NAV_OPTIONS);
+            Response response = page.navigate(request.getUrl(), PlaywrightConfig.PAGE_NAV_OPTIONS);
             // 如果需要登录，此处进行登录并且保存Cookie
             watcher.stop();
             if (ifNeedLogin) {
@@ -114,7 +114,7 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
             }
             log.info(watcher.prettyPrint());
             // playwright的自动等待还不太智能，数据未能完全加载出来，这里强制等待3秒
-//            Thread.sleep(3000L);
+            // Thread.sleep(3000L);
             if (null == response || !response.ok()) {
                 log.info("PlaywrightDownloader download page fail,response not ok,url:{}", request.getUrl());
                 return Page.fail();
