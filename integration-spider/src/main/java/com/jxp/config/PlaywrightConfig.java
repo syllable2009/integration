@@ -153,6 +153,7 @@ public class PlaywrightConfig {
         if (null != chromiumBrowser) {
             chromiumBrowser.close();
         }
+        // 代理上下文隔离，减少代理浏览器的消耗
 //                if (null != chromiumProxyBrowser) {
 //                    chromiumProxyBrowser.close();
 //                }
