@@ -17,7 +17,7 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Maps;
 import com.jxp.config.PlaywrightConfig;
-import com.jxp.dto.bo.CrawlerMetaDataConfig;
+import com.jxp.dto.bo.CrawlerDomainConfig;
 import com.jxp.dto.bo.FileDTO;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Page;
@@ -51,6 +51,8 @@ public class FileDownloader {
 
     @Resource
     private LoginService loginService;
+    @Resource
+    private Map<String, CrawlerDomainConfig> crawlerDomainDataConfigMap;
 
     public static final String COVER_PREFIX = "spider/";
 
@@ -73,7 +75,7 @@ public class FileDownloader {
         }
         //            String referer = UrlUtils.getHost(url);
         String domain = UrlUtils.getDomain(url);
-        CrawlerMetaDataConfig config = CrawlerMetaDataConfig.builder().build();
+        final CrawlerDomainConfig config = crawlerDomainDataConfigMap.get(domain);
         Boolean ifNeedLogin = false;
         Boolean ifProxy = false;
         if (config != null) {

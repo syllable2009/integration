@@ -17,7 +17,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jxp.config.PlaywrightConfig;
-import com.jxp.dto.bo.CrawlerMetaDataConfig;
+import com.jxp.dto.bo.CrawlerDomainConfig;
 import com.microsoft.playwright.Response;
 
 import lombok.AllArgsConstructor;
@@ -45,7 +45,7 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
 
     private LoginService loginService;
 
-    private CrawlerMetaDataConfig config;
+    private CrawlerDomainConfig config;
 
     public static final Map<String, String> BINARY_MAP =
             ImmutableMap.of(IMAGE_JPEG_VALUE, ".jpg", IMAGE_PNG_VALUE, ".png",

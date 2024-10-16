@@ -10,6 +10,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.jxp.dto.bo.CrawlerDomainConfig;
 import com.jxp.dto.bo.CrawlerMetaDataConfig;
 import com.jxp.dto.bo.CrawlerTaskDataConfig;
 import com.jxp.dto.bo.RecommendCrawlerTaskData;
@@ -54,6 +55,8 @@ public class SpiderApiServiceImpl implements SpiderApiService {
     private Map<String, CrawlerMetaDataConfig> crawlerMetaDataConfigMap;
     @Resource
     private Map<String, CrawlerTaskDataConfig> crawlerTaskDataConfigMap;
+    @Resource
+    private Map<String, CrawlerDomainConfig> crawlerDomainDataConfigMap;
 
     @Override
     public SingleAddressResp parse(SingleAddressReq req, String userId) {
@@ -123,7 +126,7 @@ public class SpiderApiServiceImpl implements SpiderApiService {
                 .req(req)
                 .downloader(PlaywrightDownloader.builder()
                         .loginService(loginService)
-                        .config(config)
+                        .config(crawlerDomainDataConfigMap.get(config.getDomain()))
                         .build())
                 .processor(DefaultProcessor.builder()
                         .config(config)
@@ -164,11 +167,7 @@ public class SpiderApiServiceImpl implements SpiderApiService {
                 .taskData(taskData)
                 .downloader(PlaywrightDownloader.builder()
                         .loginService(loginService)
-                        .config(CrawlerMetaDataConfig.builder()
-                                .ifNeedLogin(false)
-                                .ifProxy(false)
-                                .domain(config.getDomain())
-                                .build())
+                        .config(crawlerDomainDataConfigMap.get(config.getDomain()))
                         .build())
                 .processor(TaskProcessor.builder()
                         .config(config)

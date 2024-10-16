@@ -50,10 +50,6 @@ public class CrawlerMetaDataConfig {
     private String mediaType;
     private String maintainer;
 
-    // 是否需要登录
-    private Boolean ifNeedLogin;
-    private Boolean ifProxy;
-
     // 是否需要下载附件
     private Boolean ifDownloadPic;
     private String picMethod;
