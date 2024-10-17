@@ -21,6 +21,10 @@ public class YXZhiProcessor extends DefaultProcessor {
 
     private static String NAME = "www.yxzhi.com";
 
+    public String getName() {
+        return NAME;
+    }
+
     @Override
     public void process(Page page) {
         boolean downloadSuccess = page.isDownloadSuccess();
@@ -40,9 +44,5 @@ public class YXZhiProcessor extends DefaultProcessor {
         final String get = html.xpath("").get();
         this.setProcessorData(SingleAddressResp.builder()
                 .build());
-    }
-
-    public String getName() {
-        return "www.1111.com";
     }
 }

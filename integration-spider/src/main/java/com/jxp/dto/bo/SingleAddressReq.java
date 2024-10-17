@@ -44,7 +44,7 @@ public class SingleAddressReq {
     @JsonIgnore
     private String userId;
 
-    // 本次请求使用的解析器
+    // 本次请求使用的解析器，用于扩展配置无法处理需要自定义解析器的情况
     private String processor;
     // 本次使用的配置名称
     private String config;
