@@ -33,6 +33,7 @@ import us.codecraft.webmagic.utils.UrlUtils;
 
 
 /**
+ * name必须匹配processor
  * @author jiaxiaopeng
  * Created on 2023-08-11 16:09
  */
