@@ -70,6 +70,10 @@ public class DefaultProcessor implements PageProcessor {
                                 + "Chrome/112.0.0.0 Safari/537.36");
     }
 
+    public String getName() {
+        return "defaultProcessor";
+    }
+
     @Override
     public Site getSite() {
         if (null == site) {

@@ -27,6 +27,7 @@ import com.jxp.webmagic.FileDownloader;
 import com.jxp.webmagic.LoginService;
 import com.jxp.webmagic.PlaywrightDownloader;
 import com.jxp.webmagic.TaskProcessor;
+import com.jxp.webmagic.processor.ProcessorFactory;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,8 @@ public class SpiderApiServiceImpl implements SpiderApiService {
     private FileDownloader fileDownloader;
     @Resource
     private CustomSelector customSelector;
+    @Resource
+    private ProcessorFactory processorFactory;
     @Resource
     private Map<String, CrawlerMetaDataConfig> crawlerMetaDataConfigMap;
     @Resource
@@ -122,19 +125,21 @@ public class SpiderApiServiceImpl implements SpiderApiService {
 
     @Override
     public SingleAddressResp parseRun(SingleAddressReq req, CrawlerMetaDataConfig config, Site site) {
+
+        final DefaultProcessor defaultProcessor = processorFactory.getDefaultProcessor(config.getDomain());
+        defaultProcessor.setConfig(config);
+        defaultProcessor.setSite(site);
+        defaultProcessor.setReq(req);
+        defaultProcessor.setFileDownloader(fileDownloader);
+        defaultProcessor.setSelector(customSelector);
+
         SpiderHelper spiderHelper = SpiderHelper.builder()
                 .req(req)
                 .downloader(PlaywrightDownloader.builder()
                         .loginService(loginService)
                         .config(crawlerDomainDataConfigMap.get(config.getDomain()))
                         .build())
-                .processor(DefaultProcessor.builder()
-                        .config(config)
-                        .site(site)
-                        .req(req)
-                        .fileDownloader(fileDownloader)
-                        .selector(customSelector)
-                        .build())
+                .processor(defaultProcessor)
                 .pipeline(defaultPipeline)
                 .build();
         try {
@@ -145,7 +150,7 @@ public class SpiderApiServiceImpl implements SpiderApiService {
             }
             return processor.getProcessorData();
         } catch (Exception e) {
-            log.info("spider exception,url:{},aid:{}", req.getUrl(), e);
+            log.error("spider exception,url:{},aid:{}", req.getUrl(), e);
         }
         return null;
     }
