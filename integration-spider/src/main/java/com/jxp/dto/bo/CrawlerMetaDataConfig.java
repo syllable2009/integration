@@ -17,8 +17,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CrawlerMetaDataConfig {
 
-    private String name;
-    private String domain;
     // 默认的解析方式：支持css，xpath1.0，css-list只适合content，不必做成配置
     private String method;
     // 原始链接

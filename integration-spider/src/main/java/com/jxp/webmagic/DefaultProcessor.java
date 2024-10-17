@@ -104,7 +104,7 @@ public class DefaultProcessor implements PageProcessor {
         } else {
             initConfig(config);
             processorData = SingleAddressResp.builder()
-                    .processorName(config.getName())
+                    .processorName(req.getProcessor())
                     .content(parseContent(config, html, selector))
                     .title(parseTitle(null, config, html))
                     .description(parseDescription(req, config, html))
@@ -335,7 +335,7 @@ public class DefaultProcessor implements PageProcessor {
         }
         //        List<String> content = Lists.newArrayList(html.smartContent().get());
         return SingleAddressResp.builder()
-                .processorName(config.getName())
+                .processorName(req.getProcessor())
                 .content(content)
                 .title(StringUtils.isNotBlank(req.getTitle()) ? req.getTitle() : html.getDocument().title())
                 .link(StringUtils.isNotBlank(req.getLink()) ? req.getLink() : page.getUrl().get())

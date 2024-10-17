@@ -56,6 +56,7 @@ public class SpiderParseConfig implements InitializingBean {
                 log.error("CrawlerMetaDataConfig initialize error,", e);
             }
         }
+        ret.put("default", CrawlerMetaDataConfig.builder().build());
         return ret;
     }
 
@@ -86,6 +87,10 @@ public class SpiderParseConfig implements InitializingBean {
                 log.error("CrawlerTaskDataConfig initialize error,", e);
             }
         }
+        ret.put("default", CrawlerDomainConfig.builder()
+                .ifNeedLogin(false)
+                .ifNeedLogin(false)
+                .build());
         return ret;
     }
 

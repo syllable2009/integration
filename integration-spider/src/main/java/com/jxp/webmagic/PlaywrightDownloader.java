@@ -30,6 +30,7 @@ import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.downloader.AbstractDownloader;
 import us.codecraft.webmagic.selector.PlainText;
+import us.codecraft.webmagic.utils.UrlUtils;
 
 /**
  * @author jiaxiaopeng
@@ -69,8 +70,8 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
             log.error("PlaywrightDownloader download page fail,config can not be null,url:{}", request.getUrl());
             return Page.fail();
         }
-        String domain = config.getDomain();
         String url = request.getUrl();
+        String domain = UrlUtils.getDomain(url);
         // 判断是否需要登录，登录拦截了才会去登录
         Boolean ifNeedLogin = false;
         if (config != null && BooleanUtils.isTrue(config.getIfNeedLogin())) {

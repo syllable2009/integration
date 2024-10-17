@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 import javax.annotation.Resource;
-import javax.validation.constraints.NotEmpty;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -65,7 +64,7 @@ public class SpiderApiServiceImpl implements SpiderApiService {
     public SingleAddressResp parse(SingleAddressReq req, String userId) {
         // 参数校验
         req.setUrl(StrUtil.trim(req.getUrl()));
-        @NotEmpty String url = req.getUrl();
+        String url = req.getUrl();
         log.info("------>spider start parse,url:{},userId:{}", url, userId);
         if (StringUtils.isBlank(url)) {
             log.error("<------spider stop parse,url is blank,url:{},userId:{}", url, userId);
@@ -85,20 +84,16 @@ public class SpiderApiServiceImpl implements SpiderApiService {
         // 根据domain获取配置
         CrawlerMetaDataConfig config = null;
         String processor = StrUtil.isNotBlank(req.getProcessor()) ? req.getProcessor() : domain;
+        req.setProcessor(processor);
         // 按照domain获取配置，结合请求对象构造最终的配置对象，优先级：default < kconf < request
         if (StrUtil.isNotBlank(processor)) {
             // 后台按照域配置的解析器，如果有不同的分类，需要在请求中指定
             config = crawlerMetaDataConfigMap.get(processor);
         }
         if (null == config) {
-            config = CrawlerMetaDataConfig.builder()
-                    .name("default")
-                    .build();
-        } else {
-            // 设置解析器名字
-            config.setName(processor);
+            config = crawlerMetaDataConfigMap.get("default");
+            req.setProcessor("default");
         }
-        config.setDomain(domain);
         // 准备请求配置
         SingleAddressResp processorData = parseRun(req, config, null);
         if (null == processorData) {
@@ -126,7 +121,8 @@ public class SpiderApiServiceImpl implements SpiderApiService {
     @Override
     public SingleAddressResp parseRun(SingleAddressReq req, CrawlerMetaDataConfig config, Site site) {
 
-        final DefaultProcessor defaultProcessor = processorFactory.getDefaultProcessor(config.getDomain());
+        // 解析器扩展，可自定义解析器
+        final DefaultProcessor defaultProcessor = processorFactory.getDefaultProcessor(req.getProcessor());
         defaultProcessor.setConfig(config);
         defaultProcessor.setSite(site);
         defaultProcessor.setReq(req);
@@ -137,7 +133,7 @@ public class SpiderApiServiceImpl implements SpiderApiService {
                 .req(req)
                 .downloader(PlaywrightDownloader.builder()
                         .loginService(loginService)
-                        .config(crawlerDomainDataConfigMap.get(config.getDomain()))
+                        .config(crawlerDomainDataConfigMap.get(req.getProcessor()))
                         .build())
                 .processor(defaultProcessor)
                 .pipeline(defaultPipeline)
@@ -168,11 +164,18 @@ public class SpiderApiServiceImpl implements SpiderApiService {
                     taskData.getLink());
             return null;
         }
+
+        String processorName = StrUtil.isNotBlank(taskData.getProcessor()) ? taskData.getProcessor() : UrlUtils.getDomain(taskData.getLink());
+        CrawlerDomainConfig crawlerDomainConfig = crawlerDomainDataConfigMap.get(processorName);
+        if (null == crawlerDomainConfig) {
+            crawlerDomainConfig = crawlerDomainDataConfigMap.get("default");
+        }
+
         SpiderTaskHelper spiderHelper = SpiderTaskHelper.builder()
                 .taskData(taskData)
                 .downloader(PlaywrightDownloader.builder()
                         .loginService(loginService)
-                        .config(crawlerDomainDataConfigMap.get(config.getDomain()))
+                        .config(crawlerDomainConfig)
                         .build())
                 .processor(TaskProcessor.builder()
                         .config(config)
@@ -212,7 +215,6 @@ public class SpiderApiServiceImpl implements SpiderApiService {
             log.error("spider task handle fail,config not found");
             return null;
         }
-        config.setDomain(domain);
         return taskSpiderRun(RecommendCrawlerTaskData.builder()
                 .aid(0L)
                 .link(req.getUrl())

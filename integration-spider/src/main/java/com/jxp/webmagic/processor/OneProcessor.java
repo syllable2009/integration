@@ -41,4 +41,8 @@ public class OneProcessor extends DefaultProcessor {
         this.setProcessorData(SingleAddressResp.builder()
                 .build());
     }
+
+    public String getName() {
+        return "www.1111.com";
+    }
 }
