@@ -46,7 +46,8 @@ public class SingleAddressReq {
 
     // 本次请求使用的解析器
     private String processor;
-
+    // 本次使用的配置名称
+    private String config;
     // 额外解析的数据
     private Map<String, String> ext;
 

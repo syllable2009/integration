@@ -23,7 +23,7 @@ public class ProcessorFactory {
     }
 
     public DefaultProcessor getDefaultProcessor(String domain) {
-        return processorMap.getOrDefault(domain, processorMap.get("defaultProcessor"));
+        return processorMap.get(domain);
     }
 
 }

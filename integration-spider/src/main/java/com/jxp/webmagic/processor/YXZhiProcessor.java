@@ -17,9 +17,9 @@ import us.codecraft.webmagic.selector.Html;
  */
 @Slf4j
 @Component
-public class OneProcessor extends DefaultProcessor {
+public class YXZhiProcessor extends DefaultProcessor {
 
-    private static String NAME = "XXX";
+    private static String NAME = "www.yxzhi.com";
 
     @Override
     public void process(Page page) {

@@ -18,6 +18,7 @@ import com.jxp.dto.bo.SingleAddressReq;
 import com.jxp.dto.bo.SingleAddressResp;
 
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,7 +38,6 @@ import us.codecraft.webmagic.utils.UrlUtils;
  * @author jiaxiaopeng
  * Created on 2023-08-11 16:09
  */
-
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -72,7 +72,7 @@ public class DefaultProcessor implements PageProcessor {
     }
 
     public String getName() {
-        return "defaultProcessor";
+        return "default";
     }
 
     @Override
@@ -99,7 +99,7 @@ public class DefaultProcessor implements PageProcessor {
             log.error("spider process fail, html is null,{}", page.getUrl());
             return;
         }
-        if (this.config == null) {
+        if (this.config == null || StrUtil.equals("default", req.getProcessor())) {
             // 默认解析实现
             processorData = handleByDefault(page);
         } else {

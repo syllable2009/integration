@@ -1,6 +1,5 @@
 package com.jxp.service.impl;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -31,7 +30,9 @@ import com.jxp.webmagic.processor.ProcessorFactory;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import us.codecraft.webmagic.Site;
+import us.codecraft.webmagic.downloader.Downloader;
 import us.codecraft.webmagic.pipeline.Pipeline;
+import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.utils.UrlUtils;
 
 /**
@@ -77,26 +78,20 @@ public class SpiderApiServiceImpl implements SpiderApiService {
         // 获取域，后续根据域拦截，统计或者查找解析器
         String domain = UrlUtils.getDomain(url);
         req.setDomain(domain);
-        // 域白名单管理: whitelistSwitch=true表示打开白名单控制
-        // 重复校验：url和link,thirdId为了解决相同地址下不同的id的问题
-//        RecommendCrawlerMetaData dbMetaData =
-//                recommendCrawlerMetaDataService.getByUrlOrLink(domain, url, req.getThirdId());
-        // 根据domain获取配置
-        CrawlerMetaDataConfig config = null;
-        String processor = StrUtil.isNotBlank(req.getProcessor()) ? req.getProcessor() : domain;
-        req.setProcessor(processor);
-        // 按照domain获取配置，结合请求对象构造最终的配置对象，优先级：default < kconf < request
-        if (StrUtil.isNotBlank(processor)) {
-            // 后台按照域配置的解析器，如果有不同的分类，需要在请求中指定
-            config = crawlerMetaDataConfigMap.get(processor);
-        }
-        if (null == config) {
-            config = crawlerMetaDataConfigMap.get("default");
-            req.setProcessor("default");
-        }
-        // 准备请求配置
-        SingleAddressResp processorData = parseRun(req, config, null);
+
+        // 获取配置
+        CrawlerMetaDataConfig config = getMetaConfig(req);
+        // 获取解析器
+        DefaultProcessor defaultProcessor = getMetaProcessor(req, config, null);
+        // 获取下载器
+        Downloader downloader = getMetaDownloader(req);
+        // 获取pipeline
+        Pipeline pipeline = getMetaPipeline();
+
+        // 流程框架处理
+        SingleAddressResp processorData = parseRun(req, downloader, defaultProcessor, pipeline);
         if (null == processorData) {
+            log.error("<------spider parse fail,processorData is blank,url:{},userId:{}", url, userId);
             return null;
         }
         // 完善数据，这里是给前端同步返回的，真正的数据处理在pipeline处理
@@ -107,46 +102,73 @@ public class SpiderApiServiceImpl implements SpiderApiService {
         improveCoverPic(processorData, req, config);
         // 下载并转换额外的图片附件，每个请求享有单独的超时时间
         downloadPicList(processorData);
-        // db存储
-        if (null != processorData) {
-            LocalDateTime now = LocalDateTime.now();
-            // 图片落库
-        } else {
-            log.error("spider fail,processorData is null,url:{},userId:{}", url, userId);
-        }
         log.info("<------spider end parse,url:{},userId:{}", url, userId);
         return processorData;
     }
 
-    @Override
-    public SingleAddressResp parseRun(SingleAddressReq req, CrawlerMetaDataConfig config, Site site) {
+    private CrawlerMetaDataConfig getMetaConfig(SingleAddressReq req) {
+        CrawlerMetaDataConfig config = null;
+        String configName = StrUtil.isNotBlank(req.getConfig()) ? req.getConfig() : req.getDomain();
+        req.setConfig(configName);
+        // 按照domain获取配置，结合请求对象构造最终的配置对象，优先级：default < kconf < request
+        if (StrUtil.isNotBlank(configName)) {
+            // 后台按照域配置的解析器，如果有不同的分类，需要在请求中指定
+            config = crawlerMetaDataConfigMap.get(configName);
+        }
+        if (null == config) {
+            req.setConfig(configName);
+            config = crawlerMetaDataConfigMap.get("default");
+        }
+        return config;
+    }
 
+    private DefaultProcessor getMetaProcessor(SingleAddressReq req, CrawlerMetaDataConfig config, Site site) {
         // 解析器扩展，可自定义解析器
-        final DefaultProcessor defaultProcessor = processorFactory.getDefaultProcessor(req.getProcessor());
+        final String processorName = StrUtil.isNotBlank(req.getProcessor()) ? req.getProcessor() : req.getDomain();
+        req.setProcessor(processorName);
+        DefaultProcessor defaultProcessor = processorFactory.getDefaultProcessor(processorName);
+        if (defaultProcessor == null) {
+            defaultProcessor = DefaultProcessor.builder().build();
+            req.setProcessor("default");
+        }
         defaultProcessor.setConfig(config);
         defaultProcessor.setSite(site);
         defaultProcessor.setReq(req);
         defaultProcessor.setFileDownloader(fileDownloader);
         defaultProcessor.setSelector(customSelector);
+        return defaultProcessor;
+    }
+
+    private Downloader getMetaDownloader(SingleAddressReq req) {
+        return PlaywrightDownloader.builder()
+                .loginService(loginService)
+                .config(crawlerDomainDataConfigMap.get(req.getDomain()))
+                .build();
+    }
+
+    private Pipeline getMetaPipeline() {
+        return defaultPipeline;
+    }
+
+    @Override
+    public SingleAddressResp parseRun(SingleAddressReq req, Downloader downloader,
+            PageProcessor processor, Pipeline pipeline) {
 
         SpiderHelper spiderHelper = SpiderHelper.builder()
                 .req(req)
-                .downloader(PlaywrightDownloader.builder()
-                        .loginService(loginService)
-                        .config(crawlerDomainDataConfigMap.get(req.getProcessor()))
-                        .build())
-                .processor(defaultProcessor)
-                .pipeline(defaultPipeline)
+                .downloader(downloader)
+                .processor(processor)
+                .pipeline(pipeline)
                 .build();
         try {
             spiderHelper.run();
-            DefaultProcessor processor = (DefaultProcessor) spiderHelper.getProcessor();
-            if (null == processor) {
+            DefaultProcessor executeProcessor = (DefaultProcessor) spiderHelper.getProcessor();
+            if (null == executeProcessor) {
                 return null;
             }
-            return processor.getProcessorData();
+            return executeProcessor.getProcessorData();
         } catch (Exception e) {
-            log.error("spider exception,url:{},aid:{}", req.getUrl(), e);
+            log.error("spider exception,url:{}", req.getUrl(), e);
         }
         return null;
     }
@@ -199,11 +221,14 @@ public class SpiderApiServiceImpl implements SpiderApiService {
 
     @Override
     public SpiderTaskResp taskParseRun(TaskAddressReq req, String userId) {
-        if (null == req || StrUtil.isBlank(req.getUrl())) {
-            log.error("spider task handle fail,data not found");
+        req.setUrl(StrUtil.trim(req.getUrl()));
+        String url = req.getUrl();
+        log.info("------>spider task start parse,url:{},userId:{}", url, userId);
+        if (null == req || StrUtil.isBlank(url)) {
+            log.error("<------spider task handle fail,data not found");
             return null;
         }
-        String domain = UrlUtils.getDomain(req.getUrl());
+        String domain = UrlUtils.getDomain(url);
         CrawlerTaskDataConfig config = null;
         String processor = StrUtil.isNotBlank(req.getProcessor()) ? req.getProcessor() : domain;
         // 按照domain获取配置，结合请求对象构造最终的配置对象，优先级：default < kconf < request
