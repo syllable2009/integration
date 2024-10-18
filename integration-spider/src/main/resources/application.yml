@@ -6,3 +6,8 @@ server:
 
 playwright:
   enable: true
+
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
