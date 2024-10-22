@@ -68,8 +68,8 @@ public class PlaywrightConfig {
 //        System.setProperty("webdriver.chrome.logfile","/home/web_server/springboot/log/chromedriver.log");
         return new BrowserType.LaunchOptions()
                 .setTimeout(30_000)
-                .setSlowMo(1000)
-                .setHeadless(false)
+//                .setSlowMo(0)
+                .setHeadless(true)
                 .setDevtools(false)
                 .setChromiumSandbox(false)
                 .setArgs(Lists.newArrayList(
