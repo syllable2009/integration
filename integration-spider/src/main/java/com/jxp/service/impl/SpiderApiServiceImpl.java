@@ -142,7 +142,8 @@ public class SpiderApiServiceImpl implements SpiderApiService {
     private Downloader getMetaDownloader(SingleAddressReq req) {
         return PlaywrightDownloader.builder()
                 .loginService(loginService)
-                .config(crawlerDomainDataConfigMap.get(req.getDomain()))
+                .config(crawlerDomainDataConfigMap.getOrDefault(req.getDomain(),
+                        CrawlerDomainConfig.builder().ifNeedLogin(false).ifNeedLogin(false).build()))
                 .build();
     }
 
