@@ -95,5 +95,9 @@
   "cjkgirls.com": {
     "method": "xpath",
     "content": "//img/@src"
+  },
+  "report_ch.sinoimex.com": {
+    "content": "//div[@class=detail-body]/p//*/text()",
+    "pic": "//div[@class=detail-body]/div//img/@src"
   }
 }

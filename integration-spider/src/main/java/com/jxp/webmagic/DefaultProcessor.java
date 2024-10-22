@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Joiner;
@@ -99,13 +98,13 @@ public class DefaultProcessor implements PageProcessor {
             log.error("spider process fail, html is null,{}", page.getUrl());
             return;
         }
-        if (this.config == null || StrUtil.equals("default", req.getProcessor())) {
+        if (StrUtil.isBlank(req.getConfigName()) || this.config == null) {
             // 默认解析实现
             processorData = handleByDefault(page);
         } else {
             initConfig(config);
             processorData = SingleAddressResp.builder()
-                    .processorName(req.getProcessor())
+                    .processorName(req.getProcessorName())
                     .content(parseContent(config, html, selector))
                     .title(parseTitle(null, config, html))
                     .description(parseDescription(req, config, html))
@@ -246,8 +245,7 @@ public class DefaultProcessor implements PageProcessor {
     }
 
     private static List<String> parsePicList(CrawlerMetaDataConfig config, Html html) {
-
-        if (BooleanUtils.isNotTrue(config.getIfDownloadPic())) {
+        if (StrUtil.isBlank(config.getPic())) {
             return Lists.newArrayList();
         }
         List<String> picList = analysisElementList(html,
@@ -336,7 +334,6 @@ public class DefaultProcessor implements PageProcessor {
         }
         //        List<String> content = Lists.newArrayList(html.smartContent().get());
         return SingleAddressResp.builder()
-                .processorName(req.getProcessor())
                 .content(content)
                 .title(StringUtils.isNotBlank(req.getTitle()) ? req.getTitle() : html.getDocument().title())
                 .link(StringUtils.isNotBlank(req.getLink()) ? req.getLink() : page.getUrl().get())

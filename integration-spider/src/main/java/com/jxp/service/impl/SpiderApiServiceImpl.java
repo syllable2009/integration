@@ -108,34 +108,33 @@ public class SpiderApiServiceImpl implements SpiderApiService {
 
     private CrawlerMetaDataConfig getMetaConfig(SingleAddressReq req) {
         CrawlerMetaDataConfig config = null;
-        String configName = StrUtil.isNotBlank(req.getConfig()) ? req.getConfig() : req.getDomain();
-        req.setConfig(configName);
+        String configName = StrUtil.isNotBlank(req.getConfigName()) ? req.getConfigName() : req.getDomain();
         // 按照domain获取配置，结合请求对象构造最终的配置对象，优先级：default < kconf < request
         if (StrUtil.isNotBlank(configName)) {
             // 后台按照域配置的解析器，如果有不同的分类，需要在请求中指定
             config = crawlerMetaDataConfigMap.get(configName);
         }
         if (null == config) {
-            req.setConfig(configName);
             config = crawlerMetaDataConfigMap.get("default");
+            configName = "default";
         }
+        req.setConfigName(configName);
         return config;
     }
 
     private DefaultProcessor getMetaProcessor(SingleAddressReq req, CrawlerMetaDataConfig config, Site site) {
         // 解析器扩展，可自定义解析器
-        final String processorName = StrUtil.isNotBlank(req.getProcessor()) ? req.getProcessor() : req.getDomain();
-        req.setProcessor(processorName);
+        final String processorName = StrUtil.isNotBlank(req.getProcessorName()) ? req.getProcessorName() : req.getDomain();
         DefaultProcessor defaultProcessor = processorFactory.getDefaultProcessor(processorName);
         if (defaultProcessor == null) {
             defaultProcessor = DefaultProcessor.builder().build();
-            req.setProcessor("default");
         }
         defaultProcessor.setConfig(config);
         defaultProcessor.setSite(site);
         defaultProcessor.setReq(req);
         defaultProcessor.setFileDownloader(fileDownloader);
         defaultProcessor.setSelector(customSelector);
+        req.setProcessorName(defaultProcessor.getName());
         return defaultProcessor;
     }
 
@@ -256,6 +255,8 @@ public class SpiderApiServiceImpl implements SpiderApiService {
         processorData.setUrl(req.getUrl());
         processorData.setIfRepeated(false);
         processorData.setUserId(req.getUserId());
+        processorData.setConfigName(req.getConfigName());
+        processorData.setProcessorName(req.getProcessorName());
     }
 
     private void improveDesc(SingleAddressResp processorData, SingleAddressReq req, CrawlerMetaDataConfig config) {
