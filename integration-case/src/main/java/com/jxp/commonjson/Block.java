@@ -3,9 +3,8 @@ package com.jxp.commonjson;
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.As.EXTERNAL_PROPERTY;
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
 
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotEmpty;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -20,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = PictureBlock.class, name = "Picture"),
 })
 public interface Block {
-    @JsonIgnore
-    @Nonnull
+    @NotEmpty
     String getBlockType();
 }

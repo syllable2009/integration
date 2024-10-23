@@ -1,6 +1,6 @@
 package com.jxp.commonjson;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class TextBlock implements Block {
     private String content;
 
-    @NotNull
+    @NotEmpty
     @Override
     public String getBlockType() {
         return BlockTypeEnum.Text.getCode();

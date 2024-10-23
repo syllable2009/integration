@@ -1,6 +1,6 @@
 package com.jxp.commonjson;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +21,8 @@ public class PictureBlock implements Block {
     private Long size;
     private String previewUrl;
     private String previewType;
-    @NotNull
+
+    @NotEmpty
     @Override
     public String getBlockType() {
         return BlockTypeEnum.Picture.getCode();
