@@ -38,12 +38,31 @@ public class Result<T> {
     }
 
     public static <T> Result<T> ok() {
-        final Locale locale = LocaleContextHolder.getLocale();
         final I18nVo i18 = I18N_MSG_MAP.getOrDefault(0, new I18nVo());
         return get(0,
                 Locale.ENGLISH.getLanguage().equals(LocaleContextHolder.getLocale().getLanguage()) ? i18.getEnUS() : i18.getZhCN(), null
                 , i18, LocalDateTime.now());
     }
 
+    public static <T> Result<T> ok(T data) {
+        final I18nVo i18 = I18N_MSG_MAP.getOrDefault(0, new I18nVo());
+        return get(0,
+                Locale.ENGLISH.getLanguage().equals(LocaleContextHolder.getLocale().getLanguage()) ? i18.getEnUS() : i18.getZhCN(), data
+                , i18, LocalDateTime.now());
+    }
+
+    public static <T> Result<T> error(int code) {
+        final I18nVo i18 = I18N_MSG_MAP.getOrDefault(code, new I18nVo());
+        return get(code,
+                Locale.ENGLISH.getLanguage().equals(LocaleContextHolder.getLocale().getLanguage()) ? i18.getEnUS() : i18.getZhCN(), null
+                , i18, LocalDateTime.now());
+    }
+
+    public static <T> Result<T> error(int code, T data) {
+        final I18nVo i18 = I18N_MSG_MAP.getOrDefault(code, new I18nVo());
+        return get(code,
+                Locale.ENGLISH.getLanguage().equals(LocaleContextHolder.getLocale().getLanguage()) ? i18.getEnUS() : i18.getZhCN(), data
+                , i18, LocalDateTime.now());
+    }
 
 }
