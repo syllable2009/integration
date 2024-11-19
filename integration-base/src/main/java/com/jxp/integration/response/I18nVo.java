@@ -1,4 +1,4 @@
-package com.jxp.commonjson;
+package com.jxp.integration.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,12 +7,13 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author jiaxiaopeng
- * Created on 2024-10-24 16:16
+ * Created on 2024-11-19 11:52
  */
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class Text {
-    private String content;
+@NoArgsConstructor
+public class I18nVo {
+    private String zhCN;
+    private String enUS;
 }

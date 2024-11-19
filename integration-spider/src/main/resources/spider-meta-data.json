@@ -99,5 +99,8 @@
   "report_ch.sinoimex.com": {
     "content": "//div[@class=detail-body]/p//*/text()",
     "pic": "//div[@class=detail-body]/div//img/@src"
+  },
+  "data.mofcom.gov.cn": {
+    "content": "//table[@id=t1_table]/tbody//*/text()"
   }
 }

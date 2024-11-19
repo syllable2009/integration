@@ -115,7 +115,7 @@ public class PlaywrightDownloader extends AbstractDownloader implements Closeabl
             }
             log.info(watcher.prettyPrint());
             // playwright的自动等待还不太智能，数据未能完全加载出来，这里强制等待3秒
-            // Thread.sleep(3000L);
+//             Thread.sleep(3000L);
             if (null == response || !response.ok()) {
                 log.info("PlaywrightDownloader download page fail,response not ok,url:{}", request.getUrl());
                 return Page.fail();
