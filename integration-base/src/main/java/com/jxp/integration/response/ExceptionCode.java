@@ -10,7 +10,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.METHOD, ElementType.TYPE}) // 可以用于方法和类
+@Target({ElementType.FIELD}) // 可以用于方法和类
 @Retention(RetentionPolicy.RUNTIME) // 在运行时可用
 public @interface ExceptionCode {
 
