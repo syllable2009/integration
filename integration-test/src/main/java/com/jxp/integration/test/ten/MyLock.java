@@ -1,5 +1,6 @@
 package com.jxp.integration.test.ten;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 import java.util.concurrent.locks.Condition;
@@ -7,14 +8,22 @@ import java.util.concurrent.locks.Lock;
 
 import org.jetbrains.annotations.NotNull;
 
+import cn.hutool.core.util.StrUtil;
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author jiaxiaopeng
  * Created on 2024-02-29 15:08
  */
+
+@Slf4j
 public class MyLock implements Lock {
 
+    @SuppressWarnings("checkstyle:OperatorWrap")
     public static void main(String[] args) {
-
+        String str = "";
+        final List<String> split = StrUtil.split(str, ",");
+        log.info("{}", split.size());
     }
 
     // 独占锁  同步器类
