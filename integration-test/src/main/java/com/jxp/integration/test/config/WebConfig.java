@@ -61,9 +61,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns(EXCLUDE_PATH_PATTERNS);
     }
 
-
-
-
     /**
      * i18n获取多语言设置的bean
      */

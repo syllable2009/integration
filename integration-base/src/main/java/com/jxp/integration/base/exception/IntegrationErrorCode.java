@@ -1,7 +1,12 @@
 package com.jxp.integration.base.exception;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 /**
- * @author lwt
+ * @author jxp
  */
 public enum IntegrationErrorCode {
     REQUEST_NO_RESPONSE(10000, "request_no_response", "请求三方服务无响应");
@@ -26,5 +31,13 @@ public enum IntegrationErrorCode {
 
     public String getDescZh() {
         return descZh;
+    }
+
+    private static final Map<Integer, IntegrationErrorCode> CODE_MAP =
+            Arrays.stream(IntegrationErrorCode.values())
+                    .collect(Collectors.toMap(IntegrationErrorCode::getCode, Function.identity()));
+
+    public static IntegrationErrorCode of(String code) {
+        return CODE_MAP.get(code);
     }
 }

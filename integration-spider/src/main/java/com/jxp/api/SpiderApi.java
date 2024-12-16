@@ -37,4 +37,9 @@ public class SpiderApi {
     public ResponseEntity<SpiderTaskResp> taskParse(@Validated @RequestBody TaskAddressReq req) {
         return ResponseEntity.ok(spiderApiService.taskParseRun(req, "zhangsan01"));
     }
+
+    @PostMapping("/download")
+    public ResponseEntity<String> download(@Validated @RequestBody SingleAddressReq req) {
+        return ResponseEntity.ok(spiderApiService.downloadFile(req, "zhangsan01"));
+    }
 }

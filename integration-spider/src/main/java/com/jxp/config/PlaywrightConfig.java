@@ -39,7 +39,7 @@ public class PlaywrightConfig {
 
     // 页面跳转参数
     public static final NavigateOptions PAGE_NAV_OPTIONS = new NavigateOptions()
-            .setWaitUntil(WaitUntilState.LOAD)
+            .setWaitUntil(WaitUntilState.NETWORKIDLE)
             .setTimeout(30_000);
 
     @Bean(name = "playwright")

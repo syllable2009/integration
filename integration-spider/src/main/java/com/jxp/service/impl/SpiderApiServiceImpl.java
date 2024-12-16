@@ -1,5 +1,6 @@
 package com.jxp.service.impl;
 
+import java.nio.file.Paths;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -8,6 +9,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.jxp.config.PlaywrightConfig;
 import com.jxp.dto.bo.CrawlerDomainConfig;
 import com.jxp.dto.bo.CrawlerMetaDataConfig;
 import com.jxp.dto.bo.CrawlerTaskDataConfig;
@@ -26,7 +28,11 @@ import com.jxp.webmagic.LoginService;
 import com.jxp.webmagic.PlaywrightDownloader;
 import com.jxp.webmagic.TaskProcessor;
 import com.jxp.webmagic.processor.ProcessorFactory;
+import com.microsoft.playwright.Download;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Response;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import us.codecraft.webmagic.Site;
@@ -244,6 +250,49 @@ public class SpiderApiServiceImpl implements SpiderApiService {
                 .aid(0L)
                 .link(req.getUrl())
                 .build(), config);
+    }
+
+    @Override
+    public String downloadFile(SingleAddressReq req, String userId) {
+        // 参数校验
+        req.setUrl(StrUtil.trim(req.getUrl()));
+        String url = req.getUrl();
+        log.info("------>spider start download,url:{},userId:{}", url, userId);
+        if (StringUtils.isBlank(url)) {
+            log.error("<------spider stop download,url is blank,url:{},userId:{}", url, userId);
+            return null;
+        }
+        Page page = null;
+        try {
+            page = PlaywrightConfig.getChromiumBrowserPage(false);
+            final Response response = page.navigate("https://pypi.org/project/pytest/#files");
+            Page finalPage = page;
+            final Download download = page.waitForDownload(() -> {
+                finalPage.click("text=pytest-8.3.4.tar.gz");
+            });
+            download.saveAs(Paths.get("/Users/jiaxiaopeng/at/", download.suggestedFilename()));
+            if (1 == 1) {
+                return null;
+            }
+
+            if (!response.ok()) {
+                log.error("spider download page fail,url:{}", url);
+                return null;
+            }
+            String mediaType = response.allHeaders().get("content-type");
+            log.info("headers:{}", response.allHeaders());
+            String rootFilePath = System.getProperty("user.dir") + "/src/main/resources/123.tar.gz";
+            final byte[] body = response.body();
+            FileUtil.writeBytes(body, "/Users/jiaxiaopeng/at/123.tar.gz");
+        } catch (Exception e) {
+            log.info("spider download file exception,url:{},", url, e);
+            return "exception";
+        } finally {
+            if (null != page) {
+                page.close();
+            }
+        }
+        return "ok";
     }
 
     private void fillData(SingleAddressResp processorData, SingleAddressReq req, String domain, CrawlerMetaDataConfig config) {

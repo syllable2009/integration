@@ -25,4 +25,6 @@ public interface SpiderApiService {
     SpiderTaskResp taskSpiderRun(RecommendCrawlerTaskData taskData, CrawlerTaskDataConfig config);
 
     SpiderTaskResp taskParseRun(TaskAddressReq req, String userId);
+
+    String downloadFile(SingleAddressReq req, String userId);
 }
